@@ -3,10 +3,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const sequelize = require('./config/database');
-require('./models'); // Imports models and associations (User, Post)
+require('./models'); // Imports models and associations (User, Post, Like, Comment)
 
 const authRoutes = require('./Routes/authRoutes');
 const postRoutes = require('./Routes/postRoutes');
+const userRoutes = require('./Routes/userRoutes');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => {
   res.send('CampusFeed backend is running!');

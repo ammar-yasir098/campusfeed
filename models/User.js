@@ -3,8 +3,8 @@ const sequelize = require('../config/database');
 
 const User = sequelize.define('User', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   name: {
@@ -22,6 +22,22 @@ const User = sequelize.define('User', {
   password: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  studentId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  department: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  avatarUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
   },
 }, {
   timestamps: true,
