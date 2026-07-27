@@ -3,56 +3,92 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
-
+const authenticateToken = require('../middleware/authMiddleware');
 
 const loginLimiter = rateLimit({
-    windowMs: 15*60*1000,
-    max:5,
-    message:{ message: 'Too many login attempts. please try again in 15 mins.'}
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { message: 'Too many login attempts. Please try again in 15 mins.' }
 });
 
 const router = express.Router();
 
-router.post( '/signup', async (req,res) =>{
-   try{
-    const {name,email,password} = req.body;
-    const hashedPassword = await bcrypt.hash(password,10);
+router.post('/signup', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
 
-    const newUser = await User.create({
-        name: name,
-        email: email,
-        password: hashedPassword
-    });
-    res.status(201).json({ message:'User created successfully', user:newUser });
-   }catch (error){
-    res.status(500).json({ message:'Signup failed', error: error.message });
-   }
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: 'Name, email, and password are required' });
+        }
+
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists with this email' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword
+        });
+
+        res.status(201).json({
+            message: 'User created successfully',
+            user: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                createdAt: newUser.createdAt
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Signup failed', error: error.message });
+    }
 });
 
-router.post('/login', loginLimiter , async (req,res) =>{
-    try{
-        const {email,password} = req.body;
-        const user = await User.findOne({email: email});
-        if(!user){
-            return res.status(401).json({ message:'no user found' });
+router.post('/login', loginLimiter, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        const check = await bcrypt.compare(password, user.password);
-        
-        if(!check){
-            return res.status(401).json({ message:'wrong password' });
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+            return res.status(401).json({ message: 'No user found' });
         }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Wrong password' });
+        }
+
         const token = jwt.sign(
-            { userId: user._id },
+            { userId: user.id },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
-        res.status(200).json({ message:'Login successful!' , token:token });
 
-    }catch(error){
+        res.status(200).json({
+            message: 'Login successful!',
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+        });
+    } catch (error) {
         res.status(500).json({ message: 'Login failed', error: error.message });
     }
 });
 
+// Protected route to fetch current authenticated user profile
+router.get('/me', authenticateToken, (req, res) => {
+    res.status(200).json({ user: req.user });
+});
 
 module.exports = router;
