@@ -1,6 +1,7 @@
 const express = require('express');
-const { User, Post, Like, Comment } = require('../models');
+const { User, Post, Like, Comment, Bookmark } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
@@ -44,35 +45,95 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 });
 
-// UPDATE current user profile (Protected)
-router.put('/profile', authenticateToken, async (req, res) => {
+// GET current user's saved/bookmarked posts (Protected)
+router.get('/bookmarks', authenticateToken, async (req, res) => {
     try {
-        const { name, studentId, department, bio, avatarUrl } = req.body;
+        const bookmarks = await Bookmark.findAll({
+            where: { userId: req.user.id },
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: Post,
+                    as: 'post',
+                    include: [
+                        {
+                            model: User,
+                            as: 'author',
+                            attributes: ['id', 'name', 'email']
+                        },
+                        {
+                            model: Like,
+                            as: 'likes',
+                            attributes: ['id']
+                        },
+                        {
+                            model: Comment,
+                            as: 'comments',
+                            attributes: ['id']
+                        }
+                    ]
+                }
+            ]
+        });
 
-        const user = await User.findByPk(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Update fields if provided
-        if (name !== undefined) user.name = name;
-        if (studentId !== undefined) user.studentId = studentId;
-        if (department !== undefined) user.department = department;
-        if (bio !== undefined) user.bio = bio;
-        if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
-
-        await user.save();
-
-        const updatedUser = user.toJSON();
-        delete updatedUser.password;
+        const savedPosts = bookmarks
+            .filter(b => b.post !== null)
+            .map(b => {
+                const postJson = b.post.toJSON();
+                postJson.likeCount = postJson.likes ? postJson.likes.length : 0;
+                postJson.commentCount = postJson.comments ? postJson.comments.length : 0;
+                postJson.bookmarkedAt = b.createdAt;
+                return postJson;
+            });
 
         res.status(200).json({
-            message: 'Profile updated successfully',
-            user: updatedUser
+            count: savedPosts.length,
+            savedPosts
         });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to update profile', error: error.message });
+        res.status(500).json({ message: 'Failed to fetch saved posts', error: error.message });
     }
+});
+
+// UPDATE current user profile (Protected - Stores path "uploads/filename")
+router.put('/profile', authenticateToken, (req, res) => {
+    upload.single('avatar')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        try {
+            const { name, studentId, department, bio } = req.body;
+            let avatarUrl = req.body ? req.body.avatarUrl : undefined;
+
+            // If an avatar image file was uploaded in this request, build its relative path
+            if (req.file) {
+                avatarUrl = `uploads/${req.file.filename}`;
+            }
+
+            const user = await User.findByPk(req.user.id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            if (name !== undefined) user.name = name;
+            if (studentId !== undefined) user.studentId = studentId;
+            if (department !== undefined) user.department = department;
+            if (bio !== undefined) user.bio = bio;
+            if (avatarUrl !== undefined) user.avatarUrl = avatarUrl;
+
+            await user.save();
+
+            const updatedUser = user.toJSON();
+            delete updatedUser.password;
+
+            res.status(200).json({
+                message: 'Profile updated successfully',
+                user: updatedUser
+            });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to update profile', error: error.message });
+        }
+    });
 });
 
 // GET public profile of any user by ID

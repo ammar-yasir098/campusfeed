@@ -1,62 +1,80 @@
 const express = require('express');
-const { Post, User, Like, Comment } = require('../models');
+const { Post, User, Like, Comment, Bookmark } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
-// CREATE a new post (Protected)
-router.post('/', authenticateToken, async (req, res) => {
-    try {
-        const { title, content, category, imageUrl } = req.body;
-
-        if (!title || !content) {
-            return res.status(400).json({ message: 'Title and content are required' });
+// CREATE a new post (Protected - Stores path "uploads/filename")
+router.post('/', authenticateToken, (req, res) => {
+    upload.single('image')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
         }
+        try {
+            const { title, content, category } = req.body;
+            let imageUrl = req.body ? req.body.imageUrl : null;
 
-        const newPost = await Post.create({
-            title,
-            content,
-            category: category || 'General',
-            imageUrl: imageUrl || null,
-            userId: req.user.id
-        });
+            if (req.file) {
+                imageUrl = `uploads/${req.file.filename}`;
+            }
 
-        // Fetch created post with author details included
-        const postWithAuthor = await Post.findByPk(newPost.id, {
-            include: [{
-                model: User,
-                as: 'author',
-                attributes: ['id', 'name', 'email']
-            }]
-        });
+            if (!title || !content) {
+                return res.status(400).json({ message: 'Title and content are required' });
+            }
 
-        res.status(201).json({
-            message: 'Post created successfully',
-            post: postWithAuthor
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to create post', error: error.message });
-    }
+            const newPost = await Post.create({
+                title,
+                content,
+                category: category || 'General',
+                imageUrl: imageUrl || null,
+                userId: req.user.id
+            });
+
+            // Fetch created post with author details included
+            const postWithAuthor = await Post.findByPk(newPost.id, {
+                include: [{
+                    model: User,
+                    as: 'author',
+                    attributes: ['id', 'name', 'email', 'avatarUrl']
+                }]
+            });
+
+            res.status(201).json({
+                message: 'Post created successfully',
+                post: postWithAuthor
+            });
+        } catch (error) {
+            res.status(500).json({ message: 'Failed to create post', error: error.message });
+        }
+    });
 });
 
-// GET all posts (Public feed with author info, like count, comment count, and category filter)
+// GET all posts (Public feed with author info, like count, comment count, category filter, limit & offset pagination)
 router.get('/', async (req, res) => {
     try {
-        const { category } = req.query;
+        const { category, limit: queryLimit, offset: queryOffset } = req.query;
         const whereClause = {};
 
-        if (category) {
+        if (category && category !== 'All') {
             whereClause.category = category;
         }
+
+        const limit = queryLimit ? parseInt(queryLimit, 10) : undefined;
+        const offset = queryOffset ? parseInt(queryOffset, 10) : undefined;
+
+        const totalPosts = await Post.count({ where: whereClause });
 
         const posts = await Post.findAll({
             where: whereClause,
             order: [['createdAt', 'DESC']],
+            limit,
+            offset,
             include: [
                 {
                     model: User,
                     as: 'author',
-                    attributes: ['id', 'name', 'email']
+                    attributes: ['id', 'name', 'email', 'avatarUrl']
                 },
                 {
                     model: Like,
@@ -75,11 +93,17 @@ router.get('/', async (req, res) => {
             const json = post.toJSON();
             json.likeCount = json.likes ? json.likes.length : 0;
             json.commentCount = json.comments ? json.comments.length : 0;
+            delete json.comments; // Remove bare comments array to force full fetching on expand
             return json;
         });
 
+        const currentOffset = offset || 0;
+        const hasMore = currentOffset + formattedPosts.length < totalPosts;
+
         res.status(200).json({
+            total: totalPosts,
             count: formattedPosts.length,
+            hasMore,
             posts: formattedPosts
         });
     } catch (error) {
@@ -87,7 +111,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET single post by ID (Includes author, likes, and comments)
+// GET single post by ID (Includes author, likes, and full comments with author)
 router.get('/:id', async (req, res) => {
     try {
         const post = await Post.findByPk(req.params.id, {
@@ -95,7 +119,7 @@ router.get('/:id', async (req, res) => {
                 {
                     model: User,
                     as: 'author',
-                    attributes: ['id', 'name', 'email']
+                    attributes: ['id', 'name', 'email', 'avatarUrl']
                 },
                 {
                     model: Like,
@@ -108,7 +132,7 @@ router.get('/:id', async (req, res) => {
                     include: [{
                         model: User,
                         as: 'author',
-                        attributes: ['id', 'name', 'email']
+                        attributes: ['id', 'name', 'email', 'avatarUrl']
                     }]
                 }
             ]
@@ -183,6 +207,37 @@ router.post('/:id/like', authenticateToken, async (req, res) => {
 });
 
 // =================================================================
+// BOOKMARKS ENDPOINTS
+// =================================================================
+
+// TOGGLE BOOKMARK / SAVE POST (Protected)
+router.post('/:id/bookmark', authenticateToken, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const userId = req.user.id;
+
+        const post = await Post.findByPk(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        const existingBookmark = await Bookmark.findOne({ where: { userId, postId } });
+
+        if (existingBookmark) {
+            // Remove bookmark
+            await existingBookmark.destroy();
+            return res.status(200).json({ message: 'Post removed from saved bookmarks', bookmarked: false });
+        } else {
+            // Add bookmark
+            await Bookmark.create({ userId, postId });
+            return res.status(201).json({ message: 'Post saved to bookmarks successfully', bookmarked: true });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to toggle bookmark', error: error.message });
+    }
+});
+
+// =================================================================
 // COMMENTS ENDPOINTS
 // =================================================================
 
@@ -207,12 +262,12 @@ router.post('/:id/comments', authenticateToken, async (req, res) => {
             userId: req.user.id
         });
 
-        // Fetch comment with author details
+        // Fetch comment with author details (including avatarUrl)
         const commentWithAuthor = await Comment.findByPk(newComment.id, {
             include: [{
                 model: User,
                 as: 'author',
-                attributes: ['id', 'name', 'email']
+                attributes: ['id', 'name', 'email', 'avatarUrl']
             }]
         });
 
@@ -236,7 +291,7 @@ router.get('/:id/comments', async (req, res) => {
             include: [{
                 model: User,
                 as: 'author',
-                attributes: ['id', 'name', 'email']
+                attributes: ['id', 'name', 'email', 'avatarUrl']
             }]
         });
 
