@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Image, Upload, AlertCircle } from 'lucide-react';
+import { X, Upload, AlertCircle, BarChart2, Plus, Trash2 } from 'lucide-react';
 import { api } from '../services/api';
 
 const CATEGORY_OPTIONS = [
@@ -16,6 +16,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   const [category, setCategory] = useState('General');
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  
+  // Poll state
+  const [isPollEnabled, setIsPollEnabled] = useState(false);
+  const [pollOptions, setPollOptions] = useState(['', '']);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -34,10 +39,41 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     setPreviewUrl(null);
   };
 
+  const handleAddPollOption = () => {
+    if (pollOptions.length < 6) {
+      setPollOptions([...pollOptions, '']);
+    }
+  };
+
+  const handleRemovePollOption = (index) => {
+    if (pollOptions.length > 2) {
+      setPollOptions(pollOptions.filter((_, idx) => idx !== index));
+    }
+  };
+
+  const handleOptionTextChange = (index, text) => {
+    const updated = [...pollOptions];
+    updated[index] = text;
+    setPollOptions(updated);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      setError('Title and Content are required');
+    if (!title.trim()) {
+      setError('Title / Question is required');
+      return;
+    }
+
+    let pollPayload = null;
+    if (isPollEnabled) {
+      const validOptions = pollOptions.map(o => o.trim()).filter(o => o.length > 0);
+      if (validOptions.length < 2) {
+        setError('Poll must contain at least 2 non-empty options.');
+        return;
+      }
+      pollPayload = { options: validOptions };
+    } else if (!content.trim()) {
+      setError('Post Body / Context is required when no poll is attached.');
       return;
     }
 
@@ -58,9 +94,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       // Create the post
       const newPostData = {
         title,
-        content,
+        content: content.trim() || null,
         category,
-        imageUrl: finalImageUrl
+        imageUrl: finalImageUrl,
+        poll: pollPayload
       };
 
       const res = await api.createPost(newPostData);
@@ -73,6 +110,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       setCategory('General');
       setImageFile(null);
       setPreviewUrl(null);
+      setIsPollEnabled(false);
+      setPollOptions(['', '']);
     } catch (err) {
       setError(err.message || 'Failed to create post');
     } finally {
@@ -82,12 +121,12 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="glass-panel modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '1.75rem' }}>
+      <div className="glass-panel modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '1.75rem', maxWidth: '580px' }}>
         
         {/* Modal Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <h2 className="font-heading" style={{ fontSize: '1.3rem', fontWeight: 700 }}>
-            Create Campus Announcement or Post
+            Create Campus Announcement or Poll
           </h2>
           <button className="btn-icon" onClick={onClose}>
             <X size={20} />
@@ -122,11 +161,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
 
           {/* Title Input */}
           <div>
-            <label className="input-label">Title</label>
+            <label className="input-label">Title / Question</label>
             <input 
               type="text" 
               className="input-field" 
-              placeholder="e.g., Hackathon 2026 Registration Open!"
+              placeholder="e.g., Should the Library remain open 24/7 during Exam Week?"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -135,16 +174,90 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
 
           {/* Content Input */}
           <div>
-            <label className="input-label">Post Body / Details</label>
+            <label className="input-label">
+              Post Body / Context {isPollEnabled && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(Optional with Poll)</span>}
+            </label>
             <textarea 
               className="input-field" 
-              rows={4}
-              placeholder="Write your announcement or discussion details..."
+              rows={3}
+              placeholder={isPollEnabled ? "Provide background details or discussion points (Optional)..." : "Provide background details or discussion points..."}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              required
+              required={!isPollEnabled}
               style={{ resize: 'vertical' }}
             />
+          </div>
+
+          {/* Poll Options Builder Toggle */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span className="input-label" style={{ marginBottom: 0 }}>Interactive Student Poll</span>
+              <button 
+                type="button"
+                onClick={() => setIsPollEnabled(!isPollEnabled)}
+                style={{
+                  background: isPollEnabled ? 'var(--primary-gradient)' : '#f3f4f6',
+                  color: isPollEnabled ? '#ffffff' : '#374151',
+                  border: isPollEnabled ? 'none' : '1px solid #d1d5db',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <BarChart2 size={15} />
+                <span>{isPollEnabled ? 'Poll Enabled' : '+ Add Poll Options'}</span>
+              </button>
+            </div>
+
+            {/* Render Poll Option Inputs */}
+            {isPollEnabled && (
+              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
+                  Enter 2 to 6 choices for students to vote on:
+                </p>
+
+                {pollOptions.map((optText, index) => (
+                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      className="input-field" 
+                      placeholder={`Option ${index + 1}`}
+                      value={optText}
+                      onChange={(e) => handleOptionTextChange(index, e.target.value)}
+                      style={{ fontSize: '0.88rem', padding: '0.5rem 0.8rem', background: '#ffffff', color: '#1e293b' }}
+                      required={isPollEnabled && index < 2}
+                    />
+                    {pollOptions.length > 2 && (
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemovePollOption(index)}
+                        style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.35rem' }}
+                        title="Remove Option"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {pollOptions.length < 6 && (
+                  <button 
+                    type="button" 
+                    onClick={handleAddPollOption}
+                    style={{ background: 'transparent', border: '1px dashed #cbd5e1', color: 'var(--primary)', padding: '0.45rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', marginTop: '0.25rem' }}
+                  >
+                    <Plus size={15} />
+                    <span>Add Another Choice</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Image Upload Dropzone */}
@@ -152,7 +265,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
             <label className="input-label">Attach Photo (Optional)</label>
             {previewUrl ? (
               <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-glass)' }}>
-                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', display: 'block' }} />
+                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} />
                 <button 
                   type="button" 
                   onClick={handleRemoveImage}
@@ -162,9 +275,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                 </button>
               </div>
             ) : (
-              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', border: '1px dashed var(--border-glass)', borderRadius: 'var(--radius-md)', background: 'rgba(255, 255, 255, 0.02)', cursor: 'pointer', gap: '0.5rem', transition: 'all 0.2s ease' }}>
-                <Upload size={24} color="var(--primary)" />
-                <span style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>Click to upload an event poster or photo</span>
+              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.2rem', border: '1px dashed var(--border-glass)', borderRadius: 'var(--radius-md)', background: 'rgba(255, 255, 255, 0.02)', cursor: 'pointer', gap: '0.4rem', transition: 'all 0.2s ease' }}>
+                <Upload size={22} color="var(--primary)" />
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Click to upload an event poster or photo</span>
                 <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
               </label>
             )}

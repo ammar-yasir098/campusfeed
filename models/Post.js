@@ -17,7 +17,7 @@ const Post = sequelize.define('Post', {
   },
   content: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
   },
   category: {
     type: DataTypes.ENUM('General', 'Announcements', 'Events', 'Lost & Found', 'Buy & Sell'),

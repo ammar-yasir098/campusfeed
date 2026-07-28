@@ -7,11 +7,11 @@ import CreatePostModal from './components/CreatePostModal';
 import ProfileModal from './components/ProfileModal';
 import AuthPage from './components/AuthPage';
 import { api, getToken, removeToken } from './services/api';
-import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown } from 'lucide-react';
+import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
-  
+
   // Default to 'login' page if not authenticated, otherwise 'feed'
   const [activeTab, setActiveTab] = useState(() => {
     const token = getToken();
@@ -23,7 +23,7 @@ export default function App() {
 
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
-  
+
   // Pagination State
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -31,9 +31,10 @@ export default function App() {
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
-  // Modals state
+  // Modals & Mobile Menu state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Sentinel ref for infinite scroll triggering
   const loadMoreRef = useRef(null);
@@ -156,8 +157,8 @@ export default function App() {
   const filterBySearch = (list) => {
     if (!searchQuery || !searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase().trim();
-    return list.filter(p => 
-      (p.title && p.title.toLowerCase().includes(q)) || 
+    return list.filter(p =>
+      (p.title && p.title.toLowerCase().includes(q)) ||
       (p.content && p.content.toLowerCase().includes(q)) ||
       (p.category && p.category.toLowerCase().includes(q)) ||
       (p.author?.name && p.author.name.toLowerCase().includes(q))
@@ -170,7 +171,7 @@ export default function App() {
   // Dedicated Full-Page Auth View (Sign In & Registration as First Page)
   if (activeTab === 'login' || activeTab === 'signup') {
     return (
-      <AuthPage 
+      <AuthPage
         initialMode={activeTab === 'signup' ? 'signup' : 'login'}
         onAuthSuccess={(user) => {
           setCurrentUser(user);
@@ -184,29 +185,78 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      
-      {/* Docked Left Sidebar */}
-      <Sidebar 
+
+      {/* Top Mobile Header Bar (Visible on screens <= 768px) */}
+      <div className="mobile-header-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <button
+            className="btn-icon"
+            onClick={() => setIsMobileMenuOpen(true)}
+            style={{ padding: '0.45rem', color: '#0f2942', background: '#f1f5f9', borderRadius: '8px' }}
+            title="Open Navigation Menu"
+          >
+            <Menu size={22} />
+          </button>
+          <div
+            onClick={() => { setActiveTab('feed'); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: 'pointer' }}
+          >
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <GraduationCap size={18} color="#ffffff" />
+            </div>
+            <h3 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f2942' }}>
+              UMT Feed
+            </h3>
+          </div>
+        </div>
+
+        {currentUser && (
+          <button
+            className="btn-primary"
+            onClick={() => setIsCreateModalOpen(true)}
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}
+          >
+            <PlusCircle size={15} />
+            <span>Post</span>
+          </button>
+        )}
+      </div>
+
+      {/* Docked / Mobile Drawer Left Sidebar */}
+      <Sidebar
         currentUser={currentUser}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setIsMobileMenuOpen(false);
+        }}
         selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        onOpenCreateModal={() => setIsCreateModalOpen(true)}
-        onOpenAuthModal={() => setActiveTab('login')}
-        onLogout={handleLogout}
+        onSelectCategory={(cat) => {
+          setSelectedCategory(cat);
+          setIsMobileMenuOpen(false);
+        }}
+        onOpenCreateModal={() => {
+          setIsCreateModalOpen(true);
+          setIsMobileMenuOpen(false);
+        }}
+        onOpenAuthModal={() => {
+          setActiveTab('login');
+          setIsMobileMenuOpen(false);
+        }}
+        onLogout={() => {
+          handleLogout();
+          setIsMobileMenuOpen(false);
+        }}
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Feed Content Container */}
-      <main style={{ 
-        marginLeft: '270px', 
-        padding: '2rem 2rem 4rem 2rem',
-        minHeight: '100vh'
-      }}>
-        <div style={{ maxWidth: '880px', margin: '0 auto' }}>
+      <main className="main-content-container">
+        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
 
           {/* Top Search Bar */}
-          <HeaderSearchBar 
+          <HeaderSearchBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             selectedCategory={selectedCategory}
@@ -268,9 +318,9 @@ export default function App() {
               ) : (
                 <>
                   {filteredPosts.map((post) => (
-                    <PostCard 
-                      key={post.id} 
-                      post={post} 
+                    <PostCard
+                      key={post.id}
+                      post={post}
                       currentUser={currentUser}
                       onDeletePost={handleDeletePost}
                       onRequireAuth={() => setActiveTab('login')}
@@ -286,8 +336,8 @@ export default function App() {
                           <span>Loading 3 more posts...</span>
                         </div>
                       ) : hasMore ? (
-                        <button 
-                          className="btn-secondary" 
+                        <button
+                          className="btn-secondary"
                           onClick={loadMorePosts}
                           style={{ padding: '0.65rem 1.4rem', fontSize: '0.9rem' }}
                         >
@@ -328,9 +378,9 @@ export default function App() {
                 </div>
               ) : (
                 filteredBookmarks.map((post) => (
-                  <PostCard 
-                    key={post.id} 
-                    post={post} 
+                  <PostCard
+                    key={post.id}
+                    post={post}
                     currentUser={currentUser}
                     onDeletePost={handleDeletePost}
                     onRequireAuth={() => setActiveTab('login')}
@@ -342,7 +392,7 @@ export default function App() {
 
           {/* PROFILE TAB */}
           {activeTab === 'profile' && currentUser && (
-            <ProfileView 
+            <ProfileView
               currentUser={currentUser}
               onOpenEditProfile={() => setIsProfileModalOpen(true)}
               onDeletePost={handleDeletePost}
@@ -353,13 +403,13 @@ export default function App() {
       </main>
 
       {/* MODALS */}
-      <CreatePostModal 
+      <CreatePostModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onPostCreated={handlePostCreated}
       />
 
-      <ProfileModal 
+      <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         currentUser={currentUser}

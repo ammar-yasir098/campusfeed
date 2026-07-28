@@ -73,6 +73,9 @@ export const api = {
   addComment: (postId, text) => request(`/api/posts/${postId}/comments`, { method: 'POST', body: JSON.stringify({ text }) }),
   getComments: (postId) => request(`/api/posts/${postId}/comments`),
 
+  // Polls API
+  votePoll: (postId, optionId) => request(`/api/posts/${postId}/poll/vote`, { method: 'POST', body: JSON.stringify({ optionId }) }),
+
   // Bookmarks APIs
   toggleBookmark: (postId) => request(`/api/posts/${postId}/bookmark`, { method: 'POST' }),
   getBookmarks: () => request('/api/users/bookmarks'),

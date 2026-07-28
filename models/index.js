@@ -3,6 +3,9 @@ const Post = require('./Post');
 const Like = require('./Like');
 const Comment = require('./Comment');
 const Bookmark = require('./Bookmark');
+const Poll = require('./Poll');
+const PollOption = require('./PollOption');
+const PollVote = require('./PollVote');
 
 // User & Post Associations
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts', onDelete: 'CASCADE' });
@@ -32,10 +35,34 @@ Bookmark.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Post.hasMany(Bookmark, { foreignKey: 'postId', as: 'bookmarks', onDelete: 'CASCADE' });
 Bookmark.belongsTo(Post, { foreignKey: 'postId', as: 'post' });
 
+// Post & Poll Associations
+Post.hasOne(Poll, { foreignKey: 'postId', as: 'poll', onDelete: 'CASCADE' });
+Poll.belongsTo(Post, { foreignKey: 'postId', as: 'post' });
+
+// Poll & PollOption Associations
+Poll.hasMany(PollOption, { foreignKey: 'pollId', as: 'options', onDelete: 'CASCADE' });
+PollOption.belongsTo(Poll, { foreignKey: 'pollId', as: 'poll' });
+
+// Poll & PollVote Associations
+Poll.hasMany(PollVote, { foreignKey: 'pollId', as: 'votes', onDelete: 'CASCADE' });
+PollVote.belongsTo(Poll, { foreignKey: 'pollId', as: 'poll' });
+
+// PollOption & PollVote Associations
+PollOption.hasMany(PollVote, { foreignKey: 'optionId', as: 'votes', onDelete: 'CASCADE' });
+PollVote.belongsTo(PollOption, { foreignKey: 'optionId', as: 'option' });
+
+// User & PollVote Associations
+User.hasMany(PollVote, { foreignKey: 'userId', as: 'pollVotes', onDelete: 'CASCADE' });
+PollVote.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 module.exports = {
   User,
   Post,
   Like,
   Comment,
   Bookmark,
+  Poll,
+  PollOption,
+  PollVote,
 };
+

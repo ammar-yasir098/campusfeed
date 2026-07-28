@@ -1,11 +1,69 @@
 const express = require('express');
-const { Post, User, Like, Comment, Bookmark } = require('../models');
+const jwt = require('jsonwebtoken');
+const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
-// CREATE a new post (Protected - Stores path "uploads/filename")
+// Utility to extract userId optionally from authorization header (for GET calls)
+const getUserIdFromHeader = (req) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+        if (!token) return null;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return decoded ? decoded.userId : null;
+    } catch (e) {
+        return null;
+    }
+};
+
+// Utility to format poll JSON data
+const formatPoll = (pollJson, userId) => {
+    if (!pollJson) return null;
+    const totalVotes = pollJson.votes ? pollJson.votes.length : 0;
+    const userVote = userId && pollJson.votes ? pollJson.votes.find(v => v.userId === userId) : null;
+
+    const options = (pollJson.options || []).map(opt => {
+        const voteCount = pollJson.votes ? pollJson.votes.filter(v => v.optionId === opt.id).length : 0;
+        const percentage = totalVotes > 0 ? parseFloat(((voteCount / totalVotes) * 100).toFixed(1)) : 0;
+        const votedByCurrentUser = userVote ? userVote.optionId === opt.id : false;
+        return {
+            id: opt.id,
+            optionText: opt.optionText,
+            voteCount,
+            percentage,
+            votedByCurrentUser
+        };
+    });
+
+    return {
+        id: pollJson.id,
+        question: pollJson.question,
+        totalVotes,
+        userVotedOptionId: userVote ? userVote.optionId : null,
+        options
+    };
+};
+
+const pollInclude = {
+    model: Poll,
+    as: 'poll',
+    include: [
+        {
+            model: PollOption,
+            as: 'options'
+        },
+        {
+            model: PollVote,
+            as: 'votes',
+            attributes: ['id', 'optionId', 'userId']
+        }
+    ]
+};
+
+// CREATE a new post (Protected - Stores path "uploads/filename" and handles optional poll)
 router.post('/', authenticateToken, (req, res) => {
     upload.single('image')(req, res, async (err) => {
         if (err) {
@@ -19,30 +77,59 @@ router.post('/', authenticateToken, (req, res) => {
                 imageUrl = `uploads/${req.file.filename}`;
             }
 
-            if (!title || !content) {
-                return res.status(400).json({ message: 'Title and content are required' });
+            // Parse Poll Data if provided
+            let pollData = req.body.poll;
+            if (typeof pollData === 'string') {
+                try { pollData = JSON.parse(pollData); } catch (e) {}
+            }
+
+            const hasValidPoll = pollData && Array.isArray(pollData.options) && pollData.options.filter(opt => typeof opt === 'string' && opt.trim() !== '').length >= 2;
+
+            if (!title || (!content && !hasValidPoll)) {
+                return res.status(400).json({ message: 'Title is required, and content or a poll must be provided' });
             }
 
             const newPost = await Post.create({
                 title,
-                content,
+                content: content || null,
                 category: category || 'General',
                 imageUrl: imageUrl || null,
                 userId: req.user.id
             });
 
-            // Fetch created post with author details included
+            // Handle Poll Creation if provided
+            if (hasValidPoll) {
+                const validOptions = pollData.options.filter(opt => typeof opt === 'string' && opt.trim() !== '');
+                const newPoll = await Poll.create({
+                    postId: newPost.id,
+                    question: pollData.question || null
+                });
+                const optionPromises = validOptions.map(optText => 
+                    PollOption.create({ pollId: newPoll.id, optionText: optText.trim() })
+                );
+                await Promise.all(optionPromises);
+            }
+
+            // Fetch created post with author details & poll included
             const postWithAuthor = await Post.findByPk(newPost.id, {
-                include: [{
-                    model: User,
-                    as: 'author',
-                    attributes: ['id', 'name', 'email', 'avatarUrl']
-                }]
+                include: [
+                    {
+                        model: User,
+                        as: 'author',
+                        attributes: ['id', 'name', 'email', 'avatarUrl']
+                    },
+                    pollInclude
+                ]
             });
+
+            const json = postWithAuthor.toJSON();
+            json.likeCount = 0;
+            json.commentCount = 0;
+            json.poll = formatPoll(json.poll, req.user.id);
 
             res.status(201).json({
                 message: 'Post created successfully',
-                post: postWithAuthor
+                post: json
             });
         } catch (error) {
             res.status(500).json({ message: 'Failed to create post', error: error.message });
@@ -50,10 +137,11 @@ router.post('/', authenticateToken, (req, res) => {
     });
 });
 
-// GET all posts (Public feed with author info, like count, comment count, category filter, limit & offset pagination)
+// GET all posts (Public feed with author info, like count, comment count, category filter, limit & offset pagination, poll info)
 router.get('/', async (req, res) => {
     try {
         const { category, limit: queryLimit, offset: queryOffset } = req.query;
+        const currentUserId = getUserIdFromHeader(req);
         const whereClause = {};
 
         if (category && category !== 'All') {
@@ -85,7 +173,8 @@ router.get('/', async (req, res) => {
                     model: Comment,
                     as: 'comments',
                     attributes: ['id']
-                }
+                },
+                pollInclude
             ]
         });
 
@@ -93,7 +182,8 @@ router.get('/', async (req, res) => {
             const json = post.toJSON();
             json.likeCount = json.likes ? json.likes.length : 0;
             json.commentCount = json.comments ? json.comments.length : 0;
-            delete json.comments; // Remove bare comments array to force full fetching on expand
+            json.poll = formatPoll(json.poll, currentUserId);
+            delete json.comments;
             return json;
         });
 
@@ -111,9 +201,10 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET single post by ID (Includes author, likes, and full comments with author)
+// GET single post by ID (Includes author, likes, full comments with author, and poll info)
 router.get('/:id', async (req, res) => {
     try {
+        const currentUserId = getUserIdFromHeader(req);
         const post = await Post.findByPk(req.params.id, {
             include: [
                 {
@@ -134,7 +225,8 @@ router.get('/:id', async (req, res) => {
                         as: 'author',
                         attributes: ['id', 'name', 'email', 'avatarUrl']
                     }]
-                }
+                },
+                pollInclude
             ]
         });
 
@@ -145,6 +237,7 @@ router.get('/:id', async (req, res) => {
         const json = post.toJSON();
         json.likeCount = json.likes ? json.likes.length : 0;
         json.commentCount = json.comments ? json.comments.length : 0;
+        json.poll = formatPoll(json.poll, currentUserId);
 
         res.status(200).json({ post: json });
     } catch (error) {
@@ -170,6 +263,64 @@ router.delete('/:id', authenticateToken, async (req, res) => {
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete post', error: error.message });
+    }
+});
+
+// =================================================================
+// POLL ENDPOINTS
+// =================================================================
+
+// VOTE ON A POLL (Protected - Locked voting, single vote per user)
+router.post('/:id/poll/vote', authenticateToken, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { optionId } = req.body;
+        const userId = req.user.id;
+
+        if (!optionId) {
+            return res.status(400).json({ message: 'Option ID is required to vote' });
+        }
+
+        const poll = await Poll.findOne({ where: { postId } });
+        if (!poll) {
+            return res.status(404).json({ message: 'Poll not found for this post' });
+        }
+
+        // Verify option belongs to this poll
+        const option = await PollOption.findOne({ where: { id: optionId, pollId: poll.id } });
+        if (!option) {
+            return res.status(400).json({ message: 'Invalid option selected for this poll' });
+        }
+
+        // Check if user has already voted on this poll
+        const existingVote = await PollVote.findOne({ where: { pollId: poll.id, userId } });
+        if (existingVote) {
+            return res.status(400).json({ message: 'You have already voted in this poll. Votes cannot be changed.' });
+        }
+
+        // Create vote
+        await PollVote.create({
+            pollId: poll.id,
+            optionId,
+            userId
+        });
+
+        // Fetch updated poll with full votes and options
+        const updatedPoll = await Poll.findByPk(poll.id, {
+            include: [
+                { model: PollOption, as: 'options' },
+                { model: PollVote, as: 'votes', attributes: ['id', 'optionId', 'userId'] }
+            ]
+        });
+
+        const formattedPoll = formatPoll(updatedPoll.toJSON(), userId);
+
+        res.status(200).json({
+            message: 'Vote cast successfully!',
+            poll: formattedPoll
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to record vote', error: error.message });
     }
 });
 

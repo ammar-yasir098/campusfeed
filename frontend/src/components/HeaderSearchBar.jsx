@@ -1,27 +1,15 @@
 import React from 'react';
-import { Search, X, GraduationCap } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 export default function HeaderSearchBar({ searchQuery, setSearchQuery }) {
   return (
-    <div style={{ marginBottom: '1.75rem' }}>
+    <div style={{ marginBottom: '1.25rem' }}>
       
-      {/* Header Title Banner */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <div>
-          <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f2942' }}>
-            UMT Student Announcement & Discussion Feed
-          </h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Official student communication portal — University of Management and Technology
-          </p>
-        </div>
-      </div>
-
-      {/* Full Width Search Input */}
+      {/* Full Width Compact Search Input */}
       <div style={{ position: 'relative' }}>
         <Search 
-          size={19} 
-          style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} 
+          size={18} 
+          style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} 
         />
         <input 
           type="text"
@@ -30,12 +18,13 @@ export default function HeaderSearchBar({ searchQuery, setSearchQuery }) {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ 
-            paddingLeft: '2.8rem', 
-            paddingRight: searchQuery ? '2.5rem' : '1rem',
-            height: '48px', 
-            fontSize: '0.95rem',
-            boxShadow: '0 2px 10px rgba(15, 23, 42, 0.04)',
-            border: '1px solid #cbd5e1'
+            paddingLeft: '2.6rem', 
+            paddingRight: searchQuery ? '2.4rem' : '0.9rem',
+            height: '42px', 
+            fontSize: '0.88rem',
+            boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)',
+            border: '1px solid #cbd5e1',
+            borderRadius: 'var(--radius-md)'
           }}
         />
 
@@ -44,7 +33,7 @@ export default function HeaderSearchBar({ searchQuery, setSearchQuery }) {
             onClick={() => setSearchQuery('')}
             style={{ 
               position: 'absolute', 
-              right: '0.75rem', 
+              right: '0.65rem', 
               top: '50%', 
               transform: 'translateY(-50%)',
               background: 'transparent',
@@ -58,7 +47,7 @@ export default function HeaderSearchBar({ searchQuery, setSearchQuery }) {
             }}
             title="Clear search"
           >
-            <X size={17} />
+            <X size={16} />
           </button>
         )}
       </div>
