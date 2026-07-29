@@ -14,6 +14,7 @@ import {
   ShoppingBag,
   Layers,
   Award,
+  ShieldCheck,
   X
 } from 'lucide-react';
 import { resolveImageUrl } from '../services/api';
@@ -167,6 +168,21 @@ export default function Sidebar({
               >
                 <User size={18} />
                 <span>My Student Profile</span>
+              </button>
+            )}
+
+            {currentUser && currentUser.role === 'admin' && (
+              <button 
+                className={`nav-link ${activeTab === 'admin' ? 'active' : ''}`}
+                onClick={() => setActiveTab('admin')}
+                style={{
+                  background: activeTab === 'admin' ? '#eff6ff' : 'transparent',
+                  color: activeTab === 'admin' ? '#1d4ed8' : '#1e40af',
+                  fontWeight: 700
+                }}
+              >
+                <ShieldCheck size={18} color="#2563eb" />
+                <span>Admin Control Panel</span>
               </button>
             )}
           </div>

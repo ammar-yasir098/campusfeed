@@ -6,17 +6,27 @@ import ProfileView from './components/ProfileView';
 import CreatePostModal from './components/CreatePostModal';
 import ProfileModal from './components/ProfileModal';
 import AuthPage from './components/AuthPage';
+import AdminDashboard from './components/AdminDashboard';
 import { api, getToken, removeToken } from './services/api';
 import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap } from 'lucide-react';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Default to 'login' page if not authenticated, otherwise 'feed'
+  // Persist active tab across page refreshes
   const [activeTab, setActiveTab] = useState(() => {
     const token = getToken();
-    return token ? 'feed' : 'login';
+    if (!token) return 'login';
+    const savedTab = localStorage.getItem('activeTab');
+    return savedTab && savedTab !== 'login' ? savedTab : 'feed';
   });
+
+  // Sync activeTab to localStorage whenever it changes
+  useEffect(() => {
+    if (activeTab && activeTab !== 'login') {
+      localStorage.setItem('activeTab', activeTab);
+    }
+  }, [activeTab]);
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,10 +59,12 @@ export default function App() {
         })
         .catch(() => {
           removeToken();
+          localStorage.removeItem('activeTab');
           setCurrentUser(null);
           setActiveTab('login');
         });
     } else {
+      localStorage.removeItem('activeTab');
       setActiveTab('login');
     }
   }, []);
@@ -134,6 +146,7 @@ export default function App() {
   // Handlers
   const handleLogout = () => {
     removeToken();
+    localStorage.removeItem('activeTab');
     setCurrentUser(null);
     setActiveTab('login');
   };
@@ -175,7 +188,8 @@ export default function App() {
         initialMode={activeTab === 'signup' ? 'signup' : 'login'}
         onAuthSuccess={(user) => {
           setCurrentUser(user);
-          setActiveTab('feed');
+          const savedTab = localStorage.getItem('activeTab');
+          setActiveTab(savedTab && savedTab !== 'login' ? savedTab : 'feed');
           fetchPosts();
         }}
         onCancel={() => setActiveTab('feed')}
@@ -253,15 +267,17 @@ export default function App() {
 
       {/* Main Feed Content Container */}
       <main className="main-content-container">
-        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        <div style={{ maxWidth: activeTab === 'admin' ? '1140px' : '680px', margin: '0 auto', transition: 'max-width 0.22s ease' }}>
 
-          {/* Top Search Bar */}
-          <HeaderSearchBar
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
+          {/* Top Search Bar (Only shown on feed or bookmarks) */}
+          {(activeTab === 'feed' || activeTab === 'bookmarks') && (
+            <HeaderSearchBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+          )}
 
           {/* FEED TAB */}
           {activeTab === 'feed' && (
@@ -397,6 +413,11 @@ export default function App() {
               onOpenEditProfile={() => setIsProfileModalOpen(true)}
               onDeletePost={handleDeletePost}
             />
+          )}
+
+          {/* ADMIN TAB */}
+          {activeTab === 'admin' && currentUser && currentUser.role === 'admin' && (
+            <AdminDashboard currentUser={currentUser} />
           )}
 
         </div>

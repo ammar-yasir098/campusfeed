@@ -39,6 +39,22 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: 'user',
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: 'active', // 'active', 'suspended', 'banned', 'muted', 'shadowbanned'
+  },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  lastLoginIp: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
   tableName: 'users',

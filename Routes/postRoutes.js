@@ -116,7 +116,7 @@ router.post('/', authenticateToken, (req, res) => {
                     {
                         model: User,
                         as: 'author',
-                        attributes: ['id', 'name', 'email', 'avatarUrl']
+                        attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
                     },
                     pollInclude
                 ]
@@ -162,7 +162,7 @@ router.get('/', async (req, res) => {
                 {
                     model: User,
                     as: 'author',
-                    attributes: ['id', 'name', 'email', 'avatarUrl']
+                    attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
                 },
                 {
                     model: Like,
@@ -210,7 +210,7 @@ router.get('/:id', async (req, res) => {
                 {
                     model: User,
                     as: 'author',
-                    attributes: ['id', 'name', 'email', 'avatarUrl']
+                    attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
                 },
                 {
                     model: Like,
@@ -223,7 +223,7 @@ router.get('/:id', async (req, res) => {
                     include: [{
                         model: User,
                         as: 'author',
-                        attributes: ['id', 'name', 'email', 'avatarUrl']
+                        attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
                     }]
                 },
                 pollInclude
@@ -245,7 +245,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// DELETE a post (Protected - author only)
+// DELETE a post (Protected - author or admin)
 router.delete('/:id', authenticateToken, async (req, res) => {
     try {
         const post = await Post.findByPk(req.params.id);
@@ -254,7 +254,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        if (post.userId !== req.user.id) {
+        if (post.userId !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Unauthorized to delete this post' });
         }
 
@@ -263,6 +263,36 @@ router.delete('/:id', authenticateToken, async (req, res) => {
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete post', error: error.message });
+    }
+});
+
+// TAKEDOWN a post with Admin moderation notice (Protected - Admin only)
+router.post('/:id/takedown', authenticateToken, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Only admins can issue post takedowns.' });
+        }
+
+        const post = await Post.findByPk(req.params.id);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        const reason = req.body.reason || 'This post was taken down by UMT Admin for policy violation.';
+        const adminName = req.user.name || req.user.email;
+
+        await post.update({
+            isTakedown: true,
+            takedownReason: reason,
+            takedownByAdmin: adminName
+        });
+
+        res.status(200).json({
+            message: 'Post taken down by admin successfully',
+            post
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to issue post takedown', error: error.message });
     }
 });
 

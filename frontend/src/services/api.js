@@ -67,6 +67,7 @@ export const api = {
     return request('/api/posts', { method: 'POST', body: JSON.stringify(postData) });
   },
   deletePost: (id) => request(`/api/posts/${id}`, { method: 'DELETE' }),
+  takedownPost: (id, reason) => request(`/api/posts/${id}/takedown`, { method: 'POST', body: JSON.stringify({ reason }) }),
 
   // Likes & Comments APIs
   toggleLike: (postId) => request(`/api/posts/${postId}/like`, { method: 'POST' }),
@@ -91,5 +92,16 @@ export const api = {
   getUserById: (id) => request(`/api/users/${id}`),
 
   // File Upload API
-  uploadImage: (formData) => request('/api/upload', { method: 'POST', body: formData })
+  uploadImage: (formData) => request('/api/upload', { method: 'POST', body: formData }),
+
+  // Admin APIs
+  getAdminUsers: (q = '', status = 'all') => {
+    const params = new URLSearchParams();
+    if (q) params.append('q', q);
+    if (status) params.append('status', status);
+    return request(`/api/admin/users?${params.toString()}`);
+  },
+  updateUserStatus: (id, status) => request(`/api/admin/users/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }),
+  toggleUserVerification: (id, isVerified) => request(`/api/admin/users/${id}/verify`, { method: 'POST', body: JSON.stringify({ isVerified }) }),
+  updateUserRole: (id, role) => request(`/api/admin/users/${id}/role`, { method: 'POST', body: JSON.stringify({ role }) })
 };

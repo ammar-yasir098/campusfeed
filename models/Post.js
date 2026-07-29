@@ -27,6 +27,18 @@ const Post = sequelize.define('Post', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  isTakedown: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  takedownReason: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  takedownByAdmin: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
   tableName: 'posts',

@@ -6,9 +6,11 @@ const rateLimit = require('express-rate-limit');
 const authenticateToken = require('../middleware/authMiddleware');
 
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { message: 'Too many login attempts. Please try again in 15 mins.' }
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: process.env.NODE_ENV === 'production' ? 5 : 20, // Allow up to 20 attempts in dev/testing
+    message: { message: 'Too many login attempts from this IP. Please try again in 15 mins.' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 
 const router = express.Router();
@@ -27,11 +29,20 @@ router.post('/signup', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const clientIp = (req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || '').toString().split(',')[0].trim();
+
+        // If this is the first user ever registered in DB, make them an admin for easy setup
+        const userCount = await User.count();
+        const initialRole = userCount === 0 ? 'admin' : 'user';
 
         const newUser = await User.create({
             name,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            role: initialRole,
+            status: 'active',
+            isVerified: initialRole === 'admin',
+            lastLoginIp: clientIp
         });
 
         res.status(201).json({
@@ -40,6 +51,9 @@ router.post('/signup', async (req, res) => {
                 id: newUser.id,
                 name: newUser.name,
                 email: newUser.email,
+                role: newUser.role,
+                status: newUser.status,
+                isVerified: newUser.isVerified,
                 createdAt: newUser.createdAt
             }
         });
@@ -61,10 +75,17 @@ router.post('/login', loginLimiter, async (req, res) => {
             return res.status(401).json({ message: 'No user found' });
         }
 
+        if (user.status === 'banned' || user.status === 'suspended') {
+            return res.status(403).json({ message: `Your account is ${user.status}. Please contact university support.` });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Wrong password' });
         }
+
+        const clientIp = (req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || '').toString().split(',')[0].trim();
+        await user.update({ lastLoginIp: clientIp });
 
         const token = jwt.sign(
             { userId: user.id },
@@ -78,7 +99,15 @@ router.post('/login', loginLimiter, async (req, res) => {
             user: {
                 id: user.id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role,
+                status: user.status,
+                isVerified: user.isVerified,
+                studentId: user.studentId,
+                department: user.department,
+                bio: user.bio,
+                avatarUrl: user.avatarUrl,
+                lastLoginIp: user.lastLoginIp
             }
         });
     } catch (error) {

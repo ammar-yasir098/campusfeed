@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
+import VerifiedBadge from './VerifiedBadge';
 
 export default function PostCard({ post, currentUser, onDeletePost, onRequireAuth }) {
+  const [postData, setPostData] = useState(post);
   const [isLiked, setIsLiked] = useState(
     post.likes ? post.likes.some(l => l.userId === currentUser?.id) : false
   );
@@ -36,6 +38,36 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  const isOwner = currentUser && (currentUser.id === postData.userId || currentUser.id === postData.author?.id);
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const canDelete = isOwner || isAdmin;
+
+  const handleDeleteOrTakedown = async () => {
+    if (isAdmin && !isOwner) {
+      const isTakedownNotice = window.confirm(
+        "Admin Action Required:\n\nClick 'OK' to issue an official Admin Takedown Notice (with feedback log).\nClick 'Cancel' to permanently delete this post completely."
+      );
+
+      if (isTakedownNotice) {
+        const reason = window.prompt(
+          'Enter administrative feedback / reason for this takedown log:',
+          'This post was taken down by UMT Admin for violating community guidelines.'
+        );
+        if (reason === null) return;
+        try {
+          const res = await api.takedownPost(postData.id, reason);
+          setPostData(res.post);
+        } catch (err) {
+          alert(err.message || 'Failed to issue takedown');
+        }
+      } else {
+        onDeletePost(postData.id);
+      }
+    } else {
+      onDeletePost(postData.id);
+    }
+  };
+
   // Handle Like Toggle
   const handleToggleLike = async () => {
     if (!currentUser) {
@@ -43,7 +75,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
       return;
     }
     try {
-      const res = await api.toggleLike(post.id);
+      const res = await api.toggleLike(postData.id);
       setIsLiked(res.liked);
       setLikeCount(res.likeCount);
     } catch (err) {
@@ -58,7 +90,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
       return;
     }
     try {
-      const res = await api.toggleBookmark(post.id);
+      const res = await api.toggleBookmark(postData.id);
       setIsBookmarked(res.bookmarked);
     } catch (err) {
       console.error('Bookmark toggle failed:', err);
@@ -80,7 +112,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
     setVoting(true);
     try {
-      const res = await api.votePoll(post.id, optionId);
+      const res = await api.votePoll(postData.id, optionId);
       setPollState(res.poll);
       setVoteAlert({ type: 'success', message: 'Vote Recorded Successfully! Your choice has been saved.' });
       setTimeout(() => setVoteAlert(null), 4000);
@@ -100,7 +132,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     if (nextShow && !commentsLoaded) {
       setLoadingCommentsList(true);
       try {
-        const res = await api.getComments(post.id);
+        const res = await api.getComments(postData.id);
         setComments(res.comments || []);
         setCommentsLoaded(true);
       } catch (err) {
@@ -122,7 +154,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
     setLoadingComment(true);
     try {
-      const res = await api.addComment(post.id, newCommentText);
+      const res = await api.addComment(postData.id, newCommentText);
       setComments([...comments, res.comment]);
       setCommentCount(commentCount + 1);
       setNewCommentText('');
@@ -134,18 +166,16 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     }
   };
 
-  const isOwner = currentUser && (currentUser.id === post.userId || currentUser.id === post.author?.id);
-
   return (
     <article className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: '#ffffff' }}>
       
       {/* Header: Author info & Category badge */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-          {post.author?.avatarUrl ? (
+          {postData.author?.avatarUrl ? (
             <img 
-              src={resolveImageUrl(post.author.avatarUrl)} 
-              alt={post.author.name} 
+              src={resolveImageUrl(postData.author.avatarUrl)} 
+              alt={postData.author.name} 
               style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
             />
           ) : (
@@ -161,31 +191,36 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
               fontWeight: 700,
               color: '#ffffff'
             }}>
-              {post.author?.name ? post.author.name.charAt(0).toUpperCase() : 'U'}
+              {postData.author?.name ? postData.author.name.charAt(0).toUpperCase() : 'U'}
             </div>
           )}
 
           <div>
-            <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
-              {post.author?.name || 'Anonymous Student'}
-            </h4>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                {postData.author?.name || 'Anonymous Student'}
+              </h4>
+              {postData.author?.isVerified && (
+                <VerifiedBadge size={16} />
+              )}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
               <Clock size={11} />
-              <span>{formatTime(post.createdAt)}</span>
+              <span>{formatTime(postData.createdAt)}</span>
             </div>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span className={`badge badge-${(post.category || 'General').replace(/ & /g, '-').replace(/ /g, '-')}`} style={{ fontSize: '0.68rem', padding: '0.18rem 0.55rem' }}>
-            {post.category || 'General'}
+          <span className={`badge badge-${(postData.category || 'General').replace(/ & /g, '-').replace(/ /g, '-')}`} style={{ fontSize: '0.68rem', padding: '0.18rem 0.55rem' }}>
+            {postData.category || 'General'}
           </span>
 
-          {isOwner && (
+          {canDelete && (
             <button 
               className="btn-icon" 
-              onClick={() => onDeletePost(post.id)}
-              title="Delete Post"
+              onClick={handleDeleteOrTakedown}
+              title={isAdmin && !isOwner ? "Admin Takedown / Delete Post" : "Delete Post"}
               style={{ color: '#dc2626', padding: '0.3rem' }}
             >
               <Trash2 size={15} />
@@ -194,17 +229,53 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
         </div>
       </div>
 
-      {/* Content: Title & Text */}
-      <div style={{ marginBottom: '0.75rem' }}>
-        <h3 className="font-heading" style={{ fontSize: '1.08rem', fontWeight: 700, marginBottom: '0.3rem', color: '#0f172a', lineHeight: 1.35 }}>
-          {post.title}
-        </h3>
-        {post.content && (
-          <p style={{ fontSize: '0.88rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
-            {post.content}
-          </p>
-        )}
-      </div>
+      {/* Content or Admin Takedown Feedback Banner */}
+      {postData.isTakedown ? (
+        <div style={{
+          background: '#fef2f2',
+          border: '1px solid #fca5a5',
+          borderRadius: '12px',
+          padding: '1.1rem 1.25rem',
+          margin: '0.75rem 0',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '0.85rem'
+        }}>
+          <div style={{ padding: '0.45rem', borderRadius: '8px', background: '#fee2e2', color: '#dc2626', flexShrink: 0 }}>
+            <ShieldAlert size={22} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <h4 style={{ color: '#991b1b', fontWeight: 800, fontSize: '0.92rem', margin: 0 }}>
+                Post Taken Down by UMT Administration
+              </h4>
+              <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#fee2e2', color: '#991b1b', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                MODERATED
+              </span>
+            </div>
+            <p style={{ color: '#7f1d1d', fontSize: '0.86rem', marginTop: '0.25rem', marginBottom: '0.35rem', lineHeight: 1.45 }}>
+              {postData.takedownReason || 'This post was taken down by campus administration for violating community guidelines.'}
+            </p>
+            <div style={{ fontSize: '0.74rem', color: '#991b1b', fontWeight: 600 }}>
+              Feedback Logged by: <strong>{postData.takedownByAdmin || 'UMT Admin'}</strong>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Content: Title & Text */}
+          <div style={{ marginBottom: '0.75rem' }}>
+            <h3 className="font-heading" style={{ fontSize: '1.08rem', fontWeight: 700, marginBottom: '0.3rem', color: '#0f172a', lineHeight: 1.35 }}>
+              {postData.title}
+            </h3>
+            {postData.content && (
+              <p style={{ fontSize: '0.88rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                {postData.content}
+              </p>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Poll Section (if attached) */}
       {pollState && (

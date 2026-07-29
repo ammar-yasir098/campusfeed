@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Edit3, Award, BookOpen, Layers, Bookmark as BookmarkIcon, Clock } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import PostCard from './PostCard';
+import VerifiedBadge from './VerifiedBadge';
 
 export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePost }) {
   const [profileData, setProfileData] = useState(null);
@@ -77,9 +78,12 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
             )}
 
             <div>
-              <h2 className="font-heading" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                {user.name}
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <h2 className="font-heading" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)' }}>
+                  {user.name}
+                </h2>
+                {user.isVerified && <VerifiedBadge size={22} />}
+              </div>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
                 {user.email}
               </p>

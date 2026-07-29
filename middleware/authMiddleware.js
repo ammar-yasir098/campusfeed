@@ -21,6 +21,10 @@ const authenticateToken = async (req, res, next) => {
             return res.status(401).json({ message: 'Invalid token. User no longer exists.' });
         }
 
+        if (user.status === 'banned' || user.status === 'suspended') {
+            return res.status(403).json({ message: `Account is ${user.status}. Please contact university administration.` });
+        }
+
         req.user = user; // Attach user instance to request object
         next();
     } catch (error) {
