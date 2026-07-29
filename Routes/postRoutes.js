@@ -162,7 +162,7 @@ router.get('/', async (req, res) => {
                 {
                     model: User,
                     as: 'author',
-                    attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
+                    attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role', 'status']
                 },
                 {
                     model: Like,
@@ -178,7 +178,15 @@ router.get('/', async (req, res) => {
             ]
         });
 
-        const formattedPosts = posts.map(post => {
+        const formattedPosts = posts
+            .filter(post => {
+                // Shadowban Filtering: Hide posts by shadowbanned users from everyone except the shadowbanned author themselves
+                if (post.author?.status === 'shadowbanned' && post.userId !== currentUserId) {
+                    return false;
+                }
+                return true;
+            })
+            .map(post => {
             const json = post.toJSON();
             json.likeCount = json.likes ? json.likes.length : 0;
             json.commentCount = json.comments ? json.comments.length : 0;

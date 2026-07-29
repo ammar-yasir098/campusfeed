@@ -26,9 +26,9 @@ router.get('/users', async (req, res) => {
             const isNumeric = !isNaN(queryTerm);
 
             const searchConditions = [
-                { email: { [Op.iLike || Op.like]: `%${queryTerm}%` } },
-                { name: { [Op.iLike || Op.like]: `%${queryTerm}%` } },
-                { lastLoginIp: { [Op.iLike || Op.like]: `%${queryTerm}%` } }
+                { email: { [Op.iLike]: `%${queryTerm}%` } },
+                { name: { [Op.iLike]: `%${queryTerm}%` } },
+                { lastLoginIp: { [Op.iLike]: `%${queryTerm}%` } }
             ];
 
             if (isNumeric) {
@@ -167,3 +167,4 @@ router.post('/users/:id/role', async (req, res) => {
 });
 
 module.exports = router;
+//its working
