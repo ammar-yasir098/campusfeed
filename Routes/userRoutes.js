@@ -83,6 +83,7 @@ router.get('/bookmarks', authenticateToken, async (req, res) => {
                 postJson.likeCount = postJson.likes ? postJson.likes.length : 0;
                 postJson.commentCount = postJson.comments ? postJson.comments.length : 0;
                 postJson.bookmarkedAt = b.createdAt;
+                postJson.isBookmarked = true;
                 return postJson;
             });
 

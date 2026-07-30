@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
@@ -10,7 +10,21 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   );
   const [likeCount, setLikeCount] = useState(post.likeCount || 0);
 
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(() => {
+    if (typeof post.isBookmarked === 'boolean') return post.isBookmarked;
+    if (post.bookmarks && Array.isArray(post.bookmarks) && currentUser?.id) {
+      return post.bookmarks.some(b => b.userId === currentUser.id);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof post.isBookmarked === 'boolean') {
+      setIsBookmarked(post.isBookmarked);
+    } else if (post.bookmarks && Array.isArray(post.bookmarks) && currentUser?.id) {
+      setIsBookmarked(post.bookmarks.some(b => b.userId === currentUser.id));
+    }
+  }, [post.isBookmarked, post.bookmarks, currentUser?.id]);
 
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);

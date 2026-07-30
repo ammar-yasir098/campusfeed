@@ -170,6 +170,11 @@ router.get('/', async (req, res) => {
                     attributes: ['id', 'userId']
                 },
                 {
+                    model: Bookmark,
+                    as: 'bookmarks',
+                    attributes: ['id', 'userId']
+                },
+                {
                     model: Comment,
                     as: 'comments',
                     attributes: ['id']
@@ -223,6 +228,11 @@ router.get('/:id', async (req, res) => {
                 {
                     model: Like,
                     as: 'likes',
+                    attributes: ['id', 'userId']
+                },
+                {
+                    model: Bookmark,
+                    as: 'bookmarks',
                     attributes: ['id', 'userId']
                 },
                 {
