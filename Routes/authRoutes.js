@@ -72,7 +72,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         const user = await User.findOne({ where: { email } });
         if (!user) {
-            return res.status(401).json({ message: 'No user found' });
+            return res.status(401).json({ message: 'Invalid username or password' });
         }
 
         if (user.status === 'banned' || user.status === 'suspended') {
@@ -81,7 +81,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Wrong password' });
+            return res.status(401).json({ message: 'Invalid username or password' });
         }
 
         const clientIp = (req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || '').toString().split(',')[0].trim();

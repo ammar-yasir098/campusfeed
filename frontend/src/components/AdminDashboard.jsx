@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   Sparkles,
   Users,
-  Award
+  Award,
+  ChevronDown,
+  Clock
 } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
@@ -33,6 +35,21 @@ export default function AdminDashboard({ currentUser }) {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [feedbackMsg, setFeedbackMsg] = useState({ type: '', text: '' });
+  const [openMenuUserId, setOpenMenuUserId] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (e.target && typeof e.target.closest === 'function') {
+        if (!e.target.closest('.action-menu-container')) {
+          setOpenMenuUserId(null);
+        }
+      } else {
+        setOpenMenuUserId(null);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -119,11 +136,11 @@ export default function AdminDashboard({ currentUser }) {
 
   return (
     <div style={{ width: '100%', margin: '0 auto', paddingBottom: '3rem' }}>
-      
+
       {/* Header Banner */}
-      <div className="glass-panel" style={{ 
-        padding: '1.75rem 2rem', 
-        marginBottom: '2rem', 
+      <div className="glass-panel" style={{
+        padding: '1.75rem 2rem',
+        marginBottom: '2rem',
         background: 'linear-gradient(135deg, #0f2942 0%, #1e3a8a 100%)',
         color: '#ffffff',
         borderRadius: '20px',
@@ -147,8 +164,8 @@ export default function AdminDashboard({ currentUser }) {
           </p>
         </div>
 
-        <button 
-          onClick={fetchUsers} 
+        <button
+          onClick={fetchUsers}
           className="btn-secondary"
           style={{ background: 'rgba(255, 255, 255, 0.15)', color: '#ffffff', border: '1px solid rgba(255, 255, 255, 0.25)', backdropFilter: 'blur(6px)' }}
         >
@@ -202,8 +219,8 @@ export default function AdminDashboard({ currentUser }) {
 
       {/* Feedback Toast Banner */}
       {feedbackMsg.text && (
-        <div style={{ 
-          background: feedbackMsg.type === 'error' ? '#fef2f2' : '#ecfdf5', 
+        <div style={{
+          background: feedbackMsg.type === 'error' ? '#fef2f2' : '#ecfdf5',
           border: `1px solid ${feedbackMsg.type === 'error' ? '#fca5a5' : '#6ee7b7'}`,
           color: feedbackMsg.type === 'error' ? '#991b1b' : '#065f46',
           padding: '0.9rem 1.25rem',
@@ -222,11 +239,11 @@ export default function AdminDashboard({ currentUser }) {
       {/* Search & Status Filter Bar */}
       <div className="glass-panel" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: '#ffffff' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
-          
+
           {/* Search Box */}
           <div style={{ flex: '1 1 320px', position: 'relative' }}>
             <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-            <input 
+            <input
               type="text"
               className="input-field"
               placeholder="Search by User ID, Email, IP Address, or Name..."
@@ -297,15 +314,15 @@ export default function AdminDashboard({ currentUser }) {
 
                   return (
                     <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.15s ease' }}>
-                      
+
                       {/* User Info */}
                       <td style={{ padding: '1rem 1.25rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
                           <div style={{ position: 'relative' }}>
                             {u.avatarUrl ? (
-                              <img 
-                                src={resolveImageUrl(u.avatarUrl)} 
-                                alt={u.name} 
+                              <img
+                                src={resolveImageUrl(u.avatarUrl)}
+                                alt={u.name}
                                 style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #cbd5e1' }}
                               />
                             ) : (
@@ -391,134 +408,255 @@ export default function AdminDashboard({ currentUser }) {
                         </button>
                       </td>
 
-                      {/* Action Menu Buttons */}
+                      {/* Single Action Dropdown Menu */}
                       <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '0.35rem' }}>
-                          
-                          {/* Ban Action Button */}
-                          {u.status !== 'banned' ? (
-                            <button
-                              disabled={isActionLoading || isSelf}
-                              onClick={() => handleStatusChange(u.id, 'banned')}
-                              title={isSelf ? "Cannot ban yourself" : "Ban account permanently"}
-                              style={{
-                                background: '#fef2f2',
-                                border: '1px solid #fca5a5',
-                                color: '#dc2626',
-                                padding: '0.35rem 0.6rem',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: isSelf ? 'not-allowed' : 'pointer',
-                                opacity: isSelf ? 0.5 : 1
-                              }}
-                            >
-                              Ban
-                            </button>
-                          ) : (
-                            <button
-                              disabled={isActionLoading}
-                              onClick={() => handleStatusChange(u.id, 'active')}
-                              style={{
-                                background: '#ecfdf5',
-                                border: '1px solid #6ee7b7',
-                                color: '#059669',
-                                padding: '0.35rem 0.6rem',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              Unban
-                            </button>
-                          )}
+                        <div className="action-menu-container" style={{ position: 'relative', display: 'inline-block' }}>
+                          <button
+                            disabled={isActionLoading}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuUserId(prev => prev === u.id ? null : u.id);
+                            }}
+                            style={{
+                              background: openMenuUserId === u.id ? '#eff6ff' : '#ffffff',
+                              border: `1px solid ${openMenuUserId === u.id ? '#bfdbfe' : '#cbd5e1'}`,
+                              color: openMenuUserId === u.id ? '#1d4ed8' : '#334155',
+                              padding: '0.4rem 0.8rem',
+                              borderRadius: '8px',
+                              fontSize: '0.82rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.4rem',
+                              transition: 'all 0.15s ease',
+                              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
+                            }}
+                          >
+                            <span>Actions</span>
+                            <ChevronDown 
+                              size={14} 
+                              style={{ 
+                                transform: openMenuUserId === u.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.15s ease'
+                              }} 
+                            />
+                          </button>
 
-                          {/* Suspend Action Button */}
-                          {u.status !== 'suspended' && u.status !== 'banned' && (
-                            <button
-                              disabled={isActionLoading || isSelf}
-                              onClick={() => handleStatusChange(u.id, 'suspended')}
-                              title="Suspend account temporarily"
+                          {openMenuUserId === u.id && (
+                            <div 
                               style={{
-                                background: '#fffbeb',
-                                border: '1px solid #fde68a',
-                                color: '#d97706',
-                                padding: '0.35rem 0.6rem',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: isSelf ? 'not-allowed' : 'pointer',
-                                opacity: isSelf ? 0.5 : 1
+                                position: 'absolute',
+                                right: 0,
+                                top: 'calc(100% + 6px)',
+                                background: '#ffffff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '10px',
+                                boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1)',
+                                padding: '0.35rem',
+                                minWidth: '165px',
+                                zIndex: 100,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.2rem',
+                                textAlign: 'left'
                               }}
                             >
-                              Suspend
-                            </button>
-                          )}
+                              {/* Ban / Unban Option */}
+                              {u.status !== 'banned' ? (
+                                <button
+                                  disabled={isActionLoading || isSelf}
+                                  onClick={() => {
+                                    setOpenMenuUserId(null);
+                                    handleStatusChange(u.id, 'banned');
+                                  }}
+                                  title={isSelf ? "Cannot ban yourself" : "Ban account permanently"}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    width: '100%',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: isSelf ? '#94a3b8' : '#dc2626',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: isSelf ? 'not-allowed' : 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => !isSelf && (e.currentTarget.style.background = '#fef2f2')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <Ban size={15} color={isSelf ? '#94a3b8' : '#dc2626'} />
+                                  <span>Ban User</span>
+                                </button>
+                              ) : (
+                                <button
+                                  disabled={isActionLoading}
+                                  onClick={() => {
+                                    setOpenMenuUserId(null);
+                                    handleStatusChange(u.id, 'active');
+                                  }}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    width: '100%',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#059669',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.background = '#ecfdf5')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <UserCheck size={15} color="#059669" />
+                                  <span>Unban User</span>
+                                </button>
+                              )}
 
-                          {/* Mute Action Button */}
-                          {u.status !== 'muted' && (
-                            <button
-                              disabled={isActionLoading}
-                              onClick={() => handleStatusChange(u.id, 'muted')}
-                              title="Mute user from posting or commenting"
-                              style={{
-                                background: '#f3e8ff',
-                                border: '1px solid #d8b4fe',
-                                color: '#7c3aed',
-                                padding: '0.35rem 0.6rem',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              Mute
-                            </button>
-                          )}
+                              {/* Suspend Action */}
+                              {u.status !== 'suspended' && u.status !== 'banned' && (
+                                <button
+                                  disabled={isActionLoading || isSelf}
+                                  onClick={() => {
+                                    setOpenMenuUserId(null);
+                                    handleStatusChange(u.id, 'suspended');
+                                  }}
+                                  title="Suspend account temporarily"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    width: '100%',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: isSelf ? '#94a3b8' : '#d97706',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: isSelf ? 'not-allowed' : 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => !isSelf && (e.currentTarget.style.background = '#fffbeb')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <Clock size={15} color={isSelf ? '#94a3b8' : '#d97706'} />
+                                  <span>Suspend User</span>
+                                </button>
+                              )}
 
-                          {/* Shadowban Button */}
-                          {u.status !== 'shadowbanned' && (
-                            <button
-                              disabled={isActionLoading}
-                              onClick={() => handleStatusChange(u.id, 'shadowbanned')}
-                              title="Shadowban user"
-                              style={{
-                                background: '#f1f5f9',
-                                border: '1px solid #cbd5e1',
-                                color: '#475569',
-                                padding: '0.35rem 0.6rem',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              Shadowban
-                            </button>
-                          )}
+                              {/* Mute Action */}
+                              {u.status !== 'muted' && (
+                                <button
+                                  disabled={isActionLoading}
+                                  onClick={() => {
+                                    setOpenMenuUserId(null);
+                                    handleStatusChange(u.id, 'muted');
+                                  }}
+                                  title="Mute user from posting or commenting"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    width: '100%',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#7c3aed',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f3e8ff')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <VolumeX size={15} color="#7c3aed" />
+                                  <span>Mute User</span>
+                                </button>
+                              )}
 
-                          {/* Reactivate Button if not Active */}
-                          {u.status !== 'active' && (
-                            <button
-                              disabled={isActionLoading}
-                              onClick={() => handleStatusChange(u.id, 'active')}
-                              title="Reactivate user"
-                              style={{
-                                background: '#eff6ff',
-                                border: '1px solid #bfdbfe',
-                                color: '#1d4ed8',
-                                padding: '0.35rem 0.6rem',
-                                borderRadius: '6px',
-                                fontSize: '0.76rem',
-                                fontWeight: 700,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              Activate
-                            </button>
-                          )}
+                              {/* Shadowban Action */}
+                              {u.status !== 'shadowbanned' && (
+                                <button
+                                  disabled={isActionLoading}
+                                  onClick={() => {
+                                    setOpenMenuUserId(null);
+                                    handleStatusChange(u.id, 'shadowbanned');
+                                  }}
+                                  title="Shadowban user"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    width: '100%',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#475569',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f1f5f9')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <EyeOff size={15} color="#475569" />
+                                  <span>Shadowban</span>
+                                </button>
+                              )}
 
+                              {/* Reactivate Action */}
+                              {u.status !== 'active' && (
+                                <button
+                                  disabled={isActionLoading}
+                                  onClick={() => {
+                                    setOpenMenuUserId(null);
+                                    handleStatusChange(u.id, 'active');
+                                  }}
+                                  title="Reactivate user"
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.55rem',
+                                    width: '100%',
+                                    padding: '0.5rem 0.75rem',
+                                    borderRadius: '6px',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: '#1d4ed8',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    transition: 'background 0.12s ease'
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.background = '#eff6ff')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                  <UserCheck size={15} color="#1d4ed8" />
+                                  <span>Activate Account</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </td>
 

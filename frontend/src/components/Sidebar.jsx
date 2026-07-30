@@ -173,15 +173,10 @@ export default function Sidebar({
 
             {currentUser && currentUser.role === 'admin' && (
               <button 
-                className={`nav-link ${activeTab === 'admin' ? 'active' : ''}`}
+                className={`admin-btn ${activeTab === 'admin' ? 'active' : ''}`}
                 onClick={() => setActiveTab('admin')}
-                style={{
-                  background: activeTab === 'admin' ? '#eff6ff' : 'transparent',
-                  color: activeTab === 'admin' ? '#1d4ed8' : '#1e40af',
-                  fontWeight: 700
-                }}
               >
-                <ShieldCheck size={18} color="#2563eb" />
+                <ShieldCheck size={19} color="#ffffff" />
                 <span>Admin Control Panel</span>
               </button>
             )}
