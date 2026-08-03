@@ -38,14 +38,9 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
   useEffect(() => {
     if (currentUser) {
       fetchProfile();
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (activeSubTab === 'bookmarks') {
       fetchBookmarks();
     }
-  }, [activeSubTab]);
+  }, [currentUser]);
 
   if (loading) {
     return (
@@ -140,7 +135,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
           }}
         >
           <Layers size={17} />
-          <span>My Posts ({user.postCount || 0})</span>
+          <span>My Posts ({user.postCount || (user.posts ? user.posts.length : 0)})</span>
         </button>
 
         <button
@@ -160,7 +155,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
           }}
         >
           <BookmarkIcon size={17} />
-          <span>Saved Bookmarks</span>
+          <span>Saved Bookmarks ({bookmarkedPosts.length})</span>
         </button>
       </div>
 

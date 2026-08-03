@@ -100,26 +100,37 @@ export default function App() {
   }, [hasMore, loadingMore, loadingPosts, posts.length, searchQuery, activeTab]);
 
   // Bookmarks
-  useEffect(() => {
-    if (activeTab === 'bookmarks' && currentUser) {
-      setLoadingBookmarks(true);
-      api.getBookmarks()
-        .then((res) => setBookmarkedPosts(res.savedPosts || []))
-        .catch((err) => console.error('Failed to load bookmarks:', err))
-        .finally(() => setLoadingBookmarks(false));
+  const fetchBookmarksList = async () => {
+    if (!currentUser) return;
+    setLoadingBookmarks(true);
+    try {
+      const res = await api.getBookmarks();
+      setBookmarkedPosts(res.savedPosts || []);
+    } catch (err) {
+      console.error('Failed to load bookmarks:', err);
+    } finally {
+      setLoadingBookmarks(false);
     }
-  }, [activeTab, currentUser]);
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchBookmarksList();
+    }
+  }, [currentUser, activeTab]);
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleLogout = () => {
     removeToken();
     setCurrentUser(null);
+    setBookmarkedPosts([]);
     navigate('/login', { replace: true });
   };
 
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);
     fetchPosts();
+    fetchBookmarksList();
     navigate('/feed', { replace: true });
   };
 
@@ -231,6 +242,7 @@ export default function App() {
         onLogout={() => { handleLogout(); setIsMobileMenuOpen(false); }}
         isMobileOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
+        bookmarkCount={bookmarkedPosts.length}
       />
 
       {/* Main Content — single flat Routes tree, NO nesting */}

@@ -39,7 +39,8 @@ export default function Sidebar({
   onOpenAuthModal,
   onLogout,
   isMobileOpen,
-  onCloseMobile
+  onCloseMobile,
+  bookmarkCount = 0
 }) {
   const navigate = useNavigate();
   return (
