@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  GraduationCap, 
-  LogIn, 
-  UserPlus, 
-  AlertCircle, 
-  ArrowRight, 
-  Users, 
-  Bell, 
+import {
+  GraduationCap,
+  LogIn,
+  UserPlus,
+  AlertCircle,
+  ArrowRight,
+  Users,
+  Bell,
   Bookmark,
   Mail,
   Lock,
@@ -59,12 +59,12 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'radial-gradient(circle at 15% 15%, #1e3a8a 0%, #0f172a 55%, #0b1329 100%)', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
+    <div className="auth-wrapper" style={{
+      minHeight: '100vh',
+      background: 'radial-gradient(circle at 15% 15%, #1e3a8a 0%, #0f172a 55%, #0b1329 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       padding: '2.5rem 1rem',
       position: 'relative',
       overflow: 'hidden'
@@ -92,11 +92,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
       }} />
 
       {/* Main Glassmorphic Card Container */}
-      <div className="auth-card-container" style={{ 
-        width: '100%', 
-        maxWidth: '1020px', 
-        display: 'grid', 
-        gridTemplateColumns: '1.1fr 1fr', 
+      <div className="auth-card-container" style={{
+        width: '100%',
+        maxWidth: '1020px',
+        display: 'grid',
+        gridTemplateColumns: '1.1fr 1fr',
         borderRadius: '24px',
         overflow: 'hidden',
         background: '#ffffff',
@@ -104,11 +104,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
         position: 'relative',
         zIndex: 1
       }}>
-        
+
         {/* Left UMT Branding Hero Section */}
-        <div style={{ 
-          background: 'linear-gradient(145deg, #0b1e36 0%, #0f2942 50%, #1e3a8a 100%)', 
-          padding: '3.5rem 3rem', 
+        <div className="auth-hero-section" style={{
+          background: 'linear-gradient(145deg, #0b1e36 0%, #0f2942 50%, #1e3a8a 100%)',
+          padding: '3.5rem 3rem',
           color: '#ffffff',
           display: 'flex',
           flexDirection: 'column',
@@ -127,9 +127,9 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
           }} />
 
           <div style={{ position: 'relative', zIndex: 2 }}>
-            
+
             {/* Live Campus Portal Chip */}
-            <div style={{
+            <div className="auth-hero-chip" style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
@@ -149,18 +149,19 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             </div>
 
             {/* High-Contrast UMT Logo */}
-            <div 
+            <div
               onClick={onCancel}
+              className="auth-hero-logo"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', marginBottom: '2.5rem' }}
             >
-              <div style={{ 
-                width: '52px', 
-                height: '52px', 
-                borderRadius: '14px', 
-                background: '#ffffff', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
+              <div style={{
+                width: '52px',
+                height: '52px',
+                borderRadius: '14px',
+                background: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 boxShadow: '0 8px 20px rgba(0, 0, 0, 0.25)',
                 transition: 'transform 0.2s ease'
               }}>
@@ -176,75 +177,78 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
               </div>
             </div>
 
-            {/* Headline */}
-            <h1 className="font-heading" style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '1.2rem', color: '#ffffff', letterSpacing: '-0.03em' }}>
-              Transforming Learners into Leaders of Tomorrow.
-            </h1>
-            <p style={{ fontSize: '0.95rem', color: '#cbd5e1', lineHeight: 1.65, marginBottom: '2.5rem', fontWeight: 400 }}>
-              Sign in with your official UMT student account to access university announcements, department discussions, and campus events.
-            </p>
+            {/* Desktop Only Extra Hero Elements */}
+            <div className="auth-hero-details">
+              {/* Headline */}
+              <h1 className="font-heading" style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '1.2rem', color: '#ffffff', letterSpacing: '-0.03em' }}>
+                Transforming Learners into Leaders of Tomorrow.
+              </h1>
+              <p style={{ fontSize: '0.95rem', color: '#cbd5e1', lineHeight: 1.65, marginBottom: '2.5rem', fontWeight: 400 }}>
+                Sign in with your official UMT student account to access university announcements, department discussions, and campus events.
+              </p>
 
-            {/* Frosted Glass Bullet Highlight Cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '1rem',
-                padding: '0.9rem 1.1rem',
-                borderRadius: '14px',
-                background: 'rgba(255, 255, 255, 0.07)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                transition: 'transform 0.2s ease, background 0.2s ease'
-              }}>
-                <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.25)', color: '#60a5fa', display: 'flex' }}>
-                  <Bell size={18} />
+              {/* Frosted Glass Bullet Highlight Cards */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '0.9rem 1.1rem',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.07)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  transition: 'transform 0.2s ease, background 0.2s ease'
+                }}>
+                  <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.25)', color: '#60a5fa', display: 'flex' }}>
+                    <Bell size={18} />
+                  </div>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 500, color: '#f8fafc' }}>Official UMT announcements & exam schedules</span>
                 </div>
-                <span style={{ fontSize: '0.92rem', fontWeight: 500, color: '#f8fafc' }}>Official UMT announcements & exam schedules</span>
-              </div>
 
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '1rem',
-                padding: '0.9rem 1.1rem',
-                borderRadius: '14px',
-                background: 'rgba(255, 255, 255, 0.07)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.12)'
-              }}>
-                <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.25)', color: '#60a5fa', display: 'flex' }}>
-                  <Users size={18} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '0.9rem 1.1rem',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.07)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)'
+                }}>
+                  <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.25)', color: '#60a5fa', display: 'flex' }}>
+                    <Users size={18} />
+                  </div>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 500, color: '#f8fafc' }}>Connect across SST, HSM, and UMT schools</span>
                 </div>
-                <span style={{ fontSize: '0.92rem', fontWeight: 500, color: '#f8fafc' }}>Connect across SST, HSM, and UMT schools</span>
-              </div>
 
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '1rem',
-                padding: '0.9rem 1.1rem',
-                borderRadius: '14px',
-                background: 'rgba(255, 255, 255, 0.07)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.12)'
-              }}>
-                <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.25)', color: '#60a5fa', display: 'flex' }}>
-                  <Bookmark size={18} />
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '0.9rem 1.1rem',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.07)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)'
+                }}>
+                  <div style={{ padding: '0.5rem', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.25)', color: '#60a5fa', display: 'flex' }}>
+                    <Bookmark size={18} />
+                  </div>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 500, color: '#f8fafc' }}>Bookmark campus hackathons & society events</span>
                 </div>
-                <span style={{ fontSize: '0.92rem', fontWeight: 500, color: '#f8fafc' }}>Bookmark campus hackathons & society events</span>
               </div>
             </div>
           </div>
 
           {/* Footer Copyright */}
-          <div style={{ 
-            position: 'relative', 
-            zIndex: 2, 
-            paddingTop: '2rem', 
-            marginTop: '2.5rem', 
-            borderTop: '1px solid rgba(255, 255, 255, 0.12)', 
-            fontSize: '0.82rem', 
+          <div className="auth-hero-footer" style={{
+            position: 'relative',
+            zIndex: 2,
+            paddingTop: '2rem',
+            marginTop: '2.5rem',
+            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+            fontSize: '0.82rem',
             color: '#94a3b8',
             display: 'flex',
             alignItems: 'center',
@@ -256,22 +260,22 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
         </div>
 
         {/* Right Form Card Section */}
-        <div style={{ padding: '3.5rem 3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#ffffff' }}>
-          
+        <div className="auth-form-section" style={{ padding: '3.5rem 3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#ffffff' }}>
+
           {/* Top Action Bar: Browse Feed as Guest Pill Button */}
-          <div style={{ marginBottom: '2.2rem', display: 'flex', justifyContent: 'flex-end' }}>
-            <button 
+          <div className="auth-guest-bar" style={{ marginBottom: '2.2rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <button
               type="button"
-              onClick={onCancel} 
-              style={{ 
-                background: '#f1f5f9', 
-                border: '1px solid #e2e8f0', 
-                color: '#0f2942', 
-                display: 'inline-flex', 
-                alignItems: 'center', 
-                gap: '0.5rem', 
-                fontSize: '0.85rem', 
-                fontWeight: 700, 
+              onClick={onCancel}
+              style={{
+                background: '#f1f5f9',
+                border: '1px solid #e2e8f0',
+                color: '#0f2942',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.85rem',
+                fontWeight: 700,
                 padding: '0.5rem 1rem',
                 borderRadius: '9999px',
                 cursor: 'pointer',
@@ -303,17 +307,17 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
 
           {/* Error Banner */}
           {error && (
-            <div style={{ 
-              background: '#fef2f2', 
-              border: '1px solid #fca5a5', 
-              color: '#991b1b', 
-              padding: '0.85rem 1rem', 
-              borderRadius: '12px', 
-              marginBottom: '1.5rem', 
-              fontSize: '0.88rem', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.65rem' 
+            <div style={{
+              background: '#fef2f2',
+              border: '1px solid #fca5a5',
+              color: '#991b1b',
+              padding: '0.85rem 1rem',
+              borderRadius: '12px',
+              marginBottom: '1.5rem',
+              fontSize: '0.88rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.65rem'
             }}>
               <AlertCircle size={18} style={{ shrink: 0 }} />
               <span>{error}</span>
@@ -322,7 +326,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
 
           {/* Form */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.3rem' }}>
-            
+
             {mode === 'signup' && (
               <div>
                 <label className="input-label" style={{ fontWeight: 600, color: '#334155', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
@@ -330,14 +334,14 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                 </label>
                 <div style={{ position: 'relative' }}>
                   <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                  <input 
-                    type="text" 
-                    className="input-field" 
+                  <input
+                    type="text"
+                    className="input-field"
                     placeholder="e.g. Muhammad Ali"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     required
-                    style={{ 
+                    style={{
                       paddingLeft: '2.8rem',
                       height: '46px',
                       borderRadius: '12px',
@@ -355,14 +359,14 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
               </label>
               <div style={{ position: 'relative' }}>
                 <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input 
-                  type="email" 
-                  className="input-field" 
+                <input
+                  type="email"
+                  className="input-field"
                   placeholder="e.g. s2026@umt.edu.pk"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  style={{ 
+                  style={{
                     paddingLeft: '2.8rem',
                     height: '46px',
                     borderRadius: '12px',
@@ -379,14 +383,14 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
               </label>
               <div style={{ position: 'relative' }}>
                 <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  className="input-field" 
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="input-field"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  style={{ 
+                  style={{
                     paddingLeft: '2.8rem',
                     paddingRight: '2.8rem',
                     height: '46px',
@@ -420,20 +424,20 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             </div>
 
             {/* Submit Button */}
-            <button 
-              type="submit" 
-              className="btn-primary" 
-              style={{ 
-                width: '100%', 
-                justifyContent: 'center', 
-                height: '50px', 
-                fontSize: '1rem', 
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{
+                width: '100%',
+                justifyContent: 'center',
+                height: '50px',
+                fontSize: '1rem',
                 marginTop: '0.6rem',
                 borderRadius: '12px',
                 background: 'linear-gradient(135deg, #0f2942 0%, #1e40af 100%)',
                 boxShadow: '0 8px 20px rgba(15, 41, 66, 0.25)',
                 fontWeight: 700
-              }} 
+              }}
               disabled={loading}
             >
               {loading ? (
@@ -484,18 +488,106 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
 
       </div>
 
-      {/* Embedded CSS for responsive stacking under 850px */}
+      {/* Responsive Styles for Mobile View (Compact & Smaller) */}
       <style>{`
         @media (max-width: 850px) {
+          .auth-wrapper {
+            padding: 0 !important;
+            min-height: 100vh !important;
+            align-items: stretch !important;
+            background: #ffffff !important;
+          }
           .auth-card-container {
             grid-template-columns: 1fr !important;
-            max-width: 480px !important;
-            border-radius: 20px !important;
+            max-width: 100% !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            min-height: 100vh;
+            display: flex !important;
+            flex-direction: column !important;
+            background: #ffffff !important;
+          }
+          .auth-hero-section {
+            padding: 0.75rem 1rem !important;
+            background: linear-gradient(135deg, #0b1e36 0%, #0f2942 100%) !important;
+            flex-shrink: 0;
+          }
+          .auth-hero-chip,
+          .auth-hero-details, 
+          .auth-hero-footer {
+            display: none !important;
+          }
+          .auth-hero-logo {
+            margin-bottom: 0 !important;
+            width: 100%;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 0.65rem !important;
+          }
+          .auth-hero-logo > div:first-child {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 10px !important;
+          }
+          .auth-hero-logo svg {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .auth-hero-logo h2 {
+            font-size: 1.15rem !important;
+          }
+          .auth-hero-logo span {
+            font-size: 0.62rem !important;
+          }
+          .auth-form-section {
+            padding: 1rem 1.15rem 1.5rem 1.15rem !important;
+            flex: 1;
+            justify-content: flex-start !important;
+            background: #ffffff !important;
+          }
+          .auth-guest-bar {
+            margin-bottom: 0.85rem !important;
+            justify-content: flex-end !important;
+          }
+          .auth-guest-bar button {
+            padding: 0.35rem 0.75rem !important;
+            font-size: 0.78rem !important;
+          }
+          .auth-form-section h2 {
+            font-size: 1.25rem !important;
+            margin-bottom: 0.15rem !important;
+          }
+          .auth-form-section p {
+            font-size: 0.8rem !important;
+          }
+          .auth-form-section form {
+            gap: 0.75rem !important;
+          }
+          .auth-form-section label {
+            font-size: 0.78rem !important;
+            margin-bottom: 0.25rem !important;
+          }
+          .auth-form-section input {
+            height: 40px !important;
+            font-size: 0.86rem !important;
+            border-radius: 9px !important;
+          }
+          .auth-form-section button.btn-primary {
+            height: 42px !important;
+            font-size: 0.88rem !important;
+            border-radius: 10px !important;
+            margin-top: 0.3rem !important;
+          }
+          .auth-form-section p:last-child {
+            margin-top: 1rem !important;
+            font-size: 0.82rem !important;
           }
         }
       `}</style>
 
     </div>
+
   );
 }
 
