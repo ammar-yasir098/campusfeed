@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import HeaderSearchBar from './components/HeaderSearchBar';
 import PostCard from './components/PostCard';
@@ -11,65 +12,47 @@ import { api, getToken, removeToken } from './services/api';
 import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap } from 'lucide-react';
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [currentUser, setCurrentUser] = useState(null);
-
-  // Persist active tab across page refreshes
-  const [activeTab, setActiveTab] = useState(() => {
-    const token = getToken();
-    if (!token) return 'login';
-    const savedTab = localStorage.getItem('activeTab');
-    return savedTab && savedTab !== 'login' ? savedTab : 'feed';
-  });
-
-  // Sync activeTab to localStorage whenever it changes
-  useEffect(() => {
-    if (activeTab && activeTab !== 'login') {
-      localStorage.setItem('activeTab', activeTab);
-    }
-  }, [activeTab]);
+  const [authChecked, setAuthChecked] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
-
-  // Pagination State
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
-  // Modals & Mobile Menu state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Sentinel ref for infinite scroll triggering
   const loadMoreRef = useRef(null);
 
-  // Initial Auth Check
+  const path = location.pathname;
+  const isAuthPage = path === '/login' || path === '/signup';
+  const activeTab = path.replace('/', '') || 'feed';
+
+  // ── Initial Auth Check ──────────────────────────────────────────────────────
   useEffect(() => {
     const token = getToken();
     if (token) {
       api.getMe()
-        .then((res) => {
-          setCurrentUser(res.user);
-        })
-        .catch(() => {
-          removeToken();
-          localStorage.removeItem('activeTab');
-          setCurrentUser(null);
-          setActiveTab('login');
-        });
+        .then((res) => setCurrentUser(res.user))
+        .catch(() => { removeToken(); setCurrentUser(null); })
+        .finally(() => setAuthChecked(true));
     } else {
-      localStorage.removeItem('activeTab');
-      setActiveTab('login');
+      setAuthChecked(true);
     }
   }, []);
 
-  // Fetch Initial Batch (5 posts)
+  // ── Fetch Posts ─────────────────────────────────────────────────────────────
   const fetchPosts = async () => {
     setLoadingPosts(true);
     setHasMore(true);
@@ -84,7 +67,6 @@ export default function App() {
     }
   };
 
-  // Fetch Next Batch (3 posts)
   const loadMorePosts = async () => {
     if (loadingMore || !hasMore || loadingPosts || searchQuery) return;
     setLoadingMore(true);
@@ -103,36 +85,21 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (activeTab === 'feed') {
-      fetchPosts();
-    }
+    if (activeTab === 'feed') fetchPosts();
   }, [selectedCategory, activeTab]);
 
-  // Infinite Scroll Trigger using IntersectionObserver
+  // Infinite Scroll
   useEffect(() => {
     if (!hasMore || loadingMore || loadingPosts || searchQuery || activeTab !== 'feed') return;
-
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMorePosts();
-        }
-      },
+      (entries) => { if (entries[0].isIntersecting) loadMorePosts(); },
       { rootMargin: '200px' }
     );
-
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current);
-      }
-    };
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+    return () => { if (loadMoreRef.current) observer.unobserve(loadMoreRef.current); };
   }, [hasMore, loadingMore, loadingPosts, posts.length, searchQuery, activeTab]);
 
-  // Fetch Bookmarks for Bookmarks tab
+  // Bookmarks
   useEffect(() => {
     if (activeTab === 'bookmarks' && currentUser) {
       setLoadingBookmarks(true);
@@ -143,17 +110,20 @@ export default function App() {
     }
   }, [activeTab, currentUser]);
 
-  // Handlers
+  // ── Handlers ────────────────────────────────────────────────────────────────
   const handleLogout = () => {
     removeToken();
-    localStorage.removeItem('activeTab');
     setCurrentUser(null);
-    setActiveTab('login');
+    navigate('/login', { replace: true });
   };
 
-  const handlePostCreated = (newPost) => {
-    setPosts([newPost, ...posts]);
+  const handleAuthSuccess = (user) => {
+    setCurrentUser(user);
+    fetchPosts();
+    navigate('/feed', { replace: true });
   };
+
+  const handlePostCreated = (newPost) => setPosts([newPost, ...posts]);
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
@@ -166,7 +136,6 @@ export default function App() {
     }
   };
 
-  // Filter posts by search query (Title, Content, Category, Author Name)
   const filterBySearch = (list) => {
     if (!searchQuery || !searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase().trim();
@@ -181,26 +150,50 @@ export default function App() {
   const filteredPosts = filterBySearch(posts);
   const filteredBookmarks = filterBySearch(bookmarkedPosts);
 
-  // Dedicated Full-Page Auth View (Sign In & Registration as First Page)
-  if (activeTab === 'login' || activeTab === 'signup') {
+  // ── Loading splash ───────────────────────────────────────────────────────────
+  if (!authChecked) {
     return (
-      <AuthPage
-        initialMode={activeTab === 'signup' ? 'signup' : 'login'}
-        onAuthSuccess={(user) => {
-          setCurrentUser(user);
-          const savedTab = localStorage.getItem('activeTab');
-          setActiveTab(savedTab && savedTab !== 'login' ? savedTab : 'feed');
-          fetchPosts();
-        }}
-        onCancel={() => setActiveTab('feed')}
-      />
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#475569' }}>
+        Loading...
+      </div>
     );
   }
 
+  // ── Auth pages — full screen, no sidebar ─────────────────────────────────────
+  if (isAuthPage) {
+    return (
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <AuthPage
+              key="login"
+              initialMode="login"
+              onAuthSuccess={handleAuthSuccess}
+              onCancel={() => navigate('/feed')}
+            />
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <AuthPage
+              key="signup"
+              initialMode="signup"
+              onAuthSuccess={handleAuthSuccess}
+              onCancel={() => navigate('/feed')}
+            />
+          }
+        />
+      </Routes>
+    );
+  }
+
+  // ── Main App Shell ───────────────────────────────────────────────────────────
   return (
     <div style={{ minHeight: '100vh' }}>
 
-      {/* Top Mobile Header Bar (Visible on screens <= 768px) */}
+      {/* Top Mobile Header Bar */}
       <div className="mobile-header-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           <button
@@ -211,235 +204,160 @@ export default function App() {
           >
             <Menu size={22} />
           </button>
-          <div
-            onClick={() => { setActiveTab('feed'); }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: 'pointer' }}
-          >
+          <div onClick={() => navigate('/feed')} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: 'pointer' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <GraduationCap size={18} color="#ffffff" />
             </div>
-            <h3 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f2942' }}>
-              UMT Feed
-            </h3>
+            <h3 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f2942' }}>UMT Feed</h3>
           </div>
         </div>
-
         {currentUser && (
-          <button
-            className="btn-primary"
-            onClick={() => setIsCreateModalOpen(true)}
-            style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}
-          >
+          <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)} style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}>
             <PlusCircle size={15} />
             <span>Post</span>
           </button>
         )}
       </div>
 
-      {/* Docked / Mobile Drawer Left Sidebar */}
+      {/* Sidebar */}
       <Sidebar
         currentUser={currentUser}
         activeTab={activeTab}
-        setActiveTab={(tab) => {
-          setActiveTab(tab);
-          setIsMobileMenuOpen(false);
-        }}
+        setActiveTab={(tab) => { navigate(`/${tab}`); setIsMobileMenuOpen(false); }}
         selectedCategory={selectedCategory}
-        onSelectCategory={(cat) => {
-          setSelectedCategory(cat);
-          setIsMobileMenuOpen(false);
-        }}
-        onOpenCreateModal={() => {
-          setIsCreateModalOpen(true);
-          setIsMobileMenuOpen(false);
-        }}
-        onOpenAuthModal={() => {
-          setActiveTab('login');
-          setIsMobileMenuOpen(false);
-        }}
-        onLogout={() => {
-          handleLogout();
-          setIsMobileMenuOpen(false);
-        }}
+        onSelectCategory={(cat) => { setSelectedCategory(cat); setIsMobileMenuOpen(false); }}
+        onOpenCreateModal={() => { setIsCreateModalOpen(true); setIsMobileMenuOpen(false); }}
+        onOpenAuthModal={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
+        onLogout={() => { handleLogout(); setIsMobileMenuOpen(false); }}
         isMobileOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Main Feed Content Container */}
+      {/* Main Content — single flat Routes tree, NO nesting */}
       <main className="main-content-container">
         <div style={{ maxWidth: activeTab === 'admin' ? '1140px' : '680px', margin: '0 auto', transition: 'max-width 0.22s ease' }}>
+          <Routes>
 
-          {/* Top Search Bar (Only shown on feed or bookmarks) */}
-          {(activeTab === 'feed' || activeTab === 'bookmarks') && (
-            <HeaderSearchBar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-            />
-          )}
+            {/* Default → feed */}
+            <Route path="/" element={<Navigate to="/feed" replace />} />
 
-          {/* FEED TAB */}
-          {activeTab === 'feed' && (
-            <div>
+            {/* FEED */}
+            <Route path="/feed" element={
+              <div>
+                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
 
-              {/* Banner Callout for Guest Users */}
-              {!currentUser && (
-                <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Sparkles size={24} color="var(--primary)" />
-                    <div>
-                      <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#92400e' }}>
-                        Welcome to CampusFeed!
-                      </h4>
-                      <p style={{ fontSize: '0.85rem', color: '#b45309' }}>
-                        Sign in with your university account to post announcements, join discussion threads, and save events.
-                      </p>
+                {!currentUser && (
+                  <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <Sparkles size={24} color="var(--primary)" />
+                      <div>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#92400e' }}>Welcome to CampusFeed!</h4>
+                        <p style={{ fontSize: '0.85rem', color: '#b45309' }}>Sign in with your university account to post announcements, join discussion threads, and save events.</p>
+                      </div>
                     </div>
+                    <button className="btn-primary" onClick={() => navigate('/login')} style={{ whiteSpace: 'nowrap', fontSize: '0.88rem' }}>Sign In</button>
                   </div>
-                  <button className="btn-primary" onClick={() => setActiveTab('login')} style={{ whiteSpace: 'nowrap', fontSize: '0.88rem' }}>
-                    Sign In
-                  </button>
-                </div>
-              )}
+                )}
 
-              {/* Feed Status Header if searching */}
-              {searchQuery && (
-                <div style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  Showing results for "<strong>{searchQuery}</strong>" ({filteredPosts.length} post{filteredPosts.length === 1 ? '' : 's'} found)
-                </div>
-              )}
+                {searchQuery && (
+                  <div style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    Showing results for "<strong>{searchQuery}</strong>" ({filteredPosts.length} post{filteredPosts.length === 1 ? '' : 's'} found)
+                  </div>
+                )}
 
-              {/* Posts List */}
-              {loadingPosts ? (
-                <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>
-                  Loading campus feed...
-                </div>
-              ) : filteredPosts.length === 0 ? (
-                <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)', background: '#ffffff' }}>
-                  <MessageSquare size={40} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
-                  <h3 className="font-heading" style={{ fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '0.4rem' }}>
-                    No posts found
-                  </h3>
-                  <p style={{ fontSize: '0.9rem', marginBottom: '1.2rem' }}>
-                    {searchQuery ? `No posts matched "${searchQuery}"` : `No posts found in category "${selectedCategory}".`}
-                  </p>
-                  {currentUser && (
-                    <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)} style={{ margin: '0 auto' }}>
-                      <PlusCircle size={18} />
-                      <span>Create First Post</span>
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <>
-                  {filteredPosts.map((post) => (
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      currentUser={currentUser}
-                      onDeletePost={handleDeletePost}
-                      onRequireAuth={() => setActiveTab('login')}
-                    />
-                  ))}
-
-                  {/* Infinite Scroll Sentinel & Load More Trigger */}
-                  {!searchQuery && (
-                    <div ref={loadMoreRef} style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                      {loadingMore ? (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '0.9rem' }}>
-                          <RefreshCw size={18} className="spin-icon" style={{ animation: 'spin 1s linear infinite' }} />
-                          <span>Loading 3 more posts...</span>
-                        </div>
-                      ) : hasMore ? (
-                        <button
-                          className="btn-secondary"
-                          onClick={loadMorePosts}
-                          style={{ padding: '0.65rem 1.4rem', fontSize: '0.9rem' }}
-                        >
-                          <ChevronDown size={17} />
-                          <span>Load 3 More Posts</span>
-                        </button>
-                      ) : posts.length > 0 ? (
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>
-                          ✓ You're all caught up! End of UMT feed.
-                        </p>
-                      ) : null}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-
-          {/* BOOKMARKS TAB */}
-          {activeTab === 'bookmarks' && (
-            <div>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  Saved Announcements & Events
-                </h2>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  Access all your bookmarked posts in one place.
-                </p>
+                {loadingPosts ? (
+                  <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>Loading campus feed...</div>
+                ) : filteredPosts.length === 0 ? (
+                  <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)', background: '#ffffff' }}>
+                    <MessageSquare size={40} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
+                    <h3 className="font-heading" style={{ fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '0.4rem' }}>No posts found</h3>
+                    <p style={{ fontSize: '0.9rem', marginBottom: '1.2rem' }}>
+                      {searchQuery ? `No posts matched "${searchQuery}"` : `No posts found in category "${selectedCategory}".`}
+                    </p>
+                    {currentUser && (
+                      <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)} style={{ margin: '0 auto' }}>
+                        <PlusCircle size={18} /><span>Create First Post</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    {filteredPosts.map((post) => (
+                      <PostCard key={post.id} post={post} currentUser={currentUser} onDeletePost={handleDeletePost} onRequireAuth={() => navigate('/login')} />
+                    ))}
+                    {!searchQuery && (
+                      <div ref={loadMoreRef} style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                        {loadingMore ? (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 600, fontSize: '0.9rem' }}>
+                            <RefreshCw size={18} style={{ animation: 'spin 1s linear infinite' }} /><span>Loading 3 more posts...</span>
+                          </div>
+                        ) : hasMore ? (
+                          <button className="btn-secondary" onClick={loadMorePosts} style={{ padding: '0.65rem 1.4rem', fontSize: '0.9rem' }}>
+                            <ChevronDown size={17} /><span>Load 3 More Posts</span>
+                          </button>
+                        ) : posts.length > 0 ? (
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>✓ You're all caught up! End of UMT feed.</p>
+                        ) : null}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
+            } />
 
-              {loadingBookmarks ? (
-                <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>
-                  Loading saved bookmarks...
+            {/* BOOKMARKS */}
+            <Route path="/bookmarks" element={
+              currentUser ? (
+                <div>
+                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Saved Announcements & Events</h2>
+                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Access all your bookmarked posts in one place.</p>
+                  </div>
+                  {loadingBookmarks ? (
+                    <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>Loading saved bookmarks...</div>
+                  ) : filteredBookmarks.length === 0 ? (
+                    <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)', background: '#ffffff' }}>
+                      <p style={{ fontSize: '1rem' }}>No saved posts yet. Tap the bookmark icon on any post in your feed to save it here!</p>
+                    </div>
+                  ) : (
+                    filteredBookmarks.map((post) => (
+                      <PostCard key={post.id} post={post} currentUser={currentUser} onDeletePost={handleDeletePost} onRequireAuth={() => navigate('/login')} />
+                    ))
+                  )}
                 </div>
-              ) : filteredBookmarks.length === 0 ? (
-                <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)', background: '#ffffff' }}>
-                  <p style={{ fontSize: '1rem' }}>No saved posts yet. Tap the bookmark icon on any post in your feed to save it here!</p>
-                </div>
-              ) : (
-                filteredBookmarks.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    currentUser={currentUser}
-                    onDeletePost={handleDeletePost}
-                    onRequireAuth={() => setActiveTab('login')}
-                  />
-                ))
-              )}
-            </div>
-          )}
+              ) : <Navigate to="/login" replace />
+            } />
 
-          {/* PROFILE TAB */}
-          {activeTab === 'profile' && currentUser && (
-            <ProfileView
-              currentUser={currentUser}
-              onOpenEditProfile={() => setIsProfileModalOpen(true)}
-              onDeletePost={handleDeletePost}
-            />
-          )}
+            {/* PROFILE */}
+            <Route path="/profile" element={
+              currentUser
+                ? <ProfileView currentUser={currentUser} onOpenEditProfile={() => setIsProfileModalOpen(true)} onDeletePost={handleDeletePost} />
+                : <Navigate to="/login" replace />
+            } />
 
-          {/* ADMIN TAB */}
-          {activeTab === 'admin' && currentUser && currentUser.role === 'admin' && (
-            <AdminDashboard currentUser={currentUser} />
-          )}
+            {/* ADMIN */}
+            <Route path="/admin" element={
+              currentUser && currentUser.role === 'admin'
+                ? <AdminDashboard currentUser={currentUser} />
+                : <Navigate to="/feed" replace />
+            } />
 
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/feed" replace />} />
+
+          </Routes>
         </div>
       </main>
 
       {/* MODALS */}
-      <CreatePostModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onPostCreated={handlePostCreated}
-      />
-
+      <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onPostCreated={handlePostCreated} />
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
         currentUser={currentUser}
-        onProfileUpdated={(updatedUser) => {
-          setCurrentUser(updatedUser);
-          fetchPosts();
-        }}
+        onProfileUpdated={(updatedUser) => { setCurrentUser(updatedUser); fetchPosts(); }}
       />
-
     </div>
   );
 }

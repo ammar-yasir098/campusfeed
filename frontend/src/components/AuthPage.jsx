@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   GraduationCap, 
   LogIn, 
@@ -19,7 +20,8 @@ import {
 import { api, setToken } from '../services/api';
 
 export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCancel }) {
-  const [mode, setMode] = useState(initialMode); // 'login' or 'signup'
+  const navigate = useNavigate();
+  const mode = initialMode; // Fixed by URL — no internal toggle
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -289,63 +291,14 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             </button>
           </div>
 
-          {/* Mode Switcher Segmented Control (Pill Tabs) */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            background: '#f1f5f9', 
-            padding: '4px', 
-            borderRadius: '14px', 
-            marginBottom: '2.2rem',
-            border: '1px solid #e2e8f0'
-          }}>
-            <button 
-              type="button" 
-              onClick={() => { setMode('login'); setError(''); }}
-              style={{
-                background: mode === 'login' ? '#ffffff' : 'transparent',
-                border: 'none',
-                borderRadius: '10px',
-                color: mode === 'login' ? '#0f2942' : '#64748b',
-                padding: '0.7rem 0',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                boxShadow: mode === 'login' ? '0 2px 8px rgba(15, 23, 42, 0.08)' : 'none',
-                transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem'
-              }}
-            >
-              <LogIn size={16} />
-              <span>Sign In</span>
-            </button>
-
-            <button 
-              type="button" 
-              onClick={() => { setMode('signup'); setError(''); }}
-              style={{
-                background: mode === 'signup' ? '#ffffff' : 'transparent',
-                border: 'none',
-                borderRadius: '10px',
-                color: mode === 'signup' ? '#0f2942' : '#64748b',
-                padding: '0.7rem 0',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                boxShadow: mode === 'signup' ? '0 2px 8px rgba(15, 23, 42, 0.08)' : 'none',
-                transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem'
-              }}
-            >
-              <UserPlus size={16} />
-              <span>Register</span>
-            </button>
+          {/* Page Title — fixed based on mode */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h2 className="font-heading" style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f2942', marginBottom: '0.3rem' }}>
+              {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+            </h2>
+            <p style={{ fontSize: '0.88rem', color: '#64748b' }}>
+              {mode === 'login' ? 'Sign in to your UMT student account.' : 'Join the UMT student network today.'}
+            </p>
           </div>
 
           {/* Error Banner */}
@@ -499,6 +452,33 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             </button>
 
           </form>
+
+          {/* Switch page link */}
+          <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.88rem', color: '#64748b' }}>
+            {mode === 'login' ? (
+              <>
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => navigate('/signup')}
+                  style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', padding: 0, textDecoration: 'underline' }}
+                >
+                  Register here
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', padding: 0, textDecoration: 'underline' }}
+                >
+                  Sign In
+                </button>
+              </>
+            )}
+          </p>
 
         </div>
 

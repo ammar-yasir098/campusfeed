@@ -279,11 +279,11 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
         <>
           {/* Content: Title & Text */}
           <div style={{ marginBottom: '0.75rem' }}>
-            <h3 className="font-heading" style={{ fontSize: '1.08rem', fontWeight: 700, marginBottom: '0.3rem', color: '#0f172a', lineHeight: 1.35 }}>
+            <h3 className="font-heading" style={{ fontSize: '1.08rem', fontWeight: 700, marginBottom: '0.3rem', color: '#0f172a', lineHeight: 1.35,wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
               {postData.title}
             </h3>
             {postData.content && (
-              <p style={{ fontSize: '0.88rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.88rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 {postData.content}
               </p>
             )}

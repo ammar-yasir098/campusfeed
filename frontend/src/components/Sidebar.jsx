@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   GraduationCap, 
   PlusCircle, 
@@ -40,6 +41,7 @@ export default function Sidebar({
   isMobileOpen,
   onCloseMobile
 }) {
+  const navigate = useNavigate();
   return (
     <>
       {/* Mobile Overlay Backdrop */}
@@ -67,7 +69,7 @@ export default function Sidebar({
           {/* UMT Official Logo & Crest + Close button on mobile */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
             <div 
-              onClick={() => setActiveTab('feed')} 
+          onClick={() => navigate('/feed')}
               style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}
             >
               <div style={{ 
@@ -237,7 +239,7 @@ export default function Sidebar({
               border: '1px solid #f1f5f9'
             }}>
               <div 
-                onClick={() => setActiveTab('profile')}
+                onClick={() => navigate('/profile')}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', minWidth: 0, flex: 1 }}
               >
                 {currentUser.avatarUrl ? (

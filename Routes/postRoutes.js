@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const validate = require('../middleware/validate');
+const { postValidation, commentValidation } = require('../middleware/validators');
 
 const router = express.Router();
 
@@ -64,7 +66,7 @@ const pollInclude = {
 };
 
 // CREATE a new post (Protected - Stores path "uploads/filename" and handles optional poll)
-router.post('/', authenticateToken, (req, res) => {
+router.post('/', authenticateToken, postValidation, validate, (req, res) => {
     upload.single('image')(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: err.message });
@@ -441,7 +443,7 @@ router.post('/:id/bookmark', authenticateToken, async (req, res) => {
 // =================================================================
 
 // ADD COMMENT to a post (Protected)
-router.post('/:id/comments', authenticateToken, async (req, res) => {
+router.post('/:id/comments', authenticateToken, commentValidation, validate, async (req, res) => {
     try {
         const postId = req.params.id;
         const { text } = req.body;

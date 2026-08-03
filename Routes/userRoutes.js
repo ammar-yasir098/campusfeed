@@ -2,6 +2,8 @@ const express = require('express');
 const { User, Post, Like, Comment, Bookmark } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
+const validate = require('../middleware/validate');
+const { profileValidation } = require('../middleware/validators');
 
 const router = express.Router();
 
@@ -97,7 +99,7 @@ router.get('/bookmarks', authenticateToken, async (req, res) => {
 });
 
 // UPDATE current user profile (Protected - Stores path "uploads/filename")
-router.put('/profile', authenticateToken, (req, res) => {
+router.put('/profile', authenticateToken, profileValidation, validate, (req, res) => {
     upload.single('avatar')(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ message: err.message });

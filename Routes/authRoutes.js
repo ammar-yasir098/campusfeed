@@ -4,6 +4,8 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const authenticateToken = require('../middleware/authMiddleware');
+const validate = require('../middleware/validate');
+const { signupValidation, loginValidation } = require('../middleware/validators');
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -15,7 +17,7 @@ const loginLimiter = rateLimit({
 
 const router = express.Router();
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', signupValidation, validate, async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
@@ -62,7 +64,7 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-router.post('/login', loginLimiter, async (req, res) => {
+router.post('/login', loginLimiter, loginValidation, validate, async (req, res) => {
     try {
         const { email, password } = req.body;
 
