@@ -11,6 +11,7 @@ const postRoutes = require('./Routes/postRoutes');
 const userRoutes = require('./Routes/userRoutes');
 const uploadRoutes = require('./Routes/uploadRoutes');
 const adminRoutes = require('./Routes/adminRoutes');
+const notificationRoutes = require('./Routes/notificationRoutes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('CampusFeed backend is running!');

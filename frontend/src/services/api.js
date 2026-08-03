@@ -103,5 +103,11 @@ export const api = {
   },
   updateUserStatus: (id, status) => request(`/api/admin/users/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }),
   toggleUserVerification: (id, isVerified) => request(`/api/admin/users/${id}/verify`, { method: 'POST', body: JSON.stringify({ isVerified }) }),
-  updateUserRole: (id, role) => request(`/api/admin/users/${id}/role`, { method: 'POST', body: JSON.stringify({ role }) })
+  updateUserRole: (id, role) => request(`/api/admin/users/${id}/role`, { method: 'POST', body: JSON.stringify({ role }) }),
+
+  // Notifications APIs
+  getNotifications: () => request('/api/notifications'),
+  markNotificationRead: (id) => request(`/api/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'POST' }),
+  clearAllNotifications: () => request('/api/notifications/clear-all', { method: 'DELETE' }),
 };

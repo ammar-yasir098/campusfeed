@@ -8,6 +8,8 @@ import CreatePostModal from './components/CreatePostModal';
 import ProfileModal from './components/ProfileModal';
 import AuthPage from './components/AuthPage';
 import AdminDashboard from './components/AdminDashboard';
+import NotificationBell from './components/NotificationBell';
+import PostDetailView from './components/PostDetailView';
 import { api, getToken, removeToken } from './services/api';
 import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap } from 'lucide-react';
 
@@ -222,12 +224,15 @@ export default function App() {
             <h3 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f2942' }}>UMT Feed</h3>
           </div>
         </div>
-        {currentUser && (
-          <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)} style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}>
-            <PlusCircle size={15} />
-            <span>Post</span>
-          </button>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <NotificationBell currentUser={currentUser} />
+          {currentUser && (
+            <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)} style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}>
+              <PlusCircle size={15} />
+              <span>Post</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Sidebar */}
@@ -256,7 +261,7 @@ export default function App() {
             {/* FEED */}
             <Route path="/feed" element={
               <div>
-                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} currentUser={currentUser} />
 
                 {!currentUser && (
                   <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
@@ -321,7 +326,7 @@ export default function App() {
             <Route path="/bookmarks" element={
               currentUser ? (
                 <div>
-                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
+                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} currentUser={currentUser} />
                   <div style={{ marginBottom: '1.5rem' }}>
                     <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Saved Announcements & Events</h2>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Access all your bookmarked posts in one place.</p>
@@ -353,6 +358,11 @@ export default function App() {
               currentUser && currentUser.role === 'admin'
                 ? <AdminDashboard currentUser={currentUser} />
                 : <Navigate to="/feed" replace />
+            } />
+
+            {/* SINGLE POST DETAIL VIEW (from notification click) */}
+            <Route path="/posts/:id" element={
+              <PostDetailView currentUser={currentUser} onDeletePost={handleDeletePost} />
             } />
 
             {/* Catch-all */}

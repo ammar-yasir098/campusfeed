@@ -1,12 +1,13 @@
 import React from 'react';
 import { Search, X } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
-export default function HeaderSearchBar({ searchQuery, setSearchQuery }) {
+export default function HeaderSearchBar({ searchQuery, setSearchQuery, currentUser }) {
   return (
-    <div style={{ marginBottom: '1.25rem' }}>
+    <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
       
-      {/* Full Width Compact Search Input */}
-      <div style={{ position: 'relative' }}>
+      {/* Search Input — takes all remaining space */}
+      <div style={{ position: 'relative', flex: 1 }}>
         <Search 
           size={18} 
           style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} 
@@ -52,6 +53,12 @@ export default function HeaderSearchBar({ searchQuery, setSearchQuery }) {
         )}
       </div>
 
+      {/* Notification Bell — pinned top-right of content area (desktop only) */}
+      <div className="desktop-notif-bell">
+        <NotificationBell currentUser={currentUser} />
+      </div>
+
     </div>
   );
 }
+

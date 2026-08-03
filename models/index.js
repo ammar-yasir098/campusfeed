@@ -6,6 +6,7 @@ const Bookmark = require('./Bookmark');
 const Poll = require('./Poll');
 const PollOption = require('./PollOption');
 const PollVote = require('./PollVote');
+const Notification = require('./Notification');
 
 // User & Post Associations
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts', onDelete: 'CASCADE' });
@@ -55,6 +56,14 @@ PollVote.belongsTo(PollOption, { foreignKey: 'optionId', as: 'option' });
 User.hasMany(PollVote, { foreignKey: 'userId', as: 'pollVotes', onDelete: 'CASCADE' });
 PollVote.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// User & Notification Associations
+User.hasMany(Notification, { foreignKey: 'userId', as: 'notifications', onDelete: 'CASCADE' });
+Notification.belongsTo(User, { foreignKey: 'userId', as: 'recipient' });
+
+// Post & Notification Associations (so if post is deleted, notifications are also deleted)
+Post.hasMany(Notification, { foreignKey: 'postId', as: 'notifications', onDelete: 'CASCADE' });
+Notification.belongsTo(Post, { foreignKey: 'postId', as: 'post' });
+
 module.exports = {
   User,
   Post,
@@ -64,5 +73,7 @@ module.exports = {
   Poll,
   PollOption,
   PollVote,
+  Notification,
 };
+
 

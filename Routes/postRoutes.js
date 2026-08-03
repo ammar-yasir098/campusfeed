@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote } = require('../models');
+const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote, Notification } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const validate = require('../middleware/validate');
@@ -128,6 +128,27 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
             json.likeCount = 0;
             json.commentCount = 0;
             json.poll = formatPoll(json.poll, req.user.id);
+
+            // NOTIFICATION: If admin posts, broadcast announcement to all users except admin
+            if (req.user.role === 'admin') {
+                try {
+                    const allUsers = await User.findAll({
+                        where: { status: ['active', 'muted', 'shadowbanned'] },
+                        attributes: ['id']
+                    });
+                    const notifPromises = allUsers
+                        .filter(u => u.id !== req.user.id)
+                        .map(u => Notification.create({
+                            userId: u.id,
+                            type: 'announcement',
+                            message: `📢 Admin posted a new announcement: "${title.slice(0, 60)}"`,
+                            postId: newPost.id,
+                        }));
+                    await Promise.all(notifPromises);
+                } catch (notifErr) {
+                    console.error('Announcement notification error:', notifErr.message);
+                }
+            }
 
             res.status(201).json({
                 message: 'Post created successfully',
@@ -400,6 +421,22 @@ router.post('/:id/like', authenticateToken, async (req, res) => {
             // Like: Create new like
             await Like.create({ userId, postId });
             const likeCount = await Like.count({ where: { postId } });
+
+            // NOTIFICATION: Notify the post author (but not if they liked their own post)
+            if (post.userId !== userId) {
+                try {
+                    const liker = req.user;
+                    await Notification.create({
+                        userId: post.userId,
+                        type: 'like',
+                        message: `👍 ${liker.name} liked your post "${post.title.slice(0, 50)}"`,
+                        postId: post.id,
+                    });
+                } catch (notifErr) {
+                    console.error('Like notification error:', notifErr.message);
+                }
+            }
+
             return res.status(201).json({ message: 'Post liked successfully', liked: true, likeCount });
         }
     } catch (error) {
@@ -471,6 +508,21 @@ router.post('/:id/comments', authenticateToken, commentValidation, validate, asy
                 attributes: ['id', 'name', 'email', 'avatarUrl']
             }]
         });
+
+        // NOTIFICATION: Notify the post author about new comment (not if they comment on their own post)
+        if (post.userId !== req.user.id) {
+            try {
+                const commentPreview = text.length > 80 ? `${text.slice(0, 80)}...` : text;
+                await Notification.create({
+                    userId: post.userId,
+                    type: 'comment',
+                    message: `💬 ${req.user.name} on "${post.title.slice(0, 40)}": "${commentPreview}"`,
+                    postId: post.id,
+                });
+            } catch (notifErr) {
+                console.error('Comment notification error:', notifErr.message);
+            }
+        }
 
         res.status(201).json({
             message: 'Comment added successfully',

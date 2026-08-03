@@ -379,6 +379,13 @@ h6,
   display: none;
 }
 
+/* Desktop Notification Bell (in HeaderSearchBar) — shown on desktop, hidden on mobile */
+.desktop-notif-bell {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 /* Mobile Screens (<= 768px) */
 @media (max-width: 768px) {
   .mobile-header-bar {
@@ -409,6 +416,11 @@ h6,
   .main-content-container {
     margin-left: 0 !important;
     padding: 1rem 0.75rem 4rem 0.75rem !important;
+  }
+
+  /* Hide desktop bell on mobile — mobile top bar has its own bell */
+  .desktop-notif-bell {
+    display: none !important;
   }
 
   .modal-content {

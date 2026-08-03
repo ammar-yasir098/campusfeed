@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { resolveImageUrl } from '../services/api';
 
+
 const CATEGORIES = [
   { id: 'All', label: 'All Feed', icon: Layers },
   { id: 'Announcements', label: 'Announcements', icon: Megaphone },

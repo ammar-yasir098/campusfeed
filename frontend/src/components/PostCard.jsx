@@ -3,7 +3,7 @@ import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCi
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
 
-export default function PostCard({ post, currentUser, onDeletePost, onRequireAuth }) {
+export default function PostCard({ post, currentUser, onDeletePost, onRequireAuth, defaultShowComments = false }) {
   const [postData, setPostData] = useState(post);
   const [isLiked, setIsLiked] = useState(
     post.likes ? post.likes.some(l => l.userId === currentUser?.id) : false
@@ -26,7 +26,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     }
   }, [post.isBookmarked, post.bookmarks, currentUser?.id]);
 
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(defaultShowComments);
   const [comments, setComments] = useState([]);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
   const [commentsLoaded, setCommentsLoaded] = useState(false);
@@ -137,6 +137,20 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
       setVoting(false);
     }
   };
+
+  // Auto-load comments if opened from PostDetailView (defaultShowComments=true)
+  useEffect(() => {
+    if (defaultShowComments && !commentsLoaded) {
+      setLoadingCommentsList(true);
+      api.getComments(postData.id)
+        .then(res => {
+          setComments(res.comments || []);
+          setCommentsLoaded(true);
+        })
+        .catch(err => console.error('Failed to auto-load comments:', err))
+        .finally(() => setLoadingCommentsList(false));
+    }
+  }, [defaultShowComments]);
 
   // Handle Fetch & Toggle Comments
   const handleToggleComments = async () => {
