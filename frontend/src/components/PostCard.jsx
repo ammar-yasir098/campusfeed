@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
 
@@ -17,6 +17,25 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     }
     return false;
   });
+
+  // Report State
+  const [showReportMenu, setShowReportMenu] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+  const [reportToast, setReportToast] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (e.target && typeof e.target.closest === 'function') {
+        if (!e.target.closest('.report-menu-container')) {
+          setShowReportMenu(false);
+        }
+      } else {
+        setShowReportMenu(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, []);
 
   useEffect(() => {
     if (typeof post.isBookmarked === 'boolean') {
@@ -79,6 +98,24 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
       }
     } else {
       onDeletePost(postData.id);
+    }
+  };
+
+  // Handle Report Post
+  const handleReportPost = async (reason) => {
+    if (!currentUser) {
+      onRequireAuth();
+      return;
+    }
+    setShowReportMenu(false);
+    try {
+      const res = await api.reportPost(postData.id, reason);
+      setReportSubmitted(true);
+      setReportToast({ type: 'success', text: res.message || 'Report submitted successfully' });
+      setTimeout(() => setReportToast(null), 4000);
+    } catch (err) {
+      setReportToast({ type: 'error', text: err.message || 'Failed to submit report' });
+      setTimeout(() => setReportToast(null), 4000);
     }
   };
 
@@ -254,8 +291,90 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
               <Trash2 size={15} />
             </button>
           )}
+
+          {!isOwner && !postData.isTakedown && (
+            <div className="report-menu-container" style={{ position: 'relative' }}>
+              <button 
+                className="btn-icon" 
+                onClick={() => {
+                  if (!currentUser) {
+                    onRequireAuth();
+                    return;
+                  }
+                  setShowReportMenu(!showReportMenu);
+                }}
+                title={reportSubmitted ? "Reported to Moderators" : "Report Post"}
+                style={{ color: reportSubmitted ? '#d97706' : '#64748b', padding: '0.3rem' }}
+              >
+                <Flag size={15} fill={reportSubmitted ? '#d97706' : 'none'} />
+              </button>
+
+              {showReportMenu && (
+                <div style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: '100%',
+                  marginTop: '0.4rem',
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
+                  padding: '0.5rem',
+                  zIndex: 100,
+                  width: '190px'
+                }}>
+                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', padding: '0.25rem 0.5rem', borderBottom: '1px solid #f1f5f9', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span>Report Reason:</span>
+                    <X size={13} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={() => setShowReportMenu(false)} />
+                  </div>
+                  {['Spam', 'Harassment', 'Misinformation', 'Inappropriate Content'].map((reason) => (
+                    <button
+                      key={reason}
+                      onClick={() => handleReportPost(reason)}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '0.45rem 0.6rem',
+                        fontSize: '0.8rem',
+                        color: '#334155',
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: 500,
+                        display: 'block'
+                      }}
+                      onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
+                      onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                    >
+                      🚩 {reason}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {reportToast && (
+        <div style={{
+          padding: '0.55rem 0.85rem',
+          borderRadius: '8px',
+          marginBottom: '0.75rem',
+          fontSize: '0.82rem',
+          fontWeight: 600,
+          background: reportToast.type === 'success' ? '#ecfdf5' : '#fef2f2',
+          color: reportToast.type === 'success' ? '#047857' : '#b91c1c',
+          border: `1px solid ${reportToast.type === 'success' ? '#a7f3d0' : '#fca5a5'}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem'
+        }}>
+          {reportToast.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+          <span>{reportToast.text}</span>
+        </div>
+      )}
 
       {/* Content or Admin Takedown Feedback Banner */}
       {postData.isTakedown ? (

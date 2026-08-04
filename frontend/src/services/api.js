@@ -69,6 +69,7 @@ export const api = {
   },
   deletePost: (id) => request(`/api/posts/${id}`, { method: 'DELETE' }),
   takedownPost: (id, reason) => request(`/api/posts/${id}/takedown`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  reportPost: (id, reason) => request(`/api/posts/${id}/report`, { method: 'POST', body: JSON.stringify({ reason }) }),
 
   // Likes & Comments APIs
   toggleLike: (postId) => request(`/api/posts/${postId}/like`, { method: 'POST' }),
@@ -105,6 +106,9 @@ export const api = {
   updateUserStatus: (id, status) => request(`/api/admin/users/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }),
   toggleUserVerification: (id, isVerified) => request(`/api/admin/users/${id}/verify`, { method: 'POST', body: JSON.stringify({ isVerified }) }),
   updateUserRole: (id, role) => request(`/api/admin/users/${id}/role`, { method: 'POST', body: JSON.stringify({ role }) }),
+  getAdminReports: () => request('/api/admin/reports'),
+  dismissReport: (id) => request(`/api/admin/reports/${id}/dismiss`, { method: 'POST' }),
+  dismissAllPostReports: (postId) => request(`/api/admin/reports/post/${postId}/dismiss`, { method: 'POST' }),
 
   // Notifications APIs
   getNotifications: () => request('/api/notifications'),

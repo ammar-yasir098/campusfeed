@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote, Notification } = require('../models');
+const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote, Notification, Report } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const validate = require('../middleware/validate');
@@ -591,6 +591,55 @@ router.delete('/comments/:commentId', authenticateToken, async (req, res) => {
         res.status(200).json({ message: 'Comment deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete comment', error: error.message });
+    }
+});
+
+// REPORT a post (Protected)
+router.post('/:id/report', authenticateToken, async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { reason } = req.body;
+
+        const validReasons = ['Spam', 'Harassment', 'Misinformation', 'Inappropriate Content'];
+        if (!reason || !validReasons.includes(reason)) {
+            return res.status(400).json({ message: `Invalid reason. Must be one of: ${validReasons.join(', ')}` });
+        }
+
+        const post = await Post.findByPk(postId);
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Prevent reporting own post
+        if (post.userId === req.user.id) {
+            return res.status(400).json({ message: 'You cannot report your own post.' });
+        }
+
+        // Check if user already reported this post
+        const existingReport = await Report.findOne({
+            where: {
+                postId,
+                reporterId: req.user.id
+            }
+        });
+
+        if (existingReport) {
+            return res.status(409).json({ message: 'You have already reported this post.' });
+        }
+
+        const report = await Report.create({
+            postId,
+            reporterId: req.user.id,
+            reason,
+            status: 'pending'
+        });
+
+        res.status(201).json({
+            message: 'Report submitted successfully. Campus moderators will review it.',
+            report
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to submit report', error: error.message });
     }
 });
 

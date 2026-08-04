@@ -15,12 +15,18 @@ import {
   Users,
   Award,
   ChevronDown,
-  Clock
+  Clock,
+  Flag,
+  ShieldAlert,
+  Trash2,
+  CheckCircle2
 } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
 
 export default function AdminDashboard({ currentUser }) {
+  const [adminTab, setAdminTab] = useState('users'); // 'users' | 'reports'
+
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -29,6 +35,14 @@ export default function AdminDashboard({ currentUser }) {
     suspendedUsers: 0,
     verifiedUsers: 0
   });
+
+  // Reports Queue State
+  const [reports, setReports] = useState([]);
+  const [groupedReports, setGroupedReports] = useState([]);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [uniquePostsCount, setUniquePostsCount] = useState(0);
+  const [loadingReports, setLoadingReports] = useState(false);
+  const [reportActionId, setReportActionId] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -63,6 +77,75 @@ export default function AdminDashboard({ currentUser }) {
       setFeedbackMsg({ type: 'error', text: err.message || 'Failed to load user administration data' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReports = async () => {
+    setLoadingReports(true);
+    try {
+      const res = await api.getAdminReports();
+      setReports(res.reports || []);
+      setGroupedReports(res.groupedReports || []);
+      setPendingCount(res.pendingCount || 0);
+      setUniquePostsCount(res.uniquePostsCount || (res.groupedReports ? res.groupedReports.length : 0));
+    } catch (err) {
+      console.error('Failed to fetch admin reports queue:', err);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const handleDismissSingleReport = async (reportId) => {
+    setReportActionId(reportId);
+    setFeedbackMsg({ type: '', text: '' });
+    try {
+      await api.dismissReport(reportId);
+      setFeedbackMsg({ type: 'success', text: 'Report notice dismissed successfully.' });
+      fetchReports();
+    } catch (err) {
+      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to dismiss report.' });
+    } finally {
+      setReportActionId(null);
+    }
+  };
+
+  const handleDismissAllPostReports = async (postId) => {
+    setReportActionId(postId);
+    setFeedbackMsg({ type: '', text: '' });
+    try {
+      const res = await api.dismissAllPostReports(postId);
+      setFeedbackMsg({ type: 'success', text: res.message || 'All report notices for this post cleared.' });
+      fetchReports();
+    } catch (err) {
+      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to dismiss post reports.' });
+    } finally {
+      setReportActionId(null);
+    }
+  };
+
+  const handleTakedownGroupedPost = async (postId, mainReason) => {
+    const reason = window.prompt(
+      'Enter administrative feedback / reason for taking down this reported post:',
+      `This post was taken down by UMT Admin following student reports for: ${mainReason || 'Violating Community Guidelines'}.`
+    );
+    if (reason === null) return;
+
+    setReportActionId(postId);
+    setFeedbackMsg({ type: '', text: '' });
+    try {
+      await api.takedownPost(postId, reason);
+      await api.dismissAllPostReports(postId);
+      setFeedbackMsg({ type: 'success', text: 'Post taken down and all report notices cleared!' });
+      fetchReports();
+      fetchUsers();
+    } catch (err) {
+      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to process post takedown.' });
+    } finally {
+      setReportActionId(null);
     }
   };
 
@@ -236,7 +319,243 @@ export default function AdminDashboard({ currentUser }) {
         </div>
       )}
 
-      {/* Search & Status Filter Bar */}
+      {/* Admin Tab Switcher */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <button
+          onClick={() => setAdminTab('users')}
+          style={{
+            padding: '0.65rem 1.25rem',
+            borderRadius: '12px',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            border: 'none',
+            background: adminTab === 'users' ? '#0f2942' : '#ffffff',
+            color: adminTab === 'users' ? '#ffffff' : '#64748b',
+            boxShadow: adminTab === 'users' ? '0 4px 12px rgba(15, 41, 66, 0.2)' : '0 2px 6px rgba(0,0,0,0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Users size={18} />
+          <span>User Accounts Roster</span>
+        </button>
+
+        <button
+          onClick={() => setAdminTab('reports')}
+          style={{
+            padding: '0.65rem 1.25rem',
+            borderRadius: '12px',
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            border: 'none',
+            background: adminTab === 'reports' ? '#dc2626' : '#ffffff',
+            color: adminTab === 'reports' ? '#ffffff' : '#64748b',
+            boxShadow: adminTab === 'reports' ? '0 4px 12px rgba(220, 38, 38, 0.25)' : '0 2px 6px rgba(0,0,0,0.04)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Flag size={18} />
+          <span>Reported Posts Queue</span>
+          {uniquePostsCount > 0 && (
+            <span 
+              title={`${pendingCount} total report notices across ${uniquePostsCount} posts`}
+              style={{
+                background: adminTab === 'reports' ? '#ffffff' : '#dc2626',
+                color: adminTab === 'reports' ? '#dc2626' : '#ffffff',
+                padding: '0.1rem 0.55rem',
+                borderRadius: '9999px',
+                fontSize: '0.75rem',
+                fontWeight: 800
+              }}
+            >
+              {uniquePostsCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {adminTab === 'reports' ? (
+        <div className="glass-panel" style={{ padding: '1.5rem', background: '#ffffff', borderRadius: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <div>
+              <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f2942' }}>
+                🚩 Reported Posts Moderation Queue
+              </h3>
+              <p style={{ fontSize: '0.86rem', color: '#64748b', marginTop: '0.2rem' }}>
+                Review flagged content submitted by students. Take administrative action or dismiss false reports.
+              </p>
+            </div>
+            <button className="btn-secondary" onClick={fetchReports} style={{ fontSize: '0.85rem' }}>
+              <RefreshCw size={15} className={loadingReports ? 'spin-icon' : ''} />
+              <span>Refresh Queue</span>
+            </button>
+          </div>
+
+          {loadingReports ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Loading reported posts queue...</div>
+          ) : groupedReports.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: '#64748b' }}>
+              <ShieldCheck size={44} color="#059669" style={{ marginBottom: '0.75rem' }} />
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f2942', marginBottom: '0.3rem' }}>All Clear! No Pending Reports</h4>
+              <p style={{ fontSize: '0.88rem' }}>There are currently no reported posts waiting for moderation review.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {groupedReports.map((item) => (
+                <div key={item.postId} style={{
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '16px',
+                  padding: '1.4rem',
+                  background: '#ffffff',
+                  boxShadow: '0 4px 15px rgba(15, 23, 42, 0.05)'
+                }}>
+                  {/* Card Header: Post Author + Category + Total Reports Count Badge */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.85rem', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      {item.post?.author?.avatarUrl ? (
+                        <img src={resolveImageUrl(item.post.author.avatarUrl)} alt={item.post.author.name} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0f2942', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem' }}>
+                          {item.post?.author?.name?.charAt(0) || 'U'}
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f2942' }}>
+                          Post Author: {item.post?.author?.name || 'Unknown Student'} <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 500 }}>(ID: {item.post?.userId})</span>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                          Posted: {item.post?.createdAt ? new Date(item.post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span className={`badge badge-${(item.post?.category || 'General').replace(/ & /g, '-').replace(/ /g, '-')}`} style={{ fontSize: '0.7rem', padding: '0.2rem 0.6rem' }}>
+                        {item.post?.category || 'General'}
+                      </span>
+
+                      <div style={{
+                        background: '#fee2e2',
+                        color: '#991b1b',
+                        border: '1px solid #fca5a5',
+                        padding: '0.3rem 0.85rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem'
+                      }}>
+                        <Flag size={14} />
+                        <span>{item.reportCount} {item.reportCount === 1 ? 'Report' : 'Reports'} Filed</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Post Content Preview Box */}
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', marginBottom: '1.25rem' }}>
+                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.4rem' }}>
+                      {item.post?.title || 'Untitled Post'}
+                    </h4>
+                    {item.post?.content && (
+                      <p style={{ fontSize: '0.88rem', color: '#334155', margin: 0, whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                        {item.post.content.length > 300 ? `${item.post.content.slice(0, 300)}...` : item.post.content}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Student Reports List Section */}
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Users size={14} color="#64748b" />
+                      <span>Student Complaints ({item.reporters.length}):</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {item.reporters.map((rep) => (
+                        <div key={rep.reportId} style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '10px',
+                          padding: '0.65rem 0.85rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '0.5rem'
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                            {rep.reporter?.avatarUrl ? (
+                              <img src={resolveImageUrl(rep.reporter.avatarUrl)} alt={rep.reporter.name} style={{ width: '26px', height: '26px', borderRadius: '50%' }} />
+                            ) : (
+                              <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#3b82f6', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.75rem' }}>
+                                {rep.reporter?.name?.charAt(0) || 'U'}
+                              </div>
+                            )}
+                            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
+                              {rep.reporter?.name || 'Student'} <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 400 }}>({rep.reporter?.email})</span>
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                              {new Date(rep.createdAt).toLocaleString()}
+                            </span>
+
+                            <span style={{
+                              background: rep.reason === 'Harassment' ? '#fee2e2' : rep.reason === 'Spam' ? '#ffedd5' : '#f3e8ff',
+                              color: rep.reason === 'Harassment' ? '#991b1b' : rep.reason === 'Spam' ? '#9a3412' : '#6b21a8',
+                              border: `1px solid ${rep.reason === 'Harassment' ? '#fca5a5' : rep.reason === 'Spam' ? '#fed7aa' : '#d8b4fe'}`,
+                              padding: '0.15rem 0.55rem',
+                              borderRadius: '6px',
+                              fontSize: '0.72rem',
+                              fontWeight: 800
+                            }}>
+                              {rep.reason.toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Admin Card Action Buttons */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.85rem' }}>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => handleDismissAllPostReports(item.postId)}
+                      disabled={reportActionId === item.postId}
+                      style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', color: '#475569' }}
+                    >
+                      <CheckCircle2 size={15} />
+                      <span>Dismiss All {item.reportCount} Reports</span>
+                    </button>
+
+                    <button
+                      className="btn-primary"
+                      onClick={() => handleTakedownGroupedPost(item.postId, item.reporters[0]?.reason)}
+                      disabled={reportActionId === item.postId}
+                      style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', background: '#dc2626' }}
+                    >
+                      <Trash2 size={15} />
+                      <span>Take Down Post</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Search & Status Filter Bar */}
       <div className="glass-panel admin-filter-bar" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: '#ffffff' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
 
@@ -754,6 +1073,8 @@ export default function AdminDashboard({ currentUser }) {
           </>
         )}
       </div>
+    </>
+  )}
 
       {/* Embedded Responsive CSS for Admin Dashboard Mobile View */}
       <style>{`

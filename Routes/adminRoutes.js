@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const User = require('../models/User');
+const { User, Post, Report } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
@@ -166,5 +166,106 @@ router.post('/users/:id/role', async (req, res) => {
     }
 });
 
+// 5. GET /api/admin/reports - Fetch all pending reported posts (grouped by postId + individual list)
+router.get('/reports', async (req, res) => {
+    try {
+        const reports = await Report.findAll({
+            where: { status: 'pending' },
+            order: [['createdAt', 'DESC']],
+            include: [
+                {
+                    model: Post,
+                    as: 'post',
+                    include: [
+                        {
+                            model: User,
+                            as: 'author',
+                            attributes: ['id', 'name', 'email', 'avatarUrl', 'role', 'status']
+                        }
+                    ]
+                },
+                {
+                    model: User,
+                    as: 'reporter',
+                    attributes: ['id', 'name', 'email', 'avatarUrl']
+                }
+            ]
+        });
+
+        const pendingCount = reports.length;
+
+        // Group reports by postId
+        const groupedMap = {};
+        reports.forEach(report => {
+            if (!report.postId || !report.post) return;
+            if (!groupedMap[report.postId]) {
+                groupedMap[report.postId] = {
+                    postId: report.postId,
+                    post: report.post,
+                    reportCount: 0,
+                    reporters: []
+                };
+            }
+            groupedMap[report.postId].reportCount += 1;
+            groupedMap[report.postId].reporters.push({
+                reportId: report.id,
+                reason: report.reason,
+                reporter: report.reporter,
+                createdAt: report.createdAt
+            });
+        });
+
+        const groupedReports = Object.values(groupedMap);
+
+        res.status(200).json({
+            pendingCount,
+            uniquePostsCount: groupedReports.length,
+            groupedReports,
+            reports
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch reported posts queue', error: error.message });
+    }
+});
+
+// 6. POST /api/admin/reports/:id/dismiss - Dismiss a single report notice
+router.post('/reports/:id/dismiss', async (req, res) => {
+    try {
+        const reportId = req.params.id;
+
+        const report = await Report.findByPk(reportId);
+        if (!report) {
+            return res.status(404).json({ message: 'Report notice not found' });
+        }
+
+        await report.update({ status: 'dismissed' });
+
+        res.status(200).json({
+            message: 'Report notice dismissed successfully',
+            report
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to dismiss report notice', error: error.message });
+    }
+});
+
+// 7. POST /api/admin/reports/post/:postId/dismiss - Dismiss ALL pending reports for a post
+router.post('/reports/post/:postId/dismiss', async (req, res) => {
+    try {
+        const { postId } = req.params;
+
+        const [updatedCount] = await Report.update(
+            { status: 'dismissed' },
+            { where: { postId, status: 'pending' } }
+        );
+
+        res.status(200).json({
+            message: `All ${updatedCount} report notices for post #${postId} dismissed successfully`,
+            dismissedCount: updatedCount
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to dismiss post reports', error: error.message });
+    }
+});
+
 module.exports = router;
-//its working
