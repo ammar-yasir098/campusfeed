@@ -12,9 +12,9 @@ const Notification = sequelize.define('Notification', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  // 'like' | 'comment' | 'announcement'
+  // 'like' | 'comment' | 'announcement' | 'takedown'
   type: {
-    type: DataTypes.ENUM('like', 'comment', 'announcement'),
+    type: DataTypes.STRING,
     allowNull: false,
   },
   // Human-readable message e.g. "Sara liked your post"

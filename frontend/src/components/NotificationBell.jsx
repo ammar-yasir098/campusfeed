@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   Bell, BellOff, CheckCheck, Trash2,
-  ThumbsUp, MessageCircle, Megaphone, X, ChevronRight, Sparkles
+  ThumbsUp, MessageCircle, Megaphone, X, ChevronRight, Sparkles, ShieldAlert
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -24,6 +24,11 @@ const NotifIcon = ({ type }) => {
       bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
       border: '#fcd34d',
       icon: <Megaphone size={15} color="#b45309" />
+    },
+    takedown: {
+      bg: 'linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%)',
+      border: '#f87171',
+      icon: <ShieldAlert size={15} color="#991b1b" />
     },
   };
   const s = styles[type] || styles.announcement;

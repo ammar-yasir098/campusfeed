@@ -315,6 +315,15 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             return res.status(403).json({ message: 'Unauthorized to delete this post' });
         }
 
+        // Send notification to author if deleted by an Admin
+        if (req.user.role === 'admin' && post.userId !== req.user.id) {
+            await Notification.create({
+                userId: post.userId,
+                type: 'takedown',
+                message: `Your post "${post.title ? post.title.slice(0, 35) : 'post'}" was removed by campus administration.`
+            });
+        }
+
         await post.destroy();
 
         res.status(200).json({ message: 'Post deleted successfully' });
@@ -343,6 +352,16 @@ router.post('/:id/takedown', authenticateToken, async (req, res) => {
             takedownReason: reason,
             takedownByAdmin: adminName
         });
+
+        // Send notification to post author
+        if (post.userId !== req.user.id) {
+            await Notification.create({
+                userId: post.userId,
+                type: 'takedown',
+                message: `Administrative Notice: Your post "${post.title ? post.title.slice(0, 35) : 'post'}" was taken down. Reason: ${reason}`,
+                postId: post.id
+            });
+        }
 
         res.status(200).json({
             message: 'Post taken down by admin successfully',
