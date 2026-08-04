@@ -625,7 +625,7 @@ export default function AdminDashboard({ currentUser }) {
                     <th style={{ padding: '1.1rem 1.25rem' }}>IP Address</th>
                     <th style={{ padding: '1.1rem 1.25rem' }}>Status</th>
                     <th style={{ padding: '1.1rem 1.25rem' }}>Verification</th>
-                    <th style={{ padding: '1.1rem 1.25rem', textAlign: 'right' }}>Actions</th>
+                    <th style={{ padding: '1.1rem 1.25rem', textAlign: 'center' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>

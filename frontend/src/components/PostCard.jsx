@@ -292,7 +292,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             </button>
           )}
 
-          {!isOwner && !postData.isTakedown && (
+          {!isOwner && !isAdmin && !postData.isTakedown && (
             <div className="report-menu-container" style={{ position: 'relative' }}>
               <button
                 className="btn-icon"
