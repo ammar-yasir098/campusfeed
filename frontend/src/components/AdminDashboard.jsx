@@ -138,8 +138,7 @@ export default function AdminDashboard({ currentUser }) {
     setFeedbackMsg({ type: '', text: '' });
     try {
       await api.takedownPost(postId, reason);
-      await api.dismissAllPostReports(postId);
-      setFeedbackMsg({ type: 'success', text: 'Post taken down and all report notices cleared!' });
+      setFeedbackMsg({ type: 'success', text: 'Post taken down and reports status set to actioned!' });
       fetchReports();
       fetchUsers();
     } catch (err) {

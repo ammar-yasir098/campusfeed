@@ -324,6 +324,12 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             });
         }
 
+        // Mark all pending reports for this post as 'actioned'
+        await Report.update(
+            { status: 'actioned' },
+            { where: { postId: post.id, status: 'pending' } }
+        );
+
         await post.destroy();
 
         res.status(200).json({ message: 'Post deleted successfully' });
@@ -352,6 +358,12 @@ router.post('/:id/takedown', authenticateToken, async (req, res) => {
             takedownReason: reason,
             takedownByAdmin: adminName
         });
+
+        // Mark all pending reports for this post as 'actioned'
+        await Report.update(
+            { status: 'actioned' },
+            { where: { postId: post.id, status: 'pending' } }
+        );
 
         // Send notification to post author
         if (post.userId !== req.user.id) {
