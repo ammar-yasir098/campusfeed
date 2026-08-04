@@ -59,26 +59,28 @@ export default function App() {
     setLoadingPosts(true);
     setHasMore(true);
     try {
-      const res = await api.getPosts(selectedCategory, 5, 0);
+      const limit = searchQuery ? 20 : 5;
+      const res = await api.getPosts(selectedCategory, limit, 0, searchQuery);
       setPosts(res.posts || []);
-      setHasMore(res.hasMore !== undefined ? res.hasMore : (res.posts?.length >= 5));
+      setHasMore(res.hasMore !== undefined ? res.hasMore : (res.posts?.length >= limit));
     } catch (err) {
       console.error('Failed to load feed posts:', err);
+      setPosts([]);
     } finally {
       setLoadingPosts(false);
     }
   };
 
   const loadMorePosts = async () => {
-    if (loadingMore || !hasMore || loadingPosts || searchQuery) return;
+    if (loadingMore || !hasMore || loadingPosts) return;
     setLoadingMore(true);
     try {
       const currentOffset = posts.length;
-      const res = await api.getPosts(selectedCategory, 3, currentOffset);
+      const res = await api.getPosts(selectedCategory, 5, currentOffset, searchQuery);
       if (res.posts && res.posts.length > 0) {
         setPosts(prev => [...prev, ...res.posts]);
       }
-      setHasMore(res.hasMore !== undefined ? res.hasMore : (res.posts?.length >= 3));
+      setHasMore(res.hasMore !== undefined ? res.hasMore : (res.posts?.length >= 5));
     } catch (err) {
       console.error('Failed to load more posts:', err);
     } finally {
@@ -87,12 +89,16 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (activeTab === 'feed') fetchPosts();
-  }, [selectedCategory, activeTab]);
+    if (activeTab !== 'feed') return;
+    const timer = setTimeout(() => {
+      fetchPosts();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, searchQuery, activeTab]);
 
   // Infinite Scroll
   useEffect(() => {
-    if (!hasMore || loadingMore || loadingPosts || searchQuery || activeTab !== 'feed') return;
+    if (!hasMore || loadingMore || loadingPosts || activeTab !== 'feed') return;
     const observer = new IntersectionObserver(
       (entries) => { if (entries[0].isIntersecting) loadMorePosts(); },
       { rootMargin: '200px' }
@@ -160,7 +166,7 @@ export default function App() {
     );
   };
 
-  const filteredPosts = filterBySearch(posts);
+  const filteredPosts = posts;
   const filteredBookmarks = filterBySearch(bookmarkedPosts);
 
   // ── Loading splash ───────────────────────────────────────────────────────────

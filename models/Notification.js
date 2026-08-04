@@ -34,6 +34,7 @@ const Notification = sequelize.define('Notification', {
   },
 }, {
   timestamps: true,
+  paranoid: true,
   tableName: 'notifications',
 });
 

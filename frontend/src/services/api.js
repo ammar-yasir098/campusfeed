@@ -51,11 +51,12 @@ export const api = {
   getMe: () => request('/api/auth/me'),
 
   // Feed Posts APIs with limit & offset pagination support
-  getPosts: (category, limit, offset) => {
+  getPosts: (category, limit, offset,search) => {
     const params = new URLSearchParams();
     if (category && category !== 'All') params.append('category', category);
     if (limit !== undefined) params.append('limit', limit);
     if (offset !== undefined) params.append('offset', offset);
+    if (search&&search.trim() !== '') params.append('search',search.trim());
     const queryString = params.toString();
     return request(`/api/posts${queryString ? `?${queryString}` : ''}`);
   },

@@ -5,6 +5,7 @@ const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const validate = require('../middleware/validate');
 const { postValidation, commentValidation } = require('../middleware/validators');
+const { Op } = require('sequelize');
 
 const router = express.Router();
 
@@ -82,7 +83,7 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
             // Parse Poll Data if provided
             let pollData = req.body.poll;
             if (typeof pollData === 'string') {
-                try { pollData = JSON.parse(pollData); } catch (e) {}
+                try { pollData = JSON.parse(pollData); } catch (e) { }
             }
 
             const hasValidPoll = pollData && Array.isArray(pollData.options) && pollData.options.filter(opt => typeof opt === 'string' && opt.trim() !== '').length >= 2;
@@ -106,7 +107,7 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
                     postId: newPost.id,
                     question: pollData.question || null
                 });
-                const optionPromises = validOptions.map(optText => 
+                const optionPromises = validOptions.map(optText =>
                     PollOption.create({ pollId: newPoll.id, optionText: optText.trim() })
                 );
                 await Promise.all(optionPromises);
@@ -163,7 +164,7 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
 // GET all posts (Public feed with author info, like count, comment count, category filter, limit & offset pagination, poll info)
 router.get('/', async (req, res) => {
     try {
-        const { category, limit: queryLimit, offset: queryOffset } = req.query;
+        const { category, search, limit: queryLimit, offset: queryOffset } = req.query;
         const currentUserId = getUserIdFromHeader(req);
         const whereClause = {};
 
@@ -171,16 +172,31 @@ router.get('/', async (req, res) => {
             whereClause.category = category;
         }
 
+        if (search && search.trim() !== '') {
+            const q = `%${search.trim()}%`;
+            whereClause.isTakedown = false;
+            whereClause[Op.or] = [
+                { title: { [Op.iLike]: q } },
+                { content: { [Op.iLike]: q } },
+                { '$author.name$': { [Op.iLike]: q } }
+            ];
+        }
+
         const limit = queryLimit ? parseInt(queryLimit, 10) : undefined;
         const offset = queryOffset ? parseInt(queryOffset, 10) : undefined;
 
-        const totalPosts = await Post.count({ where: whereClause });
+        const totalPosts = await Post.count({ 
+            where: whereClause,
+            include:[{ model: User, as :'author', attributes:[]}],
+            distinct: true 
+        });
 
         const posts = await Post.findAll({
             where: whereClause,
             order: [['createdAt', 'DESC']],
             limit,
             offset,
+            subQuery: search ? false : undefined,
             include: [
                 {
                     model: User,
@@ -215,13 +231,13 @@ router.get('/', async (req, res) => {
                 return true;
             })
             .map(post => {
-            const json = post.toJSON();
-            json.likeCount = json.likes ? json.likes.length : 0;
-            json.commentCount = json.comments ? json.comments.length : 0;
-            json.poll = formatPoll(json.poll, currentUserId);
-            delete json.comments;
-            return json;
-        });
+                const json = post.toJSON();
+                json.likeCount = json.likes ? json.likes.length : 0;
+                json.commentCount = json.comments ? json.comments.length : 0;
+                json.poll = formatPoll(json.poll, currentUserId);
+                delete json.comments;
+                return json;
+            });
 
         const currentOffset = offset || 0;
         const hasMore = currentOffset + formattedPosts.length < totalPosts;
