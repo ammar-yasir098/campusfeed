@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, AlertCircle, BarChart2, Plus, Trash2 } from 'lucide-react';
+import { X, Upload, AlertCircle, BarChart2, Plus, Trash2, Video, Film } from 'lucide-react';
 import { api } from '../services/api';
 
 const CATEGORY_OPTIONS = [
@@ -17,6 +17,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   
+  // Video attachment state
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+
   // Poll state
   const [isPollEnabled, setIsPollEnabled] = useState(false);
   const [pollOptions, setPollOptions] = useState(['', '']);
@@ -31,12 +35,34 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     if (file) {
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+      setVideoFile(null);
+      setVideoPreviewUrl(null);
     }
   };
 
   const handleRemoveImage = () => {
     setImageFile(null);
     setPreviewUrl(null);
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) {
+        setError('Video file size must be under 50MB.');
+        return;
+      }
+      setVideoFile(file);
+      setVideoPreviewUrl(URL.createObjectURL(file));
+      setImageFile(null);
+      setPreviewUrl(null);
+      setError('');
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoFile(null);
+    setVideoPreviewUrl(null);
   };
 
   const handleAddPollOption = () => {
@@ -72,8 +98,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
         return;
       }
       pollPayload = { options: validOptions };
-    } else if (!content.trim()) {
-      setError('Post content is required when creating a standard announcement.');
+    } else if (!content.trim() && !imageFile && !videoFile) {
+      setError('Post content or media attachment is required when creating an announcement.');
       return;
     }
 
@@ -82,6 +108,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
 
     try {
       let finalImageUrl = null;
+      let finalVideoUrl = null;
 
       // If user selected an image file, upload it first
       if (imageFile) {
@@ -91,12 +118,21 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
         finalImageUrl = uploadRes.imageUrl;
       }
 
+      // If user selected a video file, upload it
+      if (videoFile) {
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        const uploadRes = await api.uploadVideo(formData);
+        finalVideoUrl = uploadRes.videoUrl;
+      }
+
       // Create the post
       const newPostData = {
         title,
         content: content.trim() || null,
         category,
         imageUrl: finalImageUrl,
+        videoUrl: finalVideoUrl,
         poll: pollPayload
       };
 
@@ -110,6 +146,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       setCategory('General');
       setImageFile(null);
       setPreviewUrl(null);
+      setVideoFile(null);
+      setVideoPreviewUrl(null);
       setIsPollEnabled(false);
       setPollOptions(['', '']);
     } catch (err) {
@@ -260,26 +298,50 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
             )}
           </div>
 
-          {/* Image Upload Dropzone */}
+          {/* Media Upload (Photo or Video) */}
           <div>
-            <label className="input-label">Attach Photo (Optional)</label>
+            <label className="input-label">Attach Media (Optional)</label>
+            
             {previewUrl ? (
-              <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-glass)' }}>
-                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '180px', objectFit: 'cover', display: 'block' }} />
+              <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', display: 'block' }} />
                 <button 
                   type="button" 
                   onClick={handleRemoveImage}
-                  style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(0, 0, 0, 0.7)', color: '#fff', border: 'none', borderRadius: '50%', padding: '0.35rem', cursor: 'pointer' }}
+                  style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(15, 23, 42, 0.75)', color: '#fff', border: 'none', borderRadius: '50%', padding: '0.35rem', cursor: 'pointer' }}
+                  title="Remove Image"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : videoPreviewUrl ? (
+              <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
+                <video src={videoPreviewUrl} controls style={{ width: '100%', maxHeight: '220px', display: 'block', borderRadius: 'var(--radius-md)' }} />
+                <button 
+                  type="button" 
+                  onClick={handleRemoveVideo}
+                  style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(15, 23, 42, 0.85)', color: '#fff', border: 'none', borderRadius: '50%', padding: '0.35rem', cursor: 'pointer', zIndex: 10 }}
+                  title="Remove Video"
                 >
                   <X size={16} />
                 </button>
               </div>
             ) : (
-              <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1.2rem', border: '1px dashed var(--border-glass)', borderRadius: 'var(--radius-md)', background: 'rgba(255, 255, 255, 0.02)', cursor: 'pointer', gap: '0.4rem', transition: 'all 0.2s ease' }}>
-                <Upload size={22} color="var(--primary)" />
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Click to upload an event poster or photo</span>
-                <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
-              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
+                  <Upload size={20} color="var(--primary)" />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Photo</span>
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>JPG, PNG, WEBP up to 5MB</span>
+                  <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                </label>
+
+                <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
+                  <Video size={20} color="#2563eb" />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Video</span>
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>MP4, WEBM, MOV up to 50MB</span>
+                  <input type="file" accept="video/mp4,video/webm,video/quicktime,video/mkv,video/avi" onChange={handleVideoChange} style={{ display: 'none' }} />
+                </label>
+              </div>
             )}
           </div>
 

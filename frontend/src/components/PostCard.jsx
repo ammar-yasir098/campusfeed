@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X, MoreVertical } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X, MoreVertical, Maximize2, Play } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
+import MediaLightboxModal from './MediaLightboxModal';
 
 export default function PostCard({ post, currentUser, onDeletePost, onRequireAuth, defaultShowComments = false }) {
   const [postData, setPostData] = useState(post);
+  const [activeMedia, setActiveMedia] = useState(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const videoRef = useRef(null);
   const [isLiked, setIsLiked] = useState(
     post.likes ? post.likes.some(l => l.userId === currentUser?.id) : false
   );
@@ -49,6 +53,38 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   }, [post.isBookmarked, post.bookmarks, currentUser?.id]);
 
   const [showComments, setShowComments] = useState(defaultShowComments);
+
+  // Intercept native video control bar maximize button to open 60-80% glassmorphic lightbox modal
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl || !post?.videoUrl) return;
+
+    const handleFullscreenIntercept = (e) => {
+      if (document.fullscreenElement === videoEl || document.webkitFullscreenElement === videoEl) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        setActiveMedia({ type: 'video', src: resolveImageUrl(post.videoUrl) });
+      }
+    };
+
+    videoEl.addEventListener('fullscreenchange', handleFullscreenIntercept);
+    videoEl.addEventListener('webkitbeginfullscreen', handleFullscreenIntercept);
+    return () => {
+      videoEl.removeEventListener('fullscreenchange', handleFullscreenIntercept);
+      videoEl.removeEventListener('webkitbeginfullscreen', handleFullscreenIntercept);
+    };
+  }, [post?.videoUrl]);
+
+  const handleStartVideoPlay = (e) => {
+    if (e) e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.preload = 'auto';
+      videoRef.current.play();
+    }
+  };
   const [comments, setComments] = useState([]);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
   const [commentsLoaded, setCommentsLoaded] = useState(false);
@@ -225,7 +261,9 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             <img
               src={resolveImageUrl(postData.author.avatarUrl)}
               alt={postData.author.name}
-              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+              onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(postData.author.avatarUrl), alt: postData.author.name })}
+              title="Click to view full-size avatar"
+              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }}
             />
           ) : (
             <div style={{
@@ -607,12 +645,89 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
           {/* Image Attachment */}
           {post.imageUrl && (
-            <div style={{ marginBottom: '0.85rem', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-glass)' }}>
+            <div 
+              onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(post.imageUrl), alt: post.title })}
+              title="Click to view full-size photo"
+              style={{ marginBottom: '0.85rem', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer' }}
+            >
               <img
                 src={resolveImageUrl(post.imageUrl)}
                 alt={post.title}
-                style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', display: 'block' }}
+                style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', display: 'block', transition: 'transform 0.2s ease' }}
               />
+            </div>
+          )}
+
+          {/* Video Attachment */}
+          {post.videoUrl && (
+            <div style={{ position: 'relative', marginBottom: '0.85rem', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
+              <video
+                ref={videoRef}
+                src={resolveImageUrl(post.videoUrl)}
+                controls
+                preload="none"
+                onPlay={() => setIsVideoPlaying(true)}
+                onPause={() => setIsVideoPlaying(false)}
+                onEnded={() => setIsVideoPlaying(false)}
+                style={{
+                  width: '100%',
+                  maxHeight: '380px',
+                  display: 'block',
+                  borderRadius: 'var(--radius-md)',
+                  filter: isVideoPlaying ? 'none' : 'blur(10px)',
+                  transition: 'filter 0.35s ease',
+                  cursor: isVideoPlaying ? 'default' : 'pointer'
+                }}
+                onClick={(e) => {
+                  if (!isVideoPlaying) {
+                    handleStartVideoPlay(e);
+                  }
+                }}
+              />
+
+              {/* Perfectly Centered Modern Glassmorphic Play Button */}
+              {!isVideoPlaying && (
+                <button
+                  type="button"
+                  onClick={handleStartVideoPlay}
+                  className="modern-play-btn"
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '72px',
+                    height: '72px',
+                    borderRadius: '50%',
+                    background: 'rgba(15, 23, 42, 0.75)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1.5px solid rgba(255, 255, 255, 0.4)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 16px 40px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                    zIndex: 10,
+                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                  title="Play Video"
+                >
+                  <div style={{
+                    width: '50px',
+                    height: '50px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.5)'
+                  }}>
+                    <Play size={22} style={{ marginLeft: '3px' }} fill="#ffffff" color="#ffffff" />
+                  </div>
+                </button>
+              )}
             </div>
           )}
 
@@ -764,6 +879,11 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     </>
   )}
 
+      {/* Full-Screen Media Lightbox Modal (Photo & Video) */}
+      <MediaLightboxModal 
+        media={activeMedia} 
+        onClose={() => setActiveMedia(null)} 
+      />
     </article>
   );
 }

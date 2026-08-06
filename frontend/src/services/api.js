@@ -95,6 +95,7 @@ export const api = {
 
   // File Upload API
   uploadImage: (formData) => request('/api/upload', { method: 'POST', body: formData }),
+  uploadVideo: (formData) => request('/api/upload/video', { method: 'POST', body: formData }),
 
   // Admin APIs
   getAdminUsers: (q = '', status = 'all') => {

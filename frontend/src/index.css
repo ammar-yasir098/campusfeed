@@ -435,3 +435,10 @@ h6,
     margin-bottom: 1rem !important;
   }
 }
+
+/* Modern Glassmorphic Play Button Hover Effect */
+.modern-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.08) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 20px 50px -5px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}

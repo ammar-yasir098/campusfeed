@@ -27,6 +27,10 @@ const Post = sequelize.define('Post', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  videoUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   isTakedown: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,

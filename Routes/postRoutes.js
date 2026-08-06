@@ -73,11 +73,16 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
             return res.status(400).json({ message: err.message });
         }
         try {
-            const { title, content, category } = req.body;
+            const { title, content, category, videoUrl } = req.body;
             let imageUrl = req.body ? req.body.imageUrl : null;
+            let finalVideoUrl = videoUrl || (req.body ? req.body.videoUrl : null);
 
             if (req.file) {
-                imageUrl = `uploads/${req.file.filename}`;
+                if (req.file.mimetype && req.file.mimetype.startsWith('video/')) {
+                    finalVideoUrl = `uploads/${req.file.filename}`;
+                } else {
+                    imageUrl = `uploads/${req.file.filename}`;
+                }
             }
 
             // Parse Poll Data if provided
@@ -88,8 +93,8 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
 
             const hasValidPoll = pollData && Array.isArray(pollData.options) && pollData.options.filter(opt => typeof opt === 'string' && opt.trim() !== '').length >= 2;
 
-            if (!title || (!content && !hasValidPoll)) {
-                return res.status(400).json({ message: 'Title is required, and content or a poll must be provided' });
+            if (!title || (!content && !hasValidPoll && !imageUrl && !finalVideoUrl)) {
+                return res.status(400).json({ message: 'Title is required, and content, media, or a poll must be provided' });
             }
 
             const newPost = await Post.create({
@@ -97,6 +102,7 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
                 content: content || null,
                 category: category || 'General',
                 imageUrl: imageUrl || null,
+                videoUrl: finalVideoUrl || null,
                 userId: req.user.id
             });
 

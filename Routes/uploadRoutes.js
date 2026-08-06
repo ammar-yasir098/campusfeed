@@ -25,4 +25,24 @@ router.post('/', authenticateToken, (req, res) => {
     });
 });
 
+// UPLOAD VIDEO (Protected - Returns path "uploads/filename")
+router.post('/video', authenticateToken, (req, res) => {
+    upload.single('video')(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please select a video file to upload' });
+        }
+
+        const videoUrl = `uploads/${req.file.filename}`;
+
+        res.status(200).json({
+            message: 'Video uploaded successfully',
+            filename: req.file.filename,
+            videoUrl: videoUrl
+        });
+    });
+});
+
 module.exports = router;

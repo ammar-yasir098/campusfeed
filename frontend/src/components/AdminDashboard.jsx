@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ShieldCheck, 
   Search, 
@@ -20,12 +20,119 @@ import {
   Flag,
   ShieldAlert,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Play
 } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
+import MediaLightboxModal from './MediaLightboxModal';
 import VerifiedBadge from './VerifiedBadge';
 
+function AdminVideoPlayer({ videoUrl, onEnlarge }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl || !videoUrl) return;
+
+    const handleFullscreenIntercept = () => {
+      if (document.fullscreenElement === videoEl || document.webkitFullscreenElement === videoEl) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+        onEnlarge(resolveImageUrl(videoUrl));
+      }
+    };
+
+    videoEl.addEventListener('fullscreenchange', handleFullscreenIntercept);
+    videoEl.addEventListener('webkitbeginfullscreen', handleFullscreenIntercept);
+    return () => {
+      videoEl.removeEventListener('fullscreenchange', handleFullscreenIntercept);
+      videoEl.removeEventListener('webkitbeginfullscreen', handleFullscreenIntercept);
+    };
+  }, [videoUrl, onEnlarge]);
+
+  const handleStartPlay = (e) => {
+    if (e) e.stopPropagation();
+    if (videoRef.current) {
+      videoRef.current.preload = 'auto';
+      videoRef.current.play();
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative', marginTop: '0.75rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#0f172a' }}>
+      <video
+        ref={videoRef}
+        src={resolveImageUrl(videoUrl)}
+        controls
+        preload="none"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        style={{
+          width: '100%',
+          maxHeight: '260px',
+          display: 'block',
+          filter: isPlaying ? 'none' : 'blur(10px)',
+          transition: 'filter 0.35s ease',
+          cursor: isPlaying ? 'default' : 'pointer'
+        }}
+        onClick={(e) => {
+          if (!isPlaying) handleStartPlay(e);
+        }}
+      />
+
+      {!isPlaying && (
+        <button
+          type="button"
+          onClick={handleStartPlay}
+          className="modern-play-btn"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '64px',
+            height: '64px',
+            borderRadius: '50%',
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1.5px solid rgba(255, 255, 255, 0.4)',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 16px 40px -8px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+            zIndex: 10,
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          title="Play Video"
+        >
+          <div style={{
+            width: '44px',
+            height: '44px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(37, 99, 235, 0.5)'
+          }}>
+            <Play size={20} style={{ marginLeft: '3px' }} fill="#ffffff" color="#ffffff" />
+          </div>
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function AdminDashboard({ currentUser }) {
+  const [activeMedia, setActiveMedia] = useState(null);
   const [adminTab, setAdminTab] = useState('users'); // 'users' | 'reports'
 
   const [users, setUsers] = useState([]);
@@ -479,13 +586,28 @@ export default function AdminDashboard({ currentUser }) {
 
                   {/* Post Content Preview Box */}
                   <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', marginBottom: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.4rem' }}>
+                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f2942', marginBottom: '0.4rem' }}>
                       {item.post?.title || 'Untitled Post'}
                     </h4>
                     {item.post?.content && (
                       <p style={{ fontSize: '0.88rem', color: '#334155', margin: 0, whiteSpace: 'pre-line', lineHeight: 1.5 }}>
                         {item.post.content.length > 300 ? `${item.post.content.slice(0, 300)}...` : item.post.content}
                       </p>
+                    )}
+                    {item.post?.imageUrl && (
+                      <div 
+                        onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(item.post.imageUrl) })}
+                        title="Click to view full-size photo"
+                        style={{ marginTop: '0.75rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer' }}
+                      >
+                        <img src={resolveImageUrl(item.post.imageUrl)} alt="Reported Media" style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', transition: 'transform 0.2s ease' }} />
+                      </div>
+                    )}
+                    {item.post?.videoUrl && (
+                      <AdminVideoPlayer 
+                        videoUrl={item.post.videoUrl} 
+                        onEnlarge={(src) => setActiveMedia({ type: 'video', src })} 
+                      />
                     )}
                   </div>
 
@@ -1154,6 +1276,12 @@ export default function AdminDashboard({ currentUser }) {
           }
         }
       `}</style>
+
+      {/* Admin Media Lightbox Modal */}
+      <MediaLightboxModal 
+        media={activeMedia} 
+        onClose={() => setActiveMedia(null)} 
+      />
 
     </div>
   );
