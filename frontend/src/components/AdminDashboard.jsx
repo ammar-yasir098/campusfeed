@@ -63,7 +63,7 @@ function AdminVideoPlayer({ videoUrl, onEnlarge }) {
   };
 
   return (
-    <div style={{ position: 'relative', marginTop: '0.75rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#0f172a' }}>
+    <div style={{ position: 'relative', marginTop: '0.75rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#0f172a' }}>
       <video
         ref={videoRef}
         src={resolveImageUrl(videoUrl)}
@@ -76,6 +76,7 @@ function AdminVideoPlayer({ videoUrl, onEnlarge }) {
           width: '100%',
           maxHeight: '260px',
           display: 'block',
+          borderRadius: '0px',
           filter: isPlaying ? 'none' : 'blur(10px)',
           transition: 'filter 0.35s ease',
           cursor: isPlaying ? 'default' : 'pointer'
@@ -598,9 +599,9 @@ export default function AdminDashboard({ currentUser }) {
                       <div 
                         onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(item.post.imageUrl) })}
                         title="Click to view full-size photo"
-                        style={{ marginTop: '0.75rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer' }}
+                        style={{ marginTop: '0.75rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer' }}
                       >
-                        <img src={resolveImageUrl(item.post.imageUrl)} alt="Reported Media" style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', transition: 'transform 0.2s ease' }} />
+                        <img src={resolveImageUrl(item.post.imageUrl)} alt="Reported Media" style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', borderRadius: '0px', transition: 'transform 0.2s ease' }} />
                       </div>
                     )}
                     {item.post?.videoUrl && (

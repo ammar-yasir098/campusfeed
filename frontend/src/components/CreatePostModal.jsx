@@ -303,8 +303,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
             <label className="input-label">Attach Media (Optional)</label>
             
             {previewUrl ? (
-              <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', display: 'block' }} />
+              <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', display: 'block', borderRadius: '0px' }} />
                 <button 
                   type="button" 
                   onClick={handleRemoveImage}
@@ -315,8 +315,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                 </button>
               </div>
             ) : videoPreviewUrl ? (
-              <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
-                <video src={videoPreviewUrl} controls style={{ width: '100%', maxHeight: '220px', display: 'block', borderRadius: 'var(--radius-md)' }} />
+              <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
+                <video src={videoPreviewUrl} controls style={{ width: '100%', maxHeight: '220px', display: 'block', borderRadius: '0px' }} />
                 <button 
                   type="button" 
                   onClick={handleRemoveVideo}
@@ -329,7 +329,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
-                  <Upload size={20} color="var(--primary)" />
+                  <Upload size={20} color="#2563eb" />
                   <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Photo</span>
                   <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>JPG, PNG, WEBP up to 5MB</span>
                   <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />

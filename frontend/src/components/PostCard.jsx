@@ -648,19 +648,19 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             <div 
               onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(post.imageUrl), alt: post.title })}
               title="Click to view full-size photo"
-              style={{ marginBottom: '0.85rem', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer' }}
+              style={{ marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer' }}
             >
               <img
                 src={resolveImageUrl(post.imageUrl)}
                 alt={post.title}
-                style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', display: 'block', transition: 'transform 0.2s ease' }}
+                style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', display: 'block', borderRadius: '0px', transition: 'transform 0.2s ease' }}
               />
             </div>
           )}
 
           {/* Video Attachment */}
           {post.videoUrl && (
-            <div style={{ position: 'relative', marginBottom: '0.85rem', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
+            <div style={{ position: 'relative', marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
               <video
                 ref={videoRef}
                 src={resolveImageUrl(post.videoUrl)}
@@ -673,7 +673,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   width: '100%',
                   maxHeight: '380px',
                   display: 'block',
-                  borderRadius: 'var(--radius-md)',
+                  borderRadius: '0px',
                   filter: isVideoPlaying ? 'none' : 'blur(10px)',
                   transition: 'filter 0.35s ease',
                   cursor: isVideoPlaying ? 'default' : 'pointer'

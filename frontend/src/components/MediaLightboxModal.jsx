@@ -94,7 +94,7 @@ export default function MediaLightboxModal({ media, onClose }) {
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              borderRadius: '16px',
+              borderRadius: '0px',
               boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.15)',
               background: '#000000'
             }} 
@@ -107,7 +107,7 @@ export default function MediaLightboxModal({ media, onClose }) {
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              borderRadius: '16px',
+              borderRadius: '0px',
               boxShadow: '0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.15)'
             }} 
           />
