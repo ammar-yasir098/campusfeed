@@ -90,9 +90,13 @@ export default function App() {
 
   useEffect(() => {
     if (activeTab !== 'feed') return;
+    // Show loader immediately on feed when user starts typing or changes category
+    setLoadingPosts(true);
+    // 1-Second (1000ms) Debounce: Wait 1 second after student stops typing before calling backend API
+    const delay = searchQuery ? 1000 : 300;
     const timer = setTimeout(() => {
       fetchPosts();
-    }, 300);
+    }, delay);
     return () => clearTimeout(timer);
   }, [selectedCategory, searchQuery, activeTab]);
 
@@ -289,7 +293,18 @@ export default function App() {
                 )}
 
                 {loadingPosts ? (
-                  <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)' }}>Loading campus feed...</div>
+                  <div className="glass-panel" style={{ textAlign: 'center', padding: '3.5rem 1rem', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <RefreshCw size={26} color="var(--primary)" style={{ animation: 'cfSpin 0.9s linear infinite', marginBottom: '0.65rem' }} />
+                    <style>{`
+                      @keyframes cfSpin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                      }
+                    `}</style>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                      {searchQuery ? `Searching for "${searchQuery}"...` : 'Loading campus feed...'}
+                    </div>
+                  </div>
                 ) : filteredPosts.length === 0 ? (
                   <div className="glass-panel" style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-muted)', background: '#ffffff' }}>
                     <MessageSquare size={40} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
