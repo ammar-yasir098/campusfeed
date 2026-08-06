@@ -20,8 +20,15 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    return sessionStorage.getItem('selectedCategory') || 'All';
+  });
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSelectCategory = (cat) => {
+    setSelectedCategory(cat);
+    sessionStorage.setItem('selectedCategory', cat);
+  };
 
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
@@ -136,11 +143,17 @@ export default function App() {
     removeToken();
     setCurrentUser(null);
     setBookmarkedPosts([]);
+    setSelectedCategory('All');
+    setSearchQuery('');
+    sessionStorage.removeItem('selectedCategory');
     navigate('/login', { replace: true });
   };
 
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);
+    setSelectedCategory('All');
+    setSearchQuery('');
+    sessionStorage.removeItem('selectedCategory');
     fetchPosts();
     fetchBookmarksList();
     navigate('/feed', { replace: true });
@@ -251,7 +264,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={(tab) => { navigate(`/${tab}`); setIsMobileMenuOpen(false); }}
         selectedCategory={selectedCategory}
-        onSelectCategory={(cat) => { setSelectedCategory(cat); setIsMobileMenuOpen(false); }}
+        onSelectCategory={(cat) => { handleSelectCategory(cat); setIsMobileMenuOpen(false); }}
         onOpenCreateModal={() => { setIsCreateModalOpen(true); setIsMobileMenuOpen(false); }}
         onOpenAuthModal={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
         onLogout={() => { handleLogout(); setIsMobileMenuOpen(false); }}
@@ -271,7 +284,7 @@ export default function App() {
             {/* FEED */}
             <Route path="/feed" element={
               <div>
-                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} currentUser={currentUser} />
+                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
 
                 {!currentUser && (
                   <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
@@ -347,7 +360,7 @@ export default function App() {
             <Route path="/bookmarks" element={
               currentUser ? (
                 <div>
-                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} currentUser={currentUser} />
+                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
                   <div style={{ marginBottom: '1.5rem' }}>
                     <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Saved Announcements & Events</h2>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Access all your bookmarked posts in one place.</p>
@@ -376,9 +389,13 @@ export default function App() {
 
             {/* ADMIN */}
             <Route path="/admin" element={
-              currentUser && currentUser.role === 'admin'
-                ? <AdminDashboard currentUser={currentUser} />
-                : <Navigate to="/feed" replace />
+              currentUser ? (
+                currentUser.role === 'admin'
+                  ? <AdminDashboard currentUser={currentUser} />
+                  : <Navigate to="/feed" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             } />
 
             {/* SINGLE POST DETAIL VIEW (from notification click) */}
