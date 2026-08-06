@@ -168,13 +168,13 @@ export default function App() {
   const handlePostCreated = (newPost) => setPosts([newPost, ...posts]);
 
   const handleDeletePost = async (postId) => {
-    if (!window.confirm('Are you sure you want to delete this post?')) return;
+    if (!window.confirm('Are you sure you want to delete this post? This action is permanent and cannot be undone.')) return;
     try {
       await api.deletePost(postId);
       setPosts(posts.filter(p => p.id !== postId));
       setBookmarkedPosts(bookmarkedPosts.filter(p => p.id !== postId));
     } catch (err) {
-      alert(err.message || 'Failed to delete post');
+      alert(err.message || 'Unable to delete post. Please try again.');
     }
   };
 

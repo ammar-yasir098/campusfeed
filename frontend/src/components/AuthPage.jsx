@@ -25,7 +25,9 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -38,6 +40,16 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
       if (mode === 'signup') {
         if (!name.trim()) {
           setError('Full name is required');
+          setLoading(false);
+          return;
+        }
+        if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+          setError('Full name can only contain letters and spaces (no numbers or special characters)');
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match. Please verify and try again.');
           setLoading(false);
           return;
         }
@@ -339,7 +351,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                     className="input-field"
                     placeholder="e.g. Muhammad Ali"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                     required
                     style={{
                       paddingLeft: '2.8rem',
@@ -422,6 +434,54 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                 </button>
               </div>
             </div>
+
+            {mode === 'signup' && (
+              <div>
+                <label className="input-label" style={{ fontWeight: 600, color: '#334155', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
+                  Confirm Password
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="input-field"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    style={{
+                      paddingLeft: '2.8rem',
+                      paddingRight: '2.8rem',
+                      height: '46px',
+                      borderRadius: '12px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.94rem'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '0.8rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#94a3b8',
+                      cursor: 'pointer',
+                      padding: '0.3rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '6px'
+                    }}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button

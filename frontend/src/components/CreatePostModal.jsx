@@ -60,7 +60,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError('Title / Question is required');
+      setError('Please provide a post title or question.');
       return;
     }
 
@@ -68,12 +68,12 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     if (isPollEnabled) {
       const validOptions = pollOptions.map(o => o.trim()).filter(o => o.length > 0);
       if (validOptions.length < 2) {
-        setError('Poll must contain at least 2 non-empty options.');
+        setError('A poll must contain at least 2 valid options.');
         return;
       }
       pollPayload = { options: validOptions };
     } else if (!content.trim()) {
-      setError('Post Body / Context is required when no poll is attached.');
+      setError('Post content is required when creating a standard announcement.');
       return;
     }
 
@@ -113,7 +113,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       setIsPollEnabled(false);
       setPollOptions(['', '']);
     } catch (err) {
-      setError(err.message || 'Failed to create post');
+      setError(err.message || 'Unable to publish post at this time. Please try again.');
     } finally {
       setLoading(false);
     }

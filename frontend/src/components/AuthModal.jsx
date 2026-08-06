@@ -7,6 +7,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,6 +22,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
       if (mode === 'signup') {
         if (!name.trim()) {
           setError('Name is required');
+          setLoading(false);
+          return;
+        }
+        if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+          setError('Full name can only contain letters and spaces (no numbers or special characters)');
+          setLoading(false);
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Passwords do not match. Please verify and try again.');
           setLoading(false);
           return;
         }
@@ -103,7 +114,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 className="input-field" 
                 placeholder="e.g. Alex Student"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                 required
               />
             </div>
@@ -132,6 +143,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               required
             />
           </div>
+
+          {mode === 'signup' && (
+            <div>
+              <label className="input-label">Confirm Password</label>
+              <input 
+                type="password" 
+                className="input-field" 
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+          )}
 
           <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }} disabled={loading}>
             {mode === 'login' ? <LogIn size={18} /> : <UserPlus size={18} />}

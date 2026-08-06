@@ -27,6 +27,12 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
     setLoading(true);
     setError('');
 
+    if (name && !/^[a-zA-Z\s]+$/.test(name.trim())) {
+      setError('Full name can only contain letters and spaces (no numbers or special characters)');
+      setLoading(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -93,7 +99,7 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
               type="text" 
               className="input-field" 
               value={name} 
-              onChange={(e) => setName(e.target.value)} 
+              onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))} 
               required 
             />
           </div>

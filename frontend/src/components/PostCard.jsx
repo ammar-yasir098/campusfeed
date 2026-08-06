@@ -94,11 +94,11 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
       const res = await api.reportPost(postData.id, reason);
       setReportSubmitted(true);
       setReportToast({ type: 'success', text: res.message || 'Report submitted successfully' });
-      alert(`Report Submitted!\n\nReason: ${reason}\n${res.message || 'Campus moderators will review this post in the Admin Dashboard.'}`);
+      alert(`Report Submitted Successfully\n\nReason: ${reason}\n${res.message || 'Thank you for helping keep the campus community safe. Campus moderators will review this report in the Admin Dashboard.'}`);
       setTimeout(() => setReportToast(null), 5000);
     } catch (err) {
       setReportToast({ type: 'error', text: err.message || 'Failed to submit report' });
-      alert(`Report Notice: ${err.message || 'Failed to submit report'}`);
+      alert(`Report Submission Failed: ${err.message || 'Unable to process your report at this time. Please try again.'}`);
       setTimeout(() => setReportToast(null), 5000);
     }
   };
