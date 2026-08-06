@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import HeaderSearchBar from './components/HeaderSearchBar';
 import PostCard from './components/PostCard';
@@ -17,18 +17,43 @@ import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, Grad
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [currentUser, setCurrentUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState(() => {
-    return sessionStorage.getItem('selectedCategory') || 'All';
-  });
-  const [searchQuery, setSearchQuery] = useState('');
+  // Sync category and search query directly with URL search params (e.g. /feed?category=Buy+%26+Sell)
+  const selectedCategory = searchParams.get('category') || 'All';
+  const searchQuery = searchParams.get('q') || '';
 
   const handleSelectCategory = (cat) => {
-    setSelectedCategory(cat);
-    sessionStorage.setItem('selectedCategory', cat);
+    const newParams = new URLSearchParams(searchParams);
+    if (cat && cat !== 'All') {
+      newParams.set('category', cat);
+    } else {
+      newParams.delete('category');
+    }
+    if (location.pathname !== '/feed') {
+      const paramStr = newParams.toString();
+      navigate(`/feed${paramStr ? `?${paramStr}` : ''}`);
+    } else {
+      setSearchParams(newParams, { replace: false });
+    }
+  };
+
+  const handleSearchQueryChange = (q) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (q && q.trim()) {
+      newParams.set('q', q);
+    } else {
+      newParams.delete('q');
+    }
+    if (location.pathname !== '/feed') {
+      const paramStr = newParams.toString();
+      navigate(`/feed${paramStr ? `?${paramStr}` : ''}`);
+    } else {
+      setSearchParams(newParams, { replace: false });
+    }
   };
 
   const [posts, setPosts] = useState([]);
@@ -149,17 +174,11 @@ export default function App() {
     removeToken();
     setCurrentUser(null);
     setBookmarkedPosts([]);
-    setSelectedCategory('All');
-    setSearchQuery('');
-    sessionStorage.removeItem('selectedCategory');
     navigate('/login', { replace: true });
   };
 
   const handleAuthSuccess = (user) => {
     setCurrentUser(user);
-    setSelectedCategory('All');
-    setSearchQuery('');
-    sessionStorage.removeItem('selectedCategory');
     fetchPosts();
     fetchBookmarksList();
     navigate('/feed', { replace: true });
@@ -290,7 +309,7 @@ export default function App() {
             {/* FEED */}
             <Route path="/feed" element={
               <div>
-                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
+                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={handleSearchQueryChange} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
 
                 {!currentUser && (
                   <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
@@ -366,7 +385,7 @@ export default function App() {
             <Route path="/bookmarks" element={
               currentUser ? (
                 <div>
-                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
+                  <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={handleSearchQueryChange} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
                   <div style={{ marginBottom: '1.5rem' }}>
                     <h2 className="font-heading" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>Saved Announcements & Events</h2>
                     <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Access all your bookmarked posts in one place.</p>
