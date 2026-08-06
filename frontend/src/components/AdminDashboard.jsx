@@ -68,7 +68,12 @@ function AdminVideoPlayer({ videoUrl, onEnlarge }) {
         ref={videoRef}
         src={resolveImageUrl(videoUrl)}
         controls
-        preload="none"
+        preload="metadata"
+        onLoadedMetadata={(e) => {
+          if (e.target && !isPlaying) {
+            e.target.currentTime = 0.1;
+          }
+        }}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
@@ -77,7 +82,7 @@ function AdminVideoPlayer({ videoUrl, onEnlarge }) {
           maxHeight: '260px',
           display: 'block',
           borderRadius: '0px',
-          filter: isPlaying ? 'none' : 'blur(10px)',
+          filter: isPlaying ? 'none' : 'blur(4px) brightness(0.9)',
           transition: 'filter 0.35s ease',
           cursor: isPlaying ? 'default' : 'pointer'
         }}

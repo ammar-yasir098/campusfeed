@@ -833,7 +833,12 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                 ref={videoRef}
                 src={resolveImageUrl(post.videoUrl)}
                 controls
-                preload="none"
+                preload="metadata"
+                onLoadedMetadata={(e) => {
+                  if (e.target && !isVideoPlaying) {
+                    e.target.currentTime = 0.1;
+                  }
+                }}
                 onPlay={() => setIsVideoPlaying(true)}
                 onPause={() => setIsVideoPlaying(false)}
                 onEnded={() => setIsVideoPlaying(false)}
@@ -842,7 +847,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   maxHeight: '380px',
                   display: 'block',
                   borderRadius: '0px',
-                  filter: isVideoPlaying ? 'none' : 'blur(10px)',
+                  filter: isVideoPlaying ? 'none' : 'blur(4px) brightness(0.9)',
                   transition: 'filter 0.35s ease',
                   cursor: isVideoPlaying ? 'default' : 'pointer'
                 }}
