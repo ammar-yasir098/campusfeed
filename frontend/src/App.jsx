@@ -10,6 +10,7 @@ import AuthPage from './components/AuthPage';
 import AdminDashboard from './components/AdminDashboard';
 import NotificationBell from './components/NotificationBell';
 import PostDetailView from './components/PostDetailView';
+import AuthNoticeModal from './components/AuthNoticeModal';
 import { api, getToken, removeToken } from './services/api';
 import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap } from 'lucide-react';
 
@@ -41,6 +42,11 @@ export default function App() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [authNoticeModal, setAuthNoticeModal] = useState({ isOpen: false, actionName: 'interact with posts' });
+
+  const handleRequireAuth = (actionName = 'interact with posts') => {
+    setAuthNoticeModal({ isOpen: true, actionName });
+  };
 
   const loadMoreRef = useRef(null);
 
@@ -334,7 +340,7 @@ export default function App() {
                 ) : (
                   <>
                     {filteredPosts.map((post) => (
-                      <PostCard key={post.id} post={post} currentUser={currentUser} onDeletePost={handleDeletePost} onRequireAuth={() => navigate('/login')} />
+                      <PostCard key={post.id} post={post} currentUser={currentUser} onDeletePost={handleDeletePost} onRequireAuth={handleRequireAuth} />
                     ))}
                     {!searchQuery && (
                       <div ref={loadMoreRef} style={{ textAlign: 'center', padding: '1.5rem 0' }}>
@@ -373,7 +379,7 @@ export default function App() {
                     </div>
                   ) : (
                     filteredBookmarks.map((post) => (
-                      <PostCard key={post.id} post={post} currentUser={currentUser} onDeletePost={handleDeletePost} onRequireAuth={() => navigate('/login')} />
+                      <PostCard key={post.id} post={post} currentUser={currentUser} onDeletePost={handleDeletePost} onRequireAuth={handleRequireAuth} />
                     ))
                   )}
                 </div>
@@ -417,6 +423,11 @@ export default function App() {
         onClose={() => setIsProfileModalOpen(false)}
         currentUser={currentUser}
         onProfileUpdated={(updatedUser) => { setCurrentUser(updatedUser); fetchPosts(); }}
+      />
+      <AuthNoticeModal
+        isOpen={authNoticeModal.isOpen}
+        actionName={authNoticeModal.actionName}
+        onClose={() => setAuthNoticeModal({ isOpen: false, actionName: 'interact with posts' })}
       />
     </div>
   );

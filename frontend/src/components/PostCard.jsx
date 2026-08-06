@@ -85,7 +85,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   // Handle Report Post
   const handleReportPost = async (reason) => {
     if (!currentUser) {
-      onRequireAuth();
+      onRequireAuth('submit reports');
       return;
     }
     setShowPostMenu(false);
@@ -106,7 +106,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   // Handle Like Toggle
   const handleToggleLike = async () => {
     if (!currentUser) {
-      onRequireAuth();
+      onRequireAuth('like posts');
       return;
     }
     try {
@@ -121,7 +121,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   // Handle Bookmark Toggle
   const handleToggleBookmark = async () => {
     if (!currentUser) {
-      onRequireAuth();
+      onRequireAuth('save bookmarks');
       return;
     }
     try {
@@ -135,7 +135,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   // Handle Poll Vote
   const handleVoteOption = async (optionId) => {
     if (!currentUser) {
-      onRequireAuth();
+      onRequireAuth('vote in polls');
       return;
     }
     if (pollState?.userVotedOptionId) {
@@ -196,7 +196,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!currentUser) {
-      onRequireAuth();
+      onRequireAuth('post comments');
       return;
     }
     if (!newCommentText.trim()) return;
@@ -272,7 +272,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                 onClick={(e) => {
                   e.stopPropagation();
                   if (!currentUser && !isOwner) {
-                    onRequireAuth();
+                    onRequireAuth('report posts');
                     return;
                   }
                   setShowPostMenu(!showPostMenu);
