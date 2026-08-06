@@ -11,6 +11,7 @@ import {
   RefreshCw, 
   Globe, 
   AlertTriangle,
+  AlertCircle,
   Sparkles,
   Users,
   Award,
@@ -143,6 +144,24 @@ export default function AdminDashboard({ currentUser }) {
       fetchUsers();
     } catch (err) {
       setFeedbackMsg({ type: 'error', text: err.message || 'Failed to process post takedown.' });
+    } finally {
+      setReportActionId(null);
+    }
+  };
+
+  const handleDeleteGroupedPost = async (postId) => {
+    if (!window.confirm("Are you sure you want to permanently delete this post? This action cannot be undone.")) {
+      return;
+    }
+
+    setReportActionId(postId);
+    setFeedbackMsg({ type: '', text: '' });
+    try {
+      await api.deletePost(postId);
+      setFeedbackMsg({ type: 'success', text: 'Post deleted permanently!' });
+      fetchReports();
+    } catch (err) {
+      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to delete post.' });
     } finally {
       setReportActionId(null);
     }
@@ -526,7 +545,7 @@ export default function AdminDashboard({ currentUser }) {
                   </div>
 
                   {/* Admin Card Action Buttons */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.85rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.85rem', flexWrap: 'wrap' }}>
                     <button
                       className="btn-secondary"
                       onClick={() => handleDismissAllPostReports(item.postId)}
@@ -534,17 +553,27 @@ export default function AdminDashboard({ currentUser }) {
                       style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', color: '#475569' }}
                     >
                       <CheckCircle2 size={15} />
-                      <span>Dismiss All {item.reportCount} Reports</span>
+                      <span>Dismiss Reports</span>
+                    </button>
+
+                    <button
+                      className="btn-secondary"
+                      onClick={() => handleTakedownGroupedPost(item.postId, item.reporters[0]?.reason)}
+                      disabled={reportActionId === item.postId}
+                      style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', color: '#dc2626', borderColor: '#fca5a5', background: '#fef2f2' }}
+                    >
+                      <AlertCircle size={15} />
+                      <span>Take Down Post</span>
                     </button>
 
                     <button
                       className="btn-primary"
-                      onClick={() => handleTakedownGroupedPost(item.postId, item.reporters[0]?.reason)}
+                      onClick={() => handleDeleteGroupedPost(item.postId)}
                       disabled={reportActionId === item.postId}
                       style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', background: '#dc2626' }}
                     >
                       <Trash2 size={15} />
-                      <span>Take Down Post</span>
+                      <span>Delete Permanently</span>
                     </button>
                   </div>
                 </div>

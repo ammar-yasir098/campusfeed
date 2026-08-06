@@ -646,16 +646,17 @@ router.post('/:id/report', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'You cannot report your own post.' });
         }
 
-        // Check if user already reported this post
+        // Check if user already has an active pending report for this post
         const existingReport = await Report.findOne({
             where: {
                 postId,
-                reporterId: req.user.id
+                reporterId: req.user.id,
+                status: 'pending'
             }
         });
 
         if (existingReport) {
-            return res.status(409).json({ message: 'You have already reported this post.' });
+            return res.status(409).json({ message: 'You already have a pending report for this post in the moderation queue.' });
         }
 
         const report = await Report.create({

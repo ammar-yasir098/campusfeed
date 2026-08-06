@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X, MoreVertical } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
 
@@ -18,19 +18,22 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     return false;
   });
 
-  // Report State
-  const [showReportMenu, setShowReportMenu] = useState(false);
+  // Post Menu & Report State
+  const [showPostMenu, setShowPostMenu] = useState(false);
+  const [showReportReasons, setShowReportReasons] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [reportToast, setReportToast] = useState(null);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (e.target && typeof e.target.closest === 'function') {
-        if (!e.target.closest('.report-menu-container')) {
-          setShowReportMenu(false);
+        if (!e.target.closest('.post-menu-container')) {
+          setShowPostMenu(false);
+          setShowReportReasons(false);
         }
       } else {
-        setShowReportMenu(false);
+        setShowPostMenu(false);
+        setShowReportReasons(false);
       }
     };
     document.addEventListener('click', handleOutsideClick);
@@ -73,32 +76,10 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
   const isOwner = currentUser && (currentUser.id === postData.userId || currentUser.id === postData.author?.id);
   const isAdmin = currentUser && currentUser.role === 'admin';
-  const canDelete = isOwner || isAdmin;
+  const canDelete = isOwner;
 
   const handleDeleteOrTakedown = async () => {
-    if (isAdmin && !isOwner) {
-      const isTakedownNotice = window.confirm(
-        "Admin Action Required:\n\nClick 'OK' to issue an official Admin Takedown Notice (with feedback log).\nClick 'Cancel' to permanently delete this post completely."
-      );
-
-      if (isTakedownNotice) {
-        const reason = window.prompt(
-          'Enter administrative feedback / reason for this takedown log:',
-          'This post was taken down by UMT Admin for violating community guidelines.'
-        );
-        if (reason === null) return;
-        try {
-          const res = await api.takedownPost(postData.id, reason);
-          setPostData(res.post);
-        } catch (err) {
-          alert(err.message || 'Failed to issue takedown');
-        }
-      } else {
-        onDeletePost(postData.id);
-      }
-    } else {
-      onDeletePost(postData.id);
-    }
+    onDeletePost(postData.id);
   };
 
   // Handle Report Post
@@ -107,15 +88,18 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
       onRequireAuth();
       return;
     }
-    setShowReportMenu(false);
+    setShowPostMenu(false);
+    setShowReportReasons(false);
     try {
       const res = await api.reportPost(postData.id, reason);
       setReportSubmitted(true);
       setReportToast({ type: 'success', text: res.message || 'Report submitted successfully' });
-      setTimeout(() => setReportToast(null), 4000);
+      alert(`Report Submitted!\n\nReason: ${reason}\n${res.message || 'Campus moderators will review this post in the Admin Dashboard.'}`);
+      setTimeout(() => setReportToast(null), 5000);
     } catch (err) {
       setReportToast({ type: 'error', text: err.message || 'Failed to submit report' });
-      setTimeout(() => setReportToast(null), 4000);
+      alert(`Report Notice: ${err.message || 'Failed to submit report'}`);
+      setTimeout(() => setReportToast(null), 5000);
     }
   };
 
@@ -235,7 +219,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     <article className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: '#ffffff' }}>
 
       {/* Header: Author info & Category badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', borderBottom: '1px solid rgb(241, 245, 249)', paddingBottom: '0.3rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
           {postData.author?.avatarUrl ? (
             <img
@@ -281,35 +265,26 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             {postData.category || 'General'}
           </span>
 
-          {canDelete && (
-            <button
-              className="btn-icon"
-              onClick={handleDeleteOrTakedown}
-              title={isAdmin && !isOwner ? "Admin Takedown / Delete Post" : "Delete Post"}
-              style={{ color: '#dc2626', padding: '0.3rem' }}
-            >
-              <Trash2 size={15} />
-            </button>
-          )}
-
-          {!isOwner && !isAdmin && !postData.isTakedown && (
-            <div className="report-menu-container" style={{ position: 'relative' }}>
+          {(isOwner || !postData.isTakedown) && (
+            <div className="post-menu-container" style={{ position: 'relative' }}>
               <button
                 className="btn-icon"
-                onClick={() => {
-                  if (!currentUser) {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!currentUser && !isOwner) {
                     onRequireAuth();
                     return;
                   }
-                  setShowReportMenu(!showReportMenu);
+                  setShowPostMenu(!showPostMenu);
+                  setShowReportReasons(false);
                 }}
-                title={reportSubmitted ? "Reported to Moderators" : "Report Post"}
-                style={{ color: reportSubmitted ? '#d97706' : '#64748b', padding: '0.3rem' }}
+                title="Post Options"
+                style={{ color: '#64748b', padding: '0.3rem', borderRadius: '8px' }}
               >
-                <Flag size={15} fill={reportSubmitted ? '#d97706' : 'none'} />
+                <MoreVertical size={16} />
               </button>
 
-              {showReportMenu && (
+              {showPostMenu && (
                 <div style={{
                   position: 'absolute',
                   right: 0,
@@ -319,37 +294,119 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   border: '1px solid #e2e8f0',
                   borderRadius: '12px',
                   boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
-                  padding: '0.5rem',
+                  padding: '0.4rem',
                   zIndex: 100,
-                  width: '190px'
+                  width: showReportReasons ? '200px' : '160px'
                 }}>
-                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748b', padding: '0.25rem 0.5rem', borderBottom: '1px solid #f1f5f9', marginBottom: '0.3rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span>Report Reason:</span>
-                    <X size={13} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={() => setShowReportMenu(false)} />
-                  </div>
-                  {['Spam', 'Harassment', 'Misinformation', 'Inappropriate Content'].map((reason) => (
+                  {isOwner ? (
                     <button
-                      key={reason}
-                      onClick={() => handleReportPost(reason)}
+                      onClick={() => {
+                        setShowPostMenu(false);
+                        handleDeleteOrTakedown();
+                      }}
                       style={{
                         width: '100%',
                         textAlign: 'left',
-                        padding: '0.45rem 0.6rem',
-                        fontSize: '0.8rem',
-                        color: '#334155',
+                        padding: '0.5rem 0.65rem',
+                        fontSize: '0.82rem',
+                        color: '#dc2626',
                         background: 'transparent',
                         border: 'none',
-                        borderRadius: '6px',
+                        borderRadius: '8px',
                         cursor: 'pointer',
-                        fontWeight: 500,
-                        display: 'block'
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.55rem',
+                        transition: 'background 0.15s'
                       }}
-                      onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
-                      onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
-                      🚩 {reason}
+                      <Trash2 size={15} color="#dc2626" />
+                      <span>Delete Post</span>
                     </button>
-                  ))}
+                  ) : (
+                    !showReportReasons ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (reportSubmitted) return;
+                          setShowReportReasons(true);
+                        }}
+                        disabled={reportSubmitted}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.5rem 0.65rem',
+                          fontSize: '0.82rem',
+                          color: reportSubmitted ? '#d97706' : '#334155',
+                          background: 'transparent',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: reportSubmitted ? 'default' : 'pointer',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.55rem',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!reportSubmitted) e.currentTarget.style.background = '#f8fafc';
+                        }}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <Flag size={15} color={reportSubmitted ? '#d97706' : '#64748b'} fill={reportSubmitted ? '#d97706' : 'none'} />
+                        <span>{reportSubmitted ? 'Reported' : 'Report Post'}</span>
+                      </button>
+                    ) : (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <div style={{
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          color: '#64748b',
+                          padding: '0.25rem 0.4rem',
+                          borderBottom: '1px solid #f1f5f9',
+                          marginBottom: '0.3rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}>
+                          <span>Select Category Reason:</span>
+                          <X size={13} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={(e) => { e.stopPropagation(); setShowReportReasons(false); }} />
+                        </div>
+                        {['Spam', 'Harassment', 'Misinformation', 'Inappropriate Content'].map((reason) => (
+                          <button
+                            key={reason}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReportPost(reason);
+                            }}
+                            style={{
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '0.45rem 0.6rem',
+                              fontSize: '0.8rem',
+                              color: '#334155',
+                              background: 'transparent',
+                              border: 'none',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontWeight: 500,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.4rem'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <span>🚩</span>
+                            <span>{reason}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  )}
                 </div>
               )}
             </div>
