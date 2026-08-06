@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { User, Post, Report } = require('../models');
+const { User, Post, Report, PostImage } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
@@ -181,6 +181,11 @@ router.get('/reports', async (req, res) => {
                             model: User,
                             as: 'author',
                             attributes: ['id', 'name', 'email', 'avatarUrl', 'role', 'status']
+                        },
+                        {
+                            model: PostImage,
+                            as: 'images',
+                            attributes: ['id', 'imageUrl', 'orderIndex']
                         }
                     ]
                 },
@@ -198,10 +203,19 @@ router.get('/reports', async (req, res) => {
         const groupedMap = {};
         reports.forEach(report => {
             if (!report.postId || !report.post) return;
+            const postJson = report.post.toJSON ? report.post.toJSON() : report.post;
+            if (postJson.images && Array.isArray(postJson.images) && postJson.images.length > 0) {
+                postJson.imageUrls = postJson.images.sort((a,b) => a.orderIndex - b.orderIndex).map(i => i.imageUrl);
+            } else if (postJson.imageUrl) {
+                postJson.imageUrls = [postJson.imageUrl];
+            } else {
+                postJson.imageUrls = [];
+            }
+
             if (!groupedMap[report.postId]) {
                 groupedMap[report.postId] = {
                     postId: report.postId,
-                    post: report.post,
+                    post: postJson,
                     reportCount: 0,
                     reporters: []
                 };

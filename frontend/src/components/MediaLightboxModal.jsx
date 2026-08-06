@@ -1,19 +1,37 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function MediaLightboxModal({ media, onClose }) {
+  const isVideo = media?.type === 'video';
+  const images = media?.images || (media?.src ? [media.src] : []);
+  const [currentIndex, setCurrentIndex] = useState(media?.index || 0);
+
+  useEffect(() => {
+    if (typeof media?.index === 'number') {
+      setCurrentIndex(media.index);
+    }
+  }, [media?.index, media?.src]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (!isVideo && images.length > 1) {
+        if (e.key === 'ArrowLeft') {
+          setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+        } else if (e.key === 'ArrowRight') {
+          setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, isVideo, images.length]);
 
-  if (!media || !media.src) return null;
+  if (!media || (!media.src && images.length === 0)) return null;
 
-  const isVideo = media.type === 'video';
+  const currentSrc = !isVideo && images.length > 0 ? images[currentIndex] : media.src;
 
   return ReactDOM.createPortal(
     <div 
@@ -25,7 +43,7 @@ export default function MediaLightboxModal({ media, onClose }) {
         left: 0,
         width: '100vw',
         height: '100vh',
-        background: 'rgba(15, 23, 42, 0.85)',
+        background: 'rgba(15, 23, 42, 0.88)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         display: 'flex',
@@ -35,7 +53,7 @@ export default function MediaLightboxModal({ media, onClose }) {
         padding: '2rem'
       }}
     >
-      {/* Floating Control Buttons */}
+      {/* Top Floating Bar */}
       <div 
         style={{
           position: 'fixed',
@@ -43,11 +61,27 @@ export default function MediaLightboxModal({ media, onClose }) {
           right: '2rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.85rem',
+          gap: '1rem',
           zIndex: 100000
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {!isVideo && images.length > 1 && (
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            color: '#ffffff',
+            padding: '0.4rem 0.85rem',
+            borderRadius: '20px',
+            fontSize: '0.85rem',
+            fontWeight: 700,
+            letterSpacing: '0.5px'
+          }}>
+            {currentIndex + 1} / {images.length}
+          </div>
+        )}
+
         <button 
           type="button"
           onClick={onClose}
@@ -70,7 +104,73 @@ export default function MediaLightboxModal({ media, onClose }) {
         </button>
       </div>
 
-      {/* Large Media Container covering 60-80% of screen */}
+      {/* Prev Navigation Button */}
+      {!isVideo && images.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+          }}
+          style={{
+            position: 'fixed',
+            left: '2rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            color: '#ffffff',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100000,
+            transition: 'all 0.2s ease'
+          }}
+          title="Previous Photo (←)"
+        >
+          <ChevronLeft size={28} />
+        </button>
+      )}
+
+      {/* Next Navigation Button */}
+      {!isVideo && images.length > 1 && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+          }}
+          style={{
+            position: 'fixed',
+            right: '2rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            color: '#ffffff',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100000,
+            transition: 'all 0.2s ease'
+          }}
+          title="Next Photo (→)"
+        >
+          <ChevronRight size={28} />
+        </button>
+      )}
+
+      {/* Large Media Container */}
       <div 
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -85,7 +185,7 @@ export default function MediaLightboxModal({ media, onClose }) {
       >
         {isVideo ? (
           <video 
-            src={media.src} 
+            src={currentSrc} 
             controls 
             controlsList="nofullscreen"
             autoPlay 
@@ -101,7 +201,7 @@ export default function MediaLightboxModal({ media, onClose }) {
           />
         ) : (
           <img 
-            src={media.src} 
+            src={currentSrc} 
             alt={media.alt || 'Enlarged media'}
             style={{
               width: '100%',

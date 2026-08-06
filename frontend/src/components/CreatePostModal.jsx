@@ -14,8 +14,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('General');
-  const [imageFile, setImageFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [imageFiles, setImageFiles] = useState([]); // Array of up to 5 File objects
+  const [previewUrls, setPreviewUrls] = useState([]); // Array of Object URLs
   
   // Video attachment state
   const [videoFile, setVideoFile] = useState(null);
@@ -31,18 +31,31 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   if (!isOpen) return null;
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-      setVideoFile(null);
-      setVideoPreviewUrl(null);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const totalAllowed = 5 - imageFiles.length;
+    if (totalAllowed <= 0) {
+      setError('Maximum 5 photos allowed per post.');
+      return;
     }
+
+    const selected = files.slice(0, totalAllowed);
+    const newFiles = [...imageFiles, ...selected];
+    const newPreviews = [...previewUrls, ...selected.map(f => URL.createObjectURL(f))];
+
+    setImageFiles(newFiles);
+    setPreviewUrls(newPreviews);
+    setVideoFile(null);
+    setVideoPreviewUrl(null);
+    setError('');
   };
 
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setPreviewUrl(null);
+  const handleRemoveSingleImage = (index) => {
+    const newFiles = imageFiles.filter((_, idx) => idx !== index);
+    const newPreviews = previewUrls.filter((_, idx) => idx !== index);
+    setImageFiles(newFiles);
+    setPreviewUrls(newPreviews);
   };
 
   const handleVideoChange = (e) => {
@@ -54,8 +67,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       }
       setVideoFile(file);
       setVideoPreviewUrl(URL.createObjectURL(file));
-      setImageFile(null);
-      setPreviewUrl(null);
+      setImageFiles([]);
+      setPreviewUrls([]);
       setError('');
     }
   };
@@ -98,7 +111,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
         return;
       }
       pollPayload = { options: validOptions };
-    } else if (!content.trim() && !imageFile && !videoFile) {
+    } else if (!content.trim() && imageFiles.length === 0 && !videoFile) {
       setError('Post content or media attachment is required when creating an announcement.');
       return;
     }
@@ -107,15 +120,17 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     setError('');
 
     try {
-      let finalImageUrl = null;
+      let finalImageUrls = [];
       let finalVideoUrl = null;
 
-      // If user selected an image file, upload it first
-      if (imageFile) {
+      // If user selected image files, upload them
+      if (imageFiles.length > 0) {
         const formData = new FormData();
-        formData.append('image', imageFile);
-        const uploadRes = await api.uploadImage(formData);
-        finalImageUrl = uploadRes.imageUrl;
+        imageFiles.forEach(file => {
+          formData.append('images', file);
+        });
+        const uploadRes = await api.uploadMultipleImages(formData);
+        finalImageUrls = uploadRes.imageUrls || [];
       }
 
       // If user selected a video file, upload it
@@ -131,7 +146,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
         title,
         content: content.trim() || null,
         category,
-        imageUrl: finalImageUrl,
+        imageUrls: finalImageUrls,
+        imageUrl: finalImageUrls.length > 0 ? finalImageUrls[0] : null,
         videoUrl: finalVideoUrl,
         poll: pollPayload
       };
@@ -144,14 +160,14 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       setTitle('');
       setContent('');
       setCategory('General');
-      setImageFile(null);
-      setPreviewUrl(null);
+      setImageFiles([]);
+      setPreviewUrls([]);
       setVideoFile(null);
       setVideoPreviewUrl(null);
       setIsPollEnabled(false);
       setPollOptions(['', '']);
     } catch (err) {
-      setError(err.message || 'Unable to publish post at this time. Please try again.');
+      setError(err.message || 'Failed to create post. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -162,120 +178,100 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       <div className="glass-panel modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '1.75rem', maxWidth: '580px' }}>
         
         {/* Modal Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-          <h2 className="font-heading" style={{ fontSize: '1.3rem', fontWeight: 700 }}>
-            Create Campus Announcement or Poll
-          </h2>
-          <button className="btn-icon" onClick={onClose}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary)', margin: 0 }}>Create Campus Post</h2>
+          <button className="btn-icon" onClick={onClose} aria-label="Close modal">
             <X size={20} />
           </button>
         </div>
 
         {error && (
-          <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={16} />
-            <span>{error}</span>
+          <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-sm)', background: '#fef2f2', color: '#dc2626', fontSize: '0.85rem', marginBottom: '1rem', border: '1px solid #fecaca' }}>
+            {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           
-          {/* Category Dropdown */}
+          {/* Category Selector */}
           <div>
             <label className="input-label">Category</label>
             <select 
-              className="input-field" 
               value={category} 
               onChange={(e) => setCategory(e.target.value)}
-              style={{ cursor: 'pointer' }}
+              className="input-field"
+              style={{ width: '100%' }}
             >
-              {CATEGORY_OPTIONS.map((cat) => (
-                <option key={cat} value={cat} style={{ background: '#111827', color: '#fff' }}>
-                  {cat}
-                </option>
-              ))}
+              <option value="General">General</option>
+              <option value="Announcements">Announcements</option>
+              <option value="Events">Events</option>
+              <option value="Lost & Found">Lost & Found</option>
+              <option value="Buy & Sell">Buy & Sell</option>
             </select>
           </div>
 
-          {/* Title Input */}
+          {/* Post Title */}
           <div>
-            <label className="input-label">Title / Question</label>
+            <label className="input-label">Title / Heading *</label>
             <input 
               type="text" 
-              className="input-field" 
-              placeholder="e.g., Should the Library remain open 24/7 during Exam Week?"
-              value={title}
+              placeholder="e.g. Midterm Schedule Announcement" 
+              value={title} 
               onChange={(e) => setTitle(e.target.value)}
+              className="input-field"
+              style={{ width: '100%' }}
               required
             />
           </div>
 
-          {/* Content Input */}
+          {/* Post Content */}
           <div>
-            <label className="input-label">
-              Post Body / Context {isPollEnabled && <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(Optional with Poll)</span>}
-            </label>
+            <label className="input-label">Content Details</label>
             <textarea 
-              className="input-field" 
-              rows={3}
-              placeholder={isPollEnabled ? "Provide background details or discussion points (Optional)..." : "Provide background details or discussion points..."}
-              value={content}
+              placeholder="Share what's happening on campus..." 
+              value={content} 
               onChange={(e) => setContent(e.target.value)}
-              required={!isPollEnabled}
-              style={{ resize: 'vertical' }}
+              className="input-field"
+              rows={4}
+              style={{ width: '100%', resize: 'vertical' }}
             />
           </div>
 
-          {/* Poll Options Builder Toggle */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span className="input-label" style={{ marginBottom: 0 }}>Interactive Student Poll</span>
-              <button 
-                type="button"
-                onClick={() => setIsPollEnabled(!isPollEnabled)}
-                style={{
-                  background: isPollEnabled ? 'var(--primary-gradient)' : '#f3f4f6',
-                  color: isPollEnabled ? '#ffffff' : '#374151',
-                  border: isPollEnabled ? 'none' : '1px solid #d1d5db',
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <BarChart2 size={15} />
-                <span>{isPollEnabled ? 'Poll Enabled' : '+ Add Poll Options'}</span>
-              </button>
+          {/* Optional Poll Section */}
+          <div style={{ background: '#f8fafc', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.88rem', color: '#0f2942' }}>
+                <BarChart2 size={18} color="#2563eb" />
+                <span>Add Interactive Poll</span>
+              </div>
+              <input 
+                type="checkbox" 
+                checked={isPollEnabled} 
+                onChange={(e) => setIsPollEnabled(e.target.checked)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: '#2563eb' }}
+              />
             </div>
 
-            {/* Render Poll Option Inputs */}
             {isPollEnabled && (
-              <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
-                  Enter 2 to 6 choices for students to vote on:
-                </p>
-
-                {pollOptions.map((optText, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ marginTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 500 }}>
+                  Poll Options (2 to 6 options)
+                </span>
+                {pollOptions.map((opt, idx) => (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <input 
                       type="text" 
-                      className="input-field" 
-                      placeholder={`Option ${index + 1}`}
-                      value={optText}
-                      onChange={(e) => handleOptionTextChange(index, e.target.value)}
-                      style={{ fontSize: '0.88rem', padding: '0.5rem 0.8rem', background: '#ffffff', color: '#1e293b' }}
-                      required={isPollEnabled && index < 2}
+                      placeholder={`Option ${idx + 1}`}
+                      value={opt}
+                      onChange={(e) => handleOptionTextChange(idx, e.target.value)}
+                      className="input-field"
+                      style={{ flex: 1, padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
                     />
                     {pollOptions.length > 2 && (
                       <button 
                         type="button" 
-                        onClick={() => handleRemovePollOption(index)}
-                        style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.35rem' }}
+                        onClick={() => handleRemovePollOption(idx)}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.2rem' }}
                         title="Remove Option"
                       >
                         <Trash2 size={16} />
@@ -288,31 +284,64 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                   <button 
                     type="button" 
                     onClick={handleAddPollOption}
-                    style={{ background: 'transparent', border: '1px dashed #cbd5e1', color: 'var(--primary)', padding: '0.45rem', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', marginTop: '0.25rem' }}
+                    style={{
+                      alignSelf: 'flex-start',
+                      marginTop: '0.3rem',
+                      background: 'none',
+                      border: 'none',
+                      color: '#2563eb',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      cursor: 'pointer'
+                    }}
                   >
-                    <Plus size={15} />
-                    <span>Add Another Choice</span>
+                    <Plus size={15} /> Add Another Option
                   </button>
                 )}
               </div>
             )}
           </div>
 
-          {/* Media Upload (Photo or Video) */}
+          {/* Media Upload (Photos up to 5 or Video) */}
           <div>
-            <label className="input-label">Attach Media (Optional)</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <label className="input-label" style={{ margin: 0 }}>Attach Media (Optional)</label>
+              {previewUrls.length > 0 && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563eb' }}>
+                  {previewUrls.length} / 5 Photos
+                </span>
+              )}
+            </div>
             
-            {previewUrl ? (
-              <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', display: 'block', borderRadius: '0px' }} />
-                <button 
-                  type="button" 
-                  onClick={handleRemoveImage}
-                  style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(15, 23, 42, 0.75)', color: '#fff', border: 'none', borderRadius: '50%', padding: '0.35rem', cursor: 'pointer' }}
-                  title="Remove Image"
-                >
-                  <X size={16} />
-                </button>
+            {previewUrls.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.65rem' }}>
+                {previewUrls.map((url, idx) => (
+                  <div key={idx} style={{ position: 'relative', height: '90px', borderRadius: '0px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                    <img src={url} alt={`Preview ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '0px' }} />
+                    <span style={{ position: 'absolute', bottom: '4px', left: '4px', background: 'rgba(15, 23, 42, 0.75)', color: '#fff', fontSize: '0.65rem', fontWeight: 700, padding: '1px 5px', borderRadius: '3px' }}>
+                      {idx + 1}
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={() => handleRemoveSingleImage(idx)}
+                      style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(15, 23, 42, 0.85)', color: '#fff', border: 'none', borderRadius: '50%', padding: '0.2rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      title="Remove Photo"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+
+                {previewUrls.length < 5 && (
+                  <label style={{ height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1.5px dashed #3b82f6', borderRadius: '0px', background: '#eff6ff', cursor: 'pointer', gap: '0.2rem', color: '#2563eb' }}>
+                    <Plus size={20} />
+                    <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Add Photo</span>
+                    <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
+                  </label>
+                )}
               </div>
             ) : videoPreviewUrl ? (
               <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
@@ -330,9 +359,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
                   <Upload size={20} color="#2563eb" />
-                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Photo</span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Photos (Up to 5)</span>
                   <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>JPG, PNG, WEBP up to 5MB</span>
-                  <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                  <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
                 </label>
 
                 <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>

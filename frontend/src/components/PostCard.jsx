@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X, MoreVertical, Maximize2, Play } from 'lucide-react';
+import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X, MoreVertical, Maximize2, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
 import MediaLightboxModal from './MediaLightboxModal';
@@ -7,6 +7,7 @@ import MediaLightboxModal from './MediaLightboxModal';
 export default function PostCard({ post, currentUser, onDeletePost, onRequireAuth, defaultShowComments = false }) {
   const [postData, setPostData] = useState(post);
   const [activeMedia, setActiveMedia] = useState(null);
+  const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const videoRef = useRef(null);
   const [isLiked, setIsLiked] = useState(
@@ -643,20 +644,187 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             </div>
           )}
 
-          {/* Image Attachment */}
-          {post.imageUrl && (
-            <div 
-              onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(post.imageUrl), alt: post.title })}
-              title="Click to view full-size photo"
-              style={{ marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer' }}
-            >
-              <img
-                src={resolveImageUrl(post.imageUrl)}
-                alt={post.title}
-                style={{ width: '100%', maxHeight: '340px', objectFit: 'cover', display: 'block', borderRadius: '0px', transition: 'transform 0.2s ease' }}
-              />
-            </div>
-          )}
+          {/* Multi-Photo Attachments */}
+          {(() => {
+            const allImages = post.imageUrls && post.imageUrls.length > 0 
+              ? post.imageUrls 
+              : (post.imageUrl ? [post.imageUrl] : []);
+
+            if (allImages.length === 0) return null;
+
+            if (allImages.length === 1) {
+              return (
+                <div 
+                  onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(allImages[0]), alt: post.title, images: allImages.map(resolveImageUrl), index: 0 })}
+                  title="Click to view full-size photo"
+                  style={{ marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer', background: '#0f172a' }}
+                >
+                  <img
+                    src={resolveImageUrl(allImages[0])}
+                    alt={post.title}
+                    style={{ width: '100%', maxHeight: '460px', objectFit: 'contain', display: 'block', borderRadius: '0px', transition: 'transform 0.2s ease' }}
+                  />
+                </div>
+              );
+            }
+
+            if (allImages.length === 2) {
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', marginBottom: '0.85rem' }}>
+                  {allImages.map((imgSrc, idx) => (
+                    <div 
+                      key={idx}
+                      onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(imgSrc), alt: post.title, images: allImages.map(resolveImageUrl), index: idx })}
+                      title="Click to view photo"
+                      style={{ borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer', height: '260px', background: '#0f172a' }}
+                    >
+                      <img
+                        src={resolveImageUrl(imgSrc)}
+                        alt={`${post.title} ${idx + 1}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', borderRadius: '0px' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+
+            // 3 to 5 Photos Carousel Slider
+            const activeIdx = Math.min(currentImgIdx, allImages.length - 1);
+            return (
+              <div style={{ position: 'relative', marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', background: '#0f172a' }}>
+                <div 
+                  onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(allImages[activeIdx]), alt: post.title, images: allImages.map(resolveImageUrl), index: activeIdx })}
+                  style={{ width: '100%', height: '380px', cursor: 'pointer' }}
+                  title="Click to view full-size photo"
+                >
+                  <img
+                    src={resolveImageUrl(allImages[activeIdx])}
+                    alt={`${post.title} ${activeIdx + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', borderRadius: '0px' }}
+                  />
+                </div>
+
+                {/* Counter Pill Badge */}
+                <div style={{
+                  position: 'absolute',
+                  top: '0.65rem',
+                  right: '0.65rem',
+                  background: 'rgba(15, 23, 42, 0.78)',
+                  backdropFilter: 'blur(6px)',
+                  color: '#ffffff',
+                  padding: '0.25rem 0.6rem',
+                  borderRadius: '12px',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.5px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}>
+                  {activeIdx + 1} / {allImages.length}
+                </div>
+
+                {/* Prev Arrow */}
+                {activeIdx > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImgIdx(activeIdx - 1);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '0.65rem',
+                      transform: 'translateY(-50%)',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      backdropFilter: 'blur(6px)',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      zIndex: 5
+                    }}
+                    title="Previous Photo"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                )}
+
+                {/* Next Arrow */}
+                {activeIdx < allImages.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentImgIdx(activeIdx + 1);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      right: '0.65rem',
+                      transform: 'translateY(-50%)',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      backdropFilter: 'blur(6px)',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      zIndex: 5
+                    }}
+                    title="Next Photo"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                )}
+
+                {/* Dot Indicators */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '0.65rem',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  gap: '0.35rem',
+                  zIndex: 5,
+                  background: 'rgba(15, 23, 42, 0.5)',
+                  padding: '0.3rem 0.5rem',
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(4px)'
+                }}>
+                  {allImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImgIdx(idx);
+                      }}
+                      style={{
+                        width: idx === activeIdx ? '16px' : '6px',
+                        height: '6px',
+                        borderRadius: '3px',
+                        background: idx === activeIdx ? '#2563eb' : 'rgba(255, 255, 255, 0.6)',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
+                        transition: 'all 0.25s ease'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Video Attachment */}
           {post.videoUrl && (

@@ -45,4 +45,23 @@ router.post('/video', authenticateToken, (req, res) => {
     });
 });
 
+// UPLOAD MULTIPLE IMAGES (Protected - Up to 5 files, Returns array of paths "uploads/filename")
+router.post('/multiple', authenticateToken, (req, res) => {
+    upload.array('images', 5)(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'Please select at least one image to upload' });
+        }
+
+        const imageUrls = req.files.map(file => `uploads/${file.filename}`);
+
+        res.status(200).json({
+            message: 'Images uploaded successfully',
+            imageUrls: imageUrls
+        });
+    });
+});
+
 module.exports = router;

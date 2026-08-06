@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote, Notification, Report } = require('../models');
+const { Post, User, Like, Comment, Bookmark, Poll, PollOption, PollVote, Notification, Report, PostImage } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const validate = require('../middleware/validate');
@@ -8,6 +8,12 @@ const { postValidation, commentValidation } = require('../middleware/validators'
 const { Op } = require('sequelize');
 
 const router = express.Router();
+
+const imageInclude = {
+    model: PostImage,
+    as: 'images',
+    attributes: ['id', 'imageUrl', 'orderIndex']
+};
 
 // Utility to extract userId optionally from authorization header (for GET calls)
 const getUserIdFromHeader = (req) => {
@@ -66,15 +72,19 @@ const pollInclude = {
     ]
 };
 
-// CREATE a new post (Protected - Stores path "uploads/filename" and handles optional poll)
-router.post('/', authenticateToken, postValidation, validate, (req, res) => {
-    upload.single('image')(req, res, async (err) => {
-        if (err) {
-            return res.status(400).json({ message: err.message });
-        }
+// CREATE a new post (Protected - Handles JSON & optional multipart file upload)
+router.post('/', authenticateToken, postValidation, validate, async (req, res) => {
+    const handleCreate = async () => {
         try {
             const { title, content, category, videoUrl } = req.body;
             let imageUrl = req.body ? req.body.imageUrl : null;
+            let imageUrls = req.body ? req.body.imageUrls : null;
+            if (typeof imageUrls === 'string') {
+                try { imageUrls = JSON.parse(imageUrls); } catch (e) { }
+            }
+            if (!Array.isArray(imageUrls) && imageUrl) {
+                imageUrls = [imageUrl];
+            }
             let finalVideoUrl = videoUrl || (req.body ? req.body.videoUrl : null);
 
             if (req.file) {
@@ -82,18 +92,20 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
                     finalVideoUrl = `uploads/${req.file.filename}`;
                 } else {
                     imageUrl = `uploads/${req.file.filename}`;
+                    if (!imageUrls || imageUrls.length === 0) imageUrls = [imageUrl];
                 }
             }
 
             // Parse Poll Data if provided
-            let pollData = req.body.poll;
+            let pollData = req.body ? req.body.poll : null;
             if (typeof pollData === 'string') {
                 try { pollData = JSON.parse(pollData); } catch (e) { }
             }
 
             const hasValidPoll = pollData && Array.isArray(pollData.options) && pollData.options.filter(opt => typeof opt === 'string' && opt.trim() !== '').length >= 2;
+            const hasImages = Array.isArray(imageUrls) && imageUrls.length > 0;
 
-            if (!title || (!content && !hasValidPoll && !imageUrl && !finalVideoUrl)) {
+            if (!title || (!content && !hasValidPoll && !hasImages && !imageUrl && !finalVideoUrl)) {
                 return res.status(400).json({ message: 'Title is required, and content, media, or a poll must be provided' });
             }
 
@@ -101,10 +113,20 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
                 title,
                 content: content || null,
                 category: category || 'General',
-                imageUrl: imageUrl || null,
+                imageUrl: hasImages ? imageUrls[0] : (imageUrl || null),
                 videoUrl: finalVideoUrl || null,
                 userId: req.user.id
             });
+
+            // Bulk Insert attached photos into PostImage table
+            if (hasImages) {
+                const imageRecords = imageUrls.slice(0, 5).map((url, idx) => ({
+                    postId: newPost.id,
+                    imageUrl: url,
+                    orderIndex: idx
+                }));
+                await PostImage.bulkCreate(imageRecords);
+            }
 
             // Handle Poll Creation if provided
             if (hasValidPoll) {
@@ -119,7 +141,7 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
                 await Promise.all(optionPromises);
             }
 
-            // Fetch created post with author details & poll included
+            // Fetch created post with author details, images & poll included
             const postWithAuthor = await Post.findByPk(newPost.id, {
                 include: [
                     {
@@ -127,7 +149,8 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
                         as: 'author',
                         attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
                     },
-                    pollInclude
+                    pollInclude,
+                    imageInclude
                 ]
             });
 
@@ -135,6 +158,13 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
             json.likeCount = 0;
             json.commentCount = 0;
             json.poll = formatPoll(json.poll, req.user.id);
+            if (json.images && Array.isArray(json.images)) {
+                json.imageUrls = json.images.sort((a,b) => a.orderIndex - b.orderIndex).map(img => img.imageUrl);
+            } else if (json.imageUrl) {
+                json.imageUrls = [json.imageUrl];
+            } else {
+                json.imageUrls = [];
+            }
 
             // NOTIFICATION: If admin posts, broadcast announcement to all users except admin
             if (req.user.role === 'admin') {
@@ -164,7 +194,16 @@ router.post('/', authenticateToken, postValidation, validate, (req, res) => {
         } catch (error) {
             res.status(500).json({ message: 'Failed to create post', error: error.message });
         }
-    });
+    };
+
+    if (req.is('multipart/form-data')) {
+        upload.single('image')(req, res, (err) => {
+            if (err) return res.status(400).json({ message: err.message });
+            handleCreate();
+        });
+    } else {
+        handleCreate();
+    }
 });
 
 // GET all posts (Public feed with author info, like count, comment count, category filter, limit & offset pagination, poll info)
@@ -224,7 +263,8 @@ router.get('/', async (req, res) => {
                     as: 'comments',
                     attributes: ['id']
                 },
-                pollInclude
+                pollInclude,
+                imageInclude
             ]
         });
 
@@ -241,6 +281,13 @@ router.get('/', async (req, res) => {
                 json.likeCount = json.likes ? json.likes.length : 0;
                 json.commentCount = json.comments ? json.comments.length : 0;
                 json.poll = formatPoll(json.poll, currentUserId);
+                if (json.images && Array.isArray(json.images) && json.images.length > 0) {
+                    json.imageUrls = json.images.sort((a,b) => a.orderIndex - b.orderIndex).map(img => img.imageUrl);
+                } else if (json.imageUrl) {
+                    json.imageUrls = [json.imageUrl];
+                } else {
+                    json.imageUrls = [];
+                }
                 delete json.comments;
                 return json;
             });
@@ -289,7 +336,8 @@ router.get('/:id', async (req, res) => {
                         attributes: ['id', 'name', 'email', 'avatarUrl', 'isVerified', 'role']
                     }]
                 },
-                pollInclude
+                pollInclude,
+                imageInclude
             ]
         });
 
@@ -301,6 +349,13 @@ router.get('/:id', async (req, res) => {
         json.likeCount = json.likes ? json.likes.length : 0;
         json.commentCount = json.comments ? json.comments.length : 0;
         json.poll = formatPoll(json.poll, currentUserId);
+        if (json.images && Array.isArray(json.images) && json.images.length > 0) {
+            json.imageUrls = json.images.sort((a,b) => a.orderIndex - b.orderIndex).map(img => img.imageUrl);
+        } else if (json.imageUrl) {
+            json.imageUrls = [json.imageUrl];
+        } else {
+            json.imageUrls = [];
+        }
 
         res.status(200).json({ post: json });
     } catch (error) {

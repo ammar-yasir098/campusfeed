@@ -8,10 +8,15 @@ const PollOption = require('./PollOption');
 const PollVote = require('./PollVote');
 const Notification = require('./Notification');
 const Report = require('./Report');
+const PostImage = require('./PostImage');
 
 // User & Post Associations
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts', onDelete: 'CASCADE' });
 Post.belongsTo(User, { foreignKey: 'userId', as: 'author' });
+
+// Post & PostImage Associations
+Post.hasMany(PostImage, { foreignKey: 'postId', as: 'images', onDelete: 'CASCADE' });
+PostImage.belongsTo(Post, { foreignKey: 'postId', as: 'post' });
 
 // User & Like Associations
 User.hasMany(Like, { foreignKey: 'userId', as: 'likes', onDelete: 'CASCADE' });
@@ -84,6 +89,7 @@ module.exports = {
   PollVote,
   Notification,
   Report,
+  PostImage,
 };
 
 
