@@ -1003,7 +1003,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
           {/* Comments Expansion Drawer */}
           {showComments && (
-            <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px solid #f1f5f9' }}>
+            <div style={{ marginTop: '0.85rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-glass)' }}>
 
               {/* Add Comment Input */}
               <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
@@ -1044,7 +1044,8 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                         display: 'flex',
                         alignItems: 'flex-start',
                         gap: '0.6rem',
-                        background: '#f8fafc',
+                        background: 'var(--bg-card-hover)',
+                        border: '1px solid var(--border-glass)',
                         padding: '0.65rem 0.85rem',
                         borderRadius: 'var(--radius-md)'
                       }}
@@ -1070,7 +1071,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                             {formatTime(comment.createdAt)}
                           </span>
                         </div>
-                        <p style={{ fontSize: '0.84rem', color: '#292524', lineHeight: 1.4 }}>
+                        <p style={{ fontSize: '0.84rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
                           {comment.text}
                         </p>
                       </div>
