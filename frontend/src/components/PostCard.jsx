@@ -81,10 +81,13 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
   const handleStartVideoPlay = (e) => {
     if (e) e.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.preload = 'auto';
-      videoRef.current.play();
-    }
+    setIsVideoPlaying(true);
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.preload = 'auto';
+        videoRef.current.play().catch(() => {});
+      }
+    }, 50);
   };
   const [comments, setComments] = useState([]);
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
@@ -829,34 +832,49 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
           {/* Video Attachment */}
           {post.videoUrl && (
             <div style={{ position: 'relative', marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
-              <video
-                ref={videoRef}
-                src={resolveImageUrl(post.videoUrl)}
-                controls
-                preload="metadata"
-                onLoadedMetadata={(e) => {
-                  if (e.target && !isVideoPlaying) {
-                    e.target.currentTime = 0.1;
-                  }
-                }}
-                onPlay={() => setIsVideoPlaying(true)}
-                onPause={() => setIsVideoPlaying(false)}
-                onEnded={() => setIsVideoPlaying(false)}
-                style={{
-                  width: '100%',
-                  maxHeight: '380px',
-                  display: 'block',
-                  borderRadius: '0px',
-                  filter: isVideoPlaying ? 'none' : 'blur(4px) brightness(0.9)',
-                  transition: 'filter 0.35s ease',
-                  cursor: isVideoPlaying ? 'default' : 'pointer'
-                }}
-                onClick={(e) => {
-                  if (!isVideoPlaying) {
-                    handleStartVideoPlay(e);
-                  }
-                }}
-              />
+              {!isVideoPlaying && post.thumbnailUrl ? (
+                <div style={{ position: 'relative', cursor: 'pointer' }} onClick={handleStartVideoPlay}>
+                  <img
+                    src={resolveImageUrl(post.thumbnailUrl)}
+                    alt="Video thumbnail"
+                    style={{
+                      width: '100%',
+                      maxHeight: '380px',
+                      objectFit: 'cover',
+                      display: 'block',
+                      borderRadius: '0px'
+                    }}
+                  />
+                </div>
+              ) : (
+                <video
+                  ref={videoRef}
+                  src={resolveImageUrl(post.videoUrl)}
+                  controls
+                  autoPlay={isVideoPlaying}
+                  preload={post.thumbnailUrl ? "auto" : "metadata"}
+                  onLoadedMetadata={(e) => {
+                    if (e.target && !isVideoPlaying && !post.thumbnailUrl) {
+                      e.target.currentTime = 0.1;
+                    }
+                  }}
+                  onPlay={() => setIsVideoPlaying(true)}
+                  onPause={() => setIsVideoPlaying(false)}
+                  onEnded={() => setIsVideoPlaying(false)}
+                  style={{
+                    width: '100%',
+                    maxHeight: '380px',
+                    display: 'block',
+                    borderRadius: '0px',
+                    cursor: isVideoPlaying ? 'default' : 'pointer'
+                  }}
+                  onClick={(e) => {
+                    if (!isVideoPlaying) {
+                      handleStartVideoPlay(e);
+                    }
+                  }}
+                />
+              )}
 
               {/* Perfectly Centered Modern Glassmorphic Play Button */}
               {!isVideoPlaying && (

@@ -27,7 +27,7 @@ import { api, resolveImageUrl } from '../services/api';
 import MediaLightboxModal from './MediaLightboxModal';
 import VerifiedBadge from './VerifiedBadge';
 
-function AdminVideoPlayer({ videoUrl, onEnlarge }) {
+function AdminVideoPlayer({ videoUrl, thumbnailUrl, onEnlarge }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
 
@@ -56,40 +56,58 @@ function AdminVideoPlayer({ videoUrl, onEnlarge }) {
 
   const handleStartPlay = (e) => {
     if (e) e.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.preload = 'auto';
-      videoRef.current.play();
-    }
+    setIsPlaying(true);
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.preload = 'auto';
+        videoRef.current.play().catch(() => {});
+      }
+    }, 50);
   };
 
   return (
     <div style={{ position: 'relative', marginTop: '0.75rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid #cbd5e1', background: '#0f172a' }}>
-      <video
-        ref={videoRef}
-        src={resolveImageUrl(videoUrl)}
-        controls
-        preload="metadata"
-        onLoadedMetadata={(e) => {
-          if (e.target && !isPlaying) {
-            e.target.currentTime = 0.1;
-          }
-        }}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-        style={{
-          width: '100%',
-          maxHeight: '260px',
-          display: 'block',
-          borderRadius: '0px',
-          filter: isPlaying ? 'none' : 'blur(4px) brightness(0.9)',
-          transition: 'filter 0.35s ease',
-          cursor: isPlaying ? 'default' : 'pointer'
-        }}
-        onClick={(e) => {
-          if (!isPlaying) handleStartPlay(e);
-        }}
-      />
+      {!isPlaying && thumbnailUrl ? (
+        <div style={{ position: 'relative', cursor: 'pointer' }} onClick={handleStartPlay}>
+          <img
+            src={resolveImageUrl(thumbnailUrl)}
+            alt="Video thumbnail"
+            style={{
+              width: '100%',
+              maxHeight: '260px',
+              objectFit: 'cover',
+              display: 'block',
+              borderRadius: '0px'
+            }}
+          />
+        </div>
+      ) : (
+        <video
+          ref={videoRef}
+          src={resolveImageUrl(videoUrl)}
+          controls
+          autoPlay={isPlaying}
+          preload={thumbnailUrl ? "auto" : "metadata"}
+          onLoadedMetadata={(e) => {
+            if (e.target && !isPlaying && !thumbnailUrl) {
+              e.target.currentTime = 0.1;
+            }
+          }}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          style={{
+            width: '100%',
+            maxHeight: '260px',
+            display: 'block',
+            borderRadius: '0px',
+            cursor: isPlaying ? 'default' : 'pointer'
+          }}
+          onClick={(e) => {
+            if (!isPlaying) handleStartPlay(e);
+          }}
+        />
+      )}
 
       {!isPlaying && (
         <button
@@ -612,6 +630,7 @@ export default function AdminDashboard({ currentUser }) {
                     {item.post?.videoUrl && (
                       <AdminVideoPlayer 
                         videoUrl={item.post.videoUrl} 
+                        thumbnailUrl={item.post.thumbnailUrl}
                         onEnlarge={(src) => setActiveMedia({ type: 'video', src })} 
                       />
                     )}

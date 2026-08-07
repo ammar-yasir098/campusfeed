@@ -76,7 +76,7 @@ const pollInclude = {
 router.post('/', authenticateToken, postValidation, validate, async (req, res) => {
     const handleCreate = async () => {
         try {
-            const { title, content, category, videoUrl } = req.body;
+            const { title, content, category, videoUrl, thumbnailUrl } = req.body;
             let imageUrl = req.body ? req.body.imageUrl : null;
             let imageUrls = req.body ? req.body.imageUrls : null;
             if (typeof imageUrls === 'string') {
@@ -86,6 +86,7 @@ router.post('/', authenticateToken, postValidation, validate, async (req, res) =
                 imageUrls = [imageUrl];
             }
             let finalVideoUrl = videoUrl || (req.body ? req.body.videoUrl : null);
+            let finalThumbnailUrl = thumbnailUrl || (req.body ? req.body.thumbnailUrl : null);
 
             if (req.file) {
                 if (req.file.mimetype && req.file.mimetype.startsWith('video/')) {
@@ -115,6 +116,7 @@ router.post('/', authenticateToken, postValidation, validate, async (req, res) =
                 category: category || 'General',
                 imageUrl: hasImages ? imageUrls[0] : (imageUrl || null),
                 videoUrl: finalVideoUrl || null,
+                thumbnailUrl: finalThumbnailUrl || null,
                 userId: req.user.id
             });
 

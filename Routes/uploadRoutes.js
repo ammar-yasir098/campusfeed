@@ -25,22 +25,30 @@ router.post('/', authenticateToken, (req, res) => {
     });
 });
 
-// UPLOAD VIDEO (Protected - Returns path "uploads/filename")
+// UPLOAD VIDEO (Protected - Returns path "uploads/filename" & optional thumbnail)
 router.post('/video', authenticateToken, (req, res) => {
-    upload.single('video')(req, res, (err) => {
+    upload.fields([{ name: 'video', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }])(req, res, (err) => {
         if (err) {
             return res.status(400).json({ message: err.message });
         }
-        if (!req.file) {
+        
+        const videoFile = req.files && req.files['video'] ? req.files['video'][0] : (req.file || null);
+        if (!videoFile) {
             return res.status(400).json({ message: 'Please select a video file to upload' });
         }
 
-        const videoUrl = `uploads/${req.file.filename}`;
+        const videoUrl = `uploads/${videoFile.filename}`;
+        let thumbnailUrl = null;
+
+        if (req.files && req.files['thumbnail'] && req.files['thumbnail'][0]) {
+            thumbnailUrl = `uploads/${req.files['thumbnail'][0].filename}`;
+        }
 
         res.status(200).json({
             message: 'Video uploaded successfully',
-            filename: req.file.filename,
-            videoUrl: videoUrl
+            filename: videoFile.filename,
+            videoUrl: videoUrl,
+            thumbnailUrl: thumbnailUrl
         });
     });
 });

@@ -20,6 +20,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   // Video attachment state
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+  const [thumbnailBlob, setThumbnailBlob] = useState(null);
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState(null);
 
   // Poll state
   const [isPollEnabled, setIsPollEnabled] = useState(false);
@@ -29,6 +31,45 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
+
+  const generateVideoThumbnail = (file) => {
+    return new Promise((resolve) => {
+      try {
+        const video = document.createElement('video');
+        const url = URL.createObjectURL(file);
+        video.src = url;
+        video.preload = 'metadata';
+
+        video.onloadedmetadata = () => {
+          video.currentTime = Math.min(0.2, video.duration || 0.2);
+        };
+
+        video.onseeked = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 360;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          canvas.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(url);
+              resolve(blob);
+            },
+            'image/jpeg',
+            0.85
+          );
+        };
+
+        video.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve(null);
+        };
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files || []);
@@ -43,11 +84,14 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     const selected = files.slice(0, totalAllowed);
     const newFiles = [...imageFiles, ...selected];
     const newPreviews = [...previewUrls, ...selected.map(f => URL.createObjectURL(f))];
-
     setImageFiles(newFiles);
     setPreviewUrls(newPreviews);
+
+    // Clear video attachment if photos are attached
     setVideoFile(null);
     setVideoPreviewUrl(null);
+    setThumbnailBlob(null);
+    setThumbnailPreviewUrl(null);
     setError('');
   };
 
@@ -58,7 +102,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     setPreviewUrls(newPreviews);
   };
 
-  const handleVideoChange = (e) => {
+  const handleVideoChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 50 * 1024 * 1024) {
@@ -70,12 +114,21 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       setImageFiles([]);
       setPreviewUrls([]);
       setError('');
+
+      // Generate 5th frame (~0.2s) static thumbnail image blob
+      const thumbBlob = await generateVideoThumbnail(file);
+      if (thumbBlob) {
+        setThumbnailBlob(thumbBlob);
+        setThumbnailPreviewUrl(URL.createObjectURL(thumbBlob));
+      }
     }
   };
 
   const handleRemoveVideo = () => {
     setVideoFile(null);
     setVideoPreviewUrl(null);
+    setThumbnailBlob(null);
+    setThumbnailPreviewUrl(null);
   };
 
   const handleAddPollOption = () => {
@@ -122,6 +175,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
     try {
       let finalImageUrls = [];
       let finalVideoUrl = null;
+      let finalThumbnailUrl = null;
 
       // If user selected image files, upload them
       if (imageFiles.length > 0) {
@@ -133,12 +187,16 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
         finalImageUrls = uploadRes.imageUrls || [];
       }
 
-      // If user selected a video file, upload it
+      // If user selected a video file, upload it alongside generated thumbnail
       if (videoFile) {
         const formData = new FormData();
         formData.append('video', videoFile);
+        if (thumbnailBlob) {
+          formData.append('thumbnail', thumbnailBlob, 'thumbnail.jpg');
+        }
         const uploadRes = await api.uploadVideo(formData);
         finalVideoUrl = uploadRes.videoUrl;
+        finalThumbnailUrl = uploadRes.thumbnailUrl;
       }
 
       // Create the post
@@ -149,6 +207,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
         imageUrls: finalImageUrls,
         imageUrl: finalImageUrls.length > 0 ? finalImageUrls[0] : null,
         videoUrl: finalVideoUrl,
+        thumbnailUrl: finalThumbnailUrl,
         poll: pollPayload
       };
 
@@ -164,6 +223,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
       setPreviewUrls([]);
       setVideoFile(null);
       setVideoPreviewUrl(null);
+      setThumbnailBlob(null);
+      setThumbnailPreviewUrl(null);
       setIsPollEnabled(false);
       setPollOptions(['', '']);
     } catch (err) {

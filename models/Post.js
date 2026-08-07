@@ -31,6 +31,10 @@ const Post = sequelize.define('Post', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  thumbnailUrl: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   isTakedown: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
