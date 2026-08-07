@@ -1,10 +1,31 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { User, Post, Report, PostImage } = require('../models');
+const { User, Post, Report, PostImage, Poll, PollOption, PollVote } = require('../models');
 const authenticateToken = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 
 const router = express.Router();
+
+const formatPollAdmin = (pollJson) => {
+    if (!pollJson) return null;
+    const totalVotes = pollJson.votes ? pollJson.votes.length : 0;
+    const options = (pollJson.options || []).map(opt => {
+        const voteCount = pollJson.votes ? pollJson.votes.filter(v => v.optionId === opt.id).length : 0;
+        const percentage = totalVotes > 0 ? parseFloat(((voteCount / totalVotes) * 100).toFixed(1)) : 0;
+        return {
+            id: opt.id,
+            optionText: opt.optionText,
+            voteCount,
+            percentage
+        };
+    });
+    return {
+        id: pollJson.id,
+        question: pollJson.question,
+        totalVotes,
+        options
+    };
+};
 
 // Apply authentication and admin check to all admin routes
 router.use(authenticateToken);
@@ -186,6 +207,14 @@ router.get('/reports', async (req, res) => {
                             model: PostImage,
                             as: 'images',
                             attributes: ['id', 'imageUrl', 'orderIndex']
+                        },
+                        {
+                            model: Poll,
+                            as: 'poll',
+                            include: [
+                                { model: PollOption, as: 'options' },
+                                { model: PollVote, as: 'votes', attributes: ['id', 'optionId', 'userId'] }
+                            ]
                         }
                     ]
                 },
@@ -210,6 +239,10 @@ router.get('/reports', async (req, res) => {
                 postJson.imageUrls = [postJson.imageUrl];
             } else {
                 postJson.imageUrls = [];
+            }
+
+            if (postJson.poll) {
+                postJson.poll = formatPollAdmin(postJson.poll);
             }
 
             if (!groupedMap[report.postId]) {

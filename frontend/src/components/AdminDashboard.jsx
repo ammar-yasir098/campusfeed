@@ -21,7 +21,8 @@ import {
   ShieldAlert,
   Trash2,
   CheckCircle2,
-  Play
+  Play,
+  BarChart2
 } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import MediaLightboxModal from './MediaLightboxModal';
@@ -633,6 +634,28 @@ export default function AdminDashboard({ currentUser }) {
                         thumbnailUrl={item.post.thumbnailUrl}
                         onEnlarge={(src) => setActiveMedia({ type: 'video', src })} 
                       />
+                    )}
+                    {item.post?.poll && (
+                      <div style={{ marginTop: '0.85rem', padding: '0.85rem 1rem', background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0f2942', fontWeight: 700, fontSize: '0.86rem' }}>
+                            <BarChart2 size={16} color="#2563eb" />
+                            <span>Attached Poll Options</span>
+                          </div>
+                          <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                            {item.post.poll.totalVotes || 0} votes
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                          {item.post.poll.options && item.post.poll.options.map((opt) => (
+                            <div key={opt.id} style={{ position: 'relative', padding: '0.5rem 0.8rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', overflow: 'hidden' }}>
+                              <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${opt.percentage || 0}%`, background: 'rgba(37, 99, 235, 0.12)' }} />
+                              <span style={{ position: 'relative', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', zIndex: 1 }}>{opt.optionText}</span>
+                              <span style={{ position: 'relative', fontSize: '0.78rem', fontWeight: 700, color: '#2563eb', zIndex: 1 }}>{opt.percentage || 0}% ({opt.voteCount || 0})</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
 
