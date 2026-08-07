@@ -256,10 +256,10 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
   };
 
   return (
-    <article className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: '#ffffff' }}>
+    <article className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: 'var(--bg-card)' }}>
 
       {/* Header: Author info & Category badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', borderBottom: '1px solid rgb(241, 245, 249)', paddingBottom: '0.3rem', gap: '0.5rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.3rem', gap: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1 }}>
           {postData.author?.avatarUrl ? (
             <img
@@ -540,11 +540,11 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
         <>
           {/* Content: Title & Text */}
           <div style={{ marginBottom: '0.75rem' }}>
-            <h3 className="font-heading" style={{ fontSize: '1.08rem', fontWeight: 700, marginBottom: '0.3rem', color: '#0f172a', lineHeight: 1.35, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+            <h3 className="font-heading" style={{ fontSize: '1.08rem', fontWeight: 700, marginBottom: '0.3rem', color: 'var(--text-main)', lineHeight: 1.35, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
               {postData.title}
             </h3>
             {postData.content && (
-              <p style={{ fontSize: '0.88rem', color: '#334155', whiteSpace: 'pre-line', lineHeight: 1.5, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+              <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', whiteSpace: 'pre-line', lineHeight: 1.5, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 {postData.content}
               </p>
             )}
@@ -552,13 +552,13 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
           {/* Poll Section (if attached) */}
           {pollState && (
-            <div style={{ margin: '0.75rem 0 0.85rem 0', padding: '0.85rem 1rem', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px solid #e2e8f0' }}>
+            <div style={{ margin: '0.75rem 0 0.85rem 0', padding: '0.85rem 1rem', background: 'var(--bg-card-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0f2942', fontWeight: 700, fontSize: '0.86rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontWeight: 700, fontSize: '0.86rem' }}>
                   <BarChart2 size={16} color="var(--primary)" />
                   <span>Campus Student Poll</span>
                 </div>
-                <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                   {pollState.totalVotes} {pollState.totalVotes === 1 ? 'vote' : 'votes'}
                 </span>
               </div>
@@ -609,8 +609,8 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                         width: '100%',
                         padding: '0.55rem 0.85rem',
                         borderRadius: 'var(--radius-sm)',
-                        border: isUserChoice ? '2px solid var(--primary)' : '1px solid #cbd5e1',
-                        background: '#ffffff',
+                        border: isUserChoice ? '2px solid var(--primary)' : '1px solid var(--border-glass)',
+                        background: 'var(--bg-card)',
                         textAlign: 'left',
                         cursor: (hasVoted || !currentUser) ? 'default' : 'pointer',
                         transition: 'all 0.2s ease',
@@ -627,7 +627,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                           left: 0,
                           bottom: 0,
                           width: `${option.percentage}%`,
-                          background: isUserChoice ? 'rgba(15, 41, 66, 0.14)' : 'rgba(226, 232, 240, 0.7)',
+                          background: isUserChoice ? 'rgba(59, 130, 246, 0.2)' : 'var(--bg-card-hover)',
                           transition: 'width 0.4s ease-in-out',
                           zIndex: 0
                         }}
@@ -636,7 +636,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                       {/* Option Text & Checkmark (Left Side) */}
                       <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '0.45rem', flex: 1, minWidth: 0, marginRight: '0.75rem' }}>
                         {isUserChoice && <CheckCircle2 size={15} color="var(--primary)" style={{ flexShrink: 0 }} />}
-                        <span style={{ fontSize: '0.86rem', fontWeight: isUserChoice ? 700 : 500, color: '#1e293b', wordBreak: 'break-word' }}>
+                        <span style={{ fontSize: '0.86rem', fontWeight: isUserChoice ? 700 : 500, color: 'var(--text-main)', wordBreak: 'break-word' }}>
                           {option.optionText}
                         </span>
                       </div>

@@ -111,8 +111,9 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
         gridTemplateColumns: '1.1fr 1fr',
         borderRadius: '24px',
         overflow: 'hidden',
-        background: '#ffffff',
-        boxShadow: '0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border-glass)',
+        boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.4)',
         position: 'relative',
         zIndex: 1
       }}>
@@ -272,7 +273,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
         </div>
 
         {/* Right Form Card Section */}
-        <div className="auth-form-section" style={{ padding: '3.5rem 3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: '#ffffff' }}>
+        <div className="auth-form-section" style={{ padding: '3.5rem 3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'var(--bg-card)' }}>
 
           {/* Top Action Bar: Browse Feed as Guest Pill Button */}
           <div className="auth-guest-bar" style={{ marginBottom: '2.2rem', display: 'flex', justifyContent: 'flex-end' }}>
@@ -280,9 +281,9 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
               type="button"
               onClick={onCancel}
               style={{
-                background: '#f1f5f9',
-                border: '1px solid #e2e8f0',
-                color: '#0f2942',
+                background: 'var(--bg-card-hover)',
+                border: '1px solid var(--border-glass)',
+                color: 'var(--text-main)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
@@ -293,14 +294,6 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#e2e8f0';
-                e.currentTarget.style.color = '#1e3a8a';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#f1f5f9';
-                e.currentTarget.style.color = '#0f2942';
-              }}
             >
               <span>Browse Feed as Guest</span>
               <ArrowRight size={15} />
@@ -309,10 +302,10 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
 
           {/* Page Title — fixed based on mode */}
           <div style={{ marginBottom: '2rem' }}>
-            <h2 className="font-heading" style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f2942', marginBottom: '0.3rem' }}>
+            <h2 className="font-heading" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.3rem' }}>
               {mode === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
-            <p style={{ fontSize: '0.88rem', color: '#64748b' }}>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
               {mode === 'login' ? 'Sign in to your UMT student account.' : 'Join the UMT student network today.'}
             </p>
           </div>
@@ -341,11 +334,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
 
             {mode === 'signup' && (
               <div>
-                <label className="input-label" style={{ fontWeight: 600, color: '#334155', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
+                <label className="input-label" style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
                   Full Name
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input
                     type="text"
                     className="input-field"
@@ -358,7 +351,6 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                       paddingLeft: '2.8rem',
                       height: '46px',
                       borderRadius: '12px',
-                      border: '1px solid #cbd5e1',
                       fontSize: '0.94rem'
                     }}
                   />
@@ -367,11 +359,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             )}
 
             <div>
-              <label className="input-label" style={{ fontWeight: 600, color: '#334155', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
+              <label className="input-label" style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
                 UMT Email Address
               </label>
               <div style={{ position: 'relative' }}>
-                <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   type="email"
                   className="input-field"
@@ -383,7 +375,6 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                     paddingLeft: '2.8rem',
                     height: '46px',
                     borderRadius: '12px',
-                    border: '1px solid #cbd5e1',
                     fontSize: '0.94rem'
                   }}
                 />
@@ -391,11 +382,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             </div>
 
             <div>
-              <label className="input-label" style={{ fontWeight: 600, color: '#334155', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
+              <label className="input-label" style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
                 Password
               </label>
               <div style={{ position: 'relative' }}>
-                <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input
                   type={showPassword ? "text" : "password"}
                   className="input-field"
@@ -408,7 +399,6 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                     paddingRight: '2.8rem',
                     height: '46px',
                     borderRadius: '12px',
-                    border: '1px solid #cbd5e1',
                     fontSize: '0.94rem'
                   }}
                 />
@@ -422,7 +412,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                     transform: 'translateY(-50%)',
                     background: 'transparent',
                     border: 'none',
-                    color: '#94a3b8',
+                    color: 'var(--text-muted)',
                     cursor: 'pointer',
                     padding: '0.3rem',
                     display: 'flex',
@@ -438,11 +428,11 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
 
             {mode === 'signup' && (
               <div>
-                <label className="input-label" style={{ fontWeight: 600, color: '#334155', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
+                <label className="input-label" style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.86rem', marginBottom: '0.4rem' }}>
                   Confirm Password
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     className="input-field"
@@ -455,7 +445,6 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                       paddingRight: '2.8rem',
                       height: '46px',
                       borderRadius: '12px',
-                      border: '1px solid #cbd5e1',
                       fontSize: '0.94rem'
                     }}
                   />
@@ -469,7 +458,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                       transform: 'translateY(-50%)',
                       background: 'transparent',
                       border: 'none',
-                      color: '#94a3b8',
+                      color: 'var(--text-muted)',
                       cursor: 'pointer',
                       padding: '0.3rem',
                       display: 'flex',
@@ -495,8 +484,8 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                 fontSize: '1rem',
                 marginTop: '0.6rem',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #0f2942 0%, #1e40af 100%)',
-                boxShadow: '0 8px 20px rgba(15, 41, 66, 0.25)',
+                background: 'var(--primary-gradient)',
+                boxShadow: 'var(--shadow-glow)',
                 fontWeight: 700
               }}
               disabled={loading}
@@ -519,14 +508,14 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
           </form>
 
           {/* Switch page link */}
-          <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.88rem', color: '#64748b' }}>
+          <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
             {mode === 'login' ? (
               <>
                 Don't have an account?{' '}
                 <button
                   type="button"
                   onClick={() => navigate('/signup')}
-                  style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', padding: 0, textDecoration: 'underline' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', padding: 0, textDecoration: 'underline' }}
                 >
                   Register here
                 </button>
@@ -537,7 +526,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', padding: 0, textDecoration: 'underline' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', padding: 0, textDecoration: 'underline' }}
                 >
                   Sign In
                 </button>
@@ -566,7 +555,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             min-height: 100vh;
             display: flex !important;
             flex-direction: column !important;
-            background: #ffffff !important;
+            background: var(--bg-card) !important;
           }
           .auth-hero-section {
             padding: 0.75rem 1rem !important;
@@ -605,7 +594,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
             padding: 1rem 1.15rem 1.5rem 1.15rem !important;
             flex: 1;
             justify-content: flex-start !important;
-            background: #ffffff !important;
+            background: var(--bg-card) !important;
           }
           .auth-guest-bar {
             margin-bottom: 0.85rem !important;

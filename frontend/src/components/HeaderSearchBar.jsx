@@ -24,7 +24,7 @@ export default function HeaderSearchBar({ searchQuery, setSearchQuery, currentUs
             height: '42px', 
             fontSize: '0.88rem',
             boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)',
-            border: '1px solid #cbd5e1',
+            border: '1px solid var(--border-glass)',
             borderRadius: 'var(--radius-md)'
           }}
         />

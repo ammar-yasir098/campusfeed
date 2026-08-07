@@ -16,7 +16,9 @@ import {
   Layers,
   Award,
   ShieldCheck,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { resolveImageUrl } from '../services/api';
 
@@ -41,7 +43,9 @@ export default function Sidebar({
   onLogout,
   isMobileOpen,
   onCloseMobile,
-  bookmarkCount = 0
+  bookmarkCount = 0,
+  theme,
+  toggleTheme
 }) {
   const navigate = useNavigate();
   return (
@@ -87,10 +91,10 @@ export default function Sidebar({
                 <GraduationCap size={22} color="#ffffff" />
               </div>
               <div>
-                <h2 className="font-heading" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f2942', lineHeight: 1.1 }}>
+                <h2 className="font-heading" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', lineHeight: 1.1 }}>
                   UMT Feed
                 </h2>
-                <span style={{ fontSize: '0.68rem', color: '#2563eb', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span style={{ fontSize: '0.68rem', color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   University Portal
                 </span>
               </div>
@@ -101,7 +105,7 @@ export default function Sidebar({
               <button 
                 className="btn-icon" 
                 onClick={onCloseMobile}
-                style={{ color: '#64748b' }}
+                style={{ color: 'var(--text-muted)' }}
                 title="Close Menu"
               >
                 <X size={20} />
@@ -110,12 +114,12 @@ export default function Sidebar({
           </div>
 
           {/* UMT Official Motto Banner */}
-          <div style={{ background: '#f0f6ff', borderRadius: 'var(--radius-md)', padding: '0.6rem 0.75rem', marginBottom: '1.25rem', border: '1px solid #bfdbfe' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0f2942', fontSize: '0.75rem', fontWeight: 700 }}>
-              <Award size={14} color="#0f2942" />
+          <div style={{ background: 'var(--bg-card-hover)', borderRadius: 'var(--radius-md)', padding: '0.6rem 0.75rem', marginBottom: '1.25rem', border: '1px solid var(--border-glass)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontSize: '0.75rem', fontWeight: 700 }}>
+              <Award size={14} color="var(--primary)" />
               <span>UMT LAHORE</span>
             </div>
-            <p style={{ fontSize: '0.71rem', color: '#334155', marginTop: '0.15rem', fontWeight: 500 }}>
+            <p style={{ fontSize: '0.71rem', color: 'var(--text-muted)', marginTop: '0.15rem', fontWeight: 500 }}>
               Transforming Learners into Leaders
             </p>
           </div>
@@ -208,8 +212,8 @@ export default function Sidebar({
                       padding: '0.5rem 0.8rem',
                       borderRadius: 'var(--radius-md)',
                       border: 'none',
-                      background: isSelected ? '#eff6ff' : 'transparent',
-                      color: isSelected ? '#0f2942' : '#475569',
+                      background: isSelected ? 'var(--bg-card-hover)' : 'transparent',
+                      color: isSelected ? 'var(--primary)' : 'var(--text-muted)',
                       fontSize: '0.86rem',
                       fontWeight: isSelected ? 700 : 500,
                       cursor: 'pointer',
@@ -217,7 +221,7 @@ export default function Sidebar({
                       textAlign: 'left'
                     }}
                   >
-                    <Icon size={16} color={isSelected ? '#0f2942' : 'currentColor'} />
+                    <Icon size={16} color={isSelected ? 'var(--primary)' : 'currentColor'} />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -228,7 +232,7 @@ export default function Sidebar({
         </div>
 
         {/* Pinned Bottom User Card / Logout */}
-        <div style={{ flexShrink: 0, paddingTop: '0.75rem', borderTop: '1px solid #e2e8f0', background: '#ffffff' }}>
+        <div style={{ flexShrink: 0, paddingTop: '0.75rem', borderTop: '1px solid var(--border-glass)', background: 'transparent' }}>
           {currentUser ? (
             <div style={{ 
               display: 'flex', 
@@ -237,8 +241,8 @@ export default function Sidebar({
               gap: '0.5rem',
               padding: '0.4rem 0.5rem',
               borderRadius: 'var(--radius-md)',
-              background: '#f8fafc',
-              border: '1px solid #f1f5f9'
+              background: 'var(--bg-card-hover)',
+              border: '1px solid var(--border-glass)'
             }}>
               <div 
                 onClick={() => navigate('/profile')}
@@ -248,7 +252,7 @@ export default function Sidebar({
                   <img 
                     src={resolveImageUrl(currentUser.avatarUrl)} 
                     alt={currentUser.name} 
-                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #0f2942', flexShrink: 0 }}
+                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)', flexShrink: 0 }}
                   />
                 ) : (
                   <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 800, fontSize: '0.85rem', flexShrink: 0 }}>
@@ -256,10 +260,10 @@ export default function Sidebar({
                   </div>
                 )}
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f2942', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
+                  <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: 0 }}>
                     {currentUser.name}
                   </h5>
-                  <span style={{ fontSize: '0.7rem', color: '#64748b', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {currentUser.email || 'Student'}
                   </span>
                 </div>

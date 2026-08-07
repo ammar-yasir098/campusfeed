@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Edit3, Award, BookOpen, Layers, Bookmark as BookmarkIcon, Clock } from 'lucide-react';
+import { User, Edit3, Award, BookOpen, Layers, Bookmark as BookmarkIcon, Clock, Sun, Moon } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import PostCard from './PostCard';
 import VerifiedBadge from './VerifiedBadge';
 
-export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePost }) {
+export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePost, theme, toggleTheme }) {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState('posts'); // 'posts' or 'bookmarks'
@@ -55,7 +55,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
   return (
     <div>
       {/* Profile Header Card */}
-      <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', background: '#ffffff' }}>
+      <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', background: 'var(--bg-card)' }}>
         
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
           
@@ -100,10 +100,24 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
             </div>
           </div>
 
-          <button className="btn-secondary" onClick={onOpenEditProfile}>
-            <Edit3 size={16} />
-            <span>Edit Profile</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            {toggleTheme && (
+              <button
+                className="btn-secondary"
+                onClick={toggleTheme}
+                title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+                style={{ padding: '0.6rem 0.95rem' }}
+              >
+                {theme === 'dark' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#3b82f6" />}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            )}
+
+            <button className="btn-secondary" onClick={onOpenEditProfile}>
+              <Edit3 size={16} />
+              <span>Edit Profile</span>
+            </button>
+          </div>
 
         </div>
 

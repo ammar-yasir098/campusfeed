@@ -265,8 +265,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
           </button>
         </div>
 
-        {/* Post Type Segmented Control (Media vs Poll) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.1rem', background: '#f1f5f9', padding: '4px', borderRadius: 'var(--radius-md)' }}>
+        {/* Mode Selector Tabs (Mutually Exclusive: Media vs Poll) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: 'var(--bg-card-hover)', padding: '0.25rem', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem', border: '1px solid var(--border-glass)' }}>
           <button
             type="button"
             onClick={() => handleTabChange('media')}
@@ -274,8 +274,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               padding: '0.6rem 0.8rem',
               borderRadius: 'var(--radius-sm)',
               border: 'none',
-              background: postType === 'media' ? '#ffffff' : 'transparent',
-              color: postType === 'media' ? '#2563eb' : '#64748b',
+              background: postType === 'media' ? 'var(--bg-card)' : 'transparent',
+              color: postType === 'media' ? '#2563eb' : 'var(--text-muted)',
               fontWeight: 700,
               fontSize: '0.86rem',
               cursor: 'pointer',
@@ -296,8 +296,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               padding: '0.6rem 0.8rem',
               borderRadius: 'var(--radius-sm)',
               border: 'none',
-              background: postType === 'poll' ? '#ffffff' : 'transparent',
-              color: postType === 'poll' ? '#2563eb' : '#64748b',
+              background: postType === 'poll' ? 'var(--bg-card)' : 'transparent',
+              color: postType === 'poll' ? '#2563eb' : 'var(--text-muted)',
               fontWeight: 700,
               fontSize: '0.86rem',
               cursor: 'pointer',
@@ -328,13 +328,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               value={category} 
               onChange={(e) => setCategory(e.target.value)}
               className="input-field"
-              style={{ width: '100%' }}
+              style={{ width: '100%', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-glass)' }}
             >
-              <option value="General">General</option>
-              <option value="Announcements">Announcements</option>
-              <option value="Events">Events</option>
-              <option value="Lost & Found">Lost & Found</option>
-              <option value="Buy & Sell">Buy & Sell</option>
+              <option value="General" style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>General</option>
+              <option value="Announcements" style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>Announcements</option>
+              <option value="Events" style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>Events</option>
+              <option value="Lost & Found" style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>Lost & Found</option>
+              <option value="Buy & Sell" style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>Buy & Sell</option>
             </select>
           </div>
 
@@ -365,15 +365,15 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               onChange={(e) => setContent(e.target.value)}
               className="input-field"
               rows={postType === 'poll' ? 2 : 4}
-              style={{ width: '100%', resize: 'vertical' }}
+              style={{ width: '100%', resize: 'vertical', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-glass)' }}
             />
           </div>
 
           {/* POLL SECTION (Only visible in Poll Tab) */}
           {postType === 'poll' && (
-            <div style={{ background: '#eff6ff', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid #bfdbfe' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.9rem', color: '#1e40af', marginBottom: '0.75rem' }}>
-                <BarChart2 size={18} color="#2563eb" />
+            <div style={{ background: 'var(--bg-card-hover)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                <BarChart2 size={18} color="var(--primary)" />
                 <span>Poll Options (2 to 6 options)</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
@@ -385,7 +385,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                       value={opt}
                       onChange={(e) => handleOptionTextChange(idx, e.target.value)}
                       className="input-field"
-                      style={{ flex: 1, padding: '0.5rem 0.75rem', fontSize: '0.88rem', background: '#ffffff' }}
+                      style={{ flex: 1, padding: '0.5rem 0.75rem', fontSize: '0.88rem', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border-glass)' }}
                       required={idx < 2}
                     />
                     {pollOptions.length > 2 && (
@@ -410,7 +410,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                       marginTop: '0.3rem',
                       background: 'none',
                       border: 'none',
-                      color: '#2563eb',
+                      color: 'var(--primary)',
                       fontSize: '0.82rem',
                       fontWeight: 700,
                       display: 'inline-flex',
@@ -432,7 +432,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                 <label className="input-label" style={{ margin: 0 }}>Attach Media (Optional)</label>
                 {previewUrls.length > 0 && (
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#2563eb' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)' }}>
                     {previewUrls.length} / 5 Photos
                   </span>
                 )}
@@ -441,7 +441,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               {previewUrls.length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.65rem' }}>
                   {previewUrls.map((url, idx) => (
-                    <div key={idx} style={{ position: 'relative', height: '90px', borderRadius: '0px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                    <div key={idx} style={{ position: 'relative', height: '90px', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)' }}>
                       <img src={url} alt={`Preview ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', borderRadius: '0px' }} />
                       <span style={{ position: 'absolute', bottom: '4px', left: '4px', background: 'rgba(15, 23, 42, 0.75)', color: '#fff', fontSize: '0.65rem', fontWeight: 700, padding: '1px 5px', borderRadius: '3px' }}>
                         {idx + 1}
@@ -458,7 +458,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                   ))}
 
                   {previewUrls.length < 5 && (
-                    <label style={{ height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1.5px dashed #3b82f6', borderRadius: '0px', background: '#eff6ff', cursor: 'pointer', gap: '0.2rem', color: '#2563eb' }}>
+                    <label style={{ height: '90px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '1.5px dashed var(--primary)', borderRadius: '0px', background: 'var(--bg-card-hover)', cursor: 'pointer', gap: '0.2rem', color: 'var(--primary)' }}>
                       <Plus size={20} />
                       <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>Add Photo</span>
                       <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
@@ -466,7 +466,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                   )}
                 </div>
               ) : videoPreviewUrl ? (
-                <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#0f172a' }}>
+                <div style={{ position: 'relative', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', background: '#0f172a' }}>
                   <video src={videoPreviewUrl} controls style={{ width: '100%', maxHeight: '220px', display: 'block', borderRadius: '0px' }} />
                   <button 
                     type="button" 
@@ -479,17 +479,17 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
-                    <Upload size={20} color="#2563eb" />
-                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Photos (Up to 5)</span>
-                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>JPG, PNG, WEBP up to 5MB</span>
+                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed var(--border-glass)', borderRadius: 'var(--radius-md)', background: 'var(--bg-card-hover)', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
+                    <Upload size={20} color="var(--primary)" />
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>Attach Photos (Up to 5)</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>JPG, PNG, WEBP up to 5MB</span>
                     <input type="file" accept="image/*" multiple onChange={handleImageChange} style={{ display: 'none' }} />
                   </label>
 
-                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed #cbd5e1', borderRadius: 'var(--radius-md)', background: '#f8fafc', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
-                    <Video size={20} color="#2563eb" />
-                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#334155' }}>Attach Video</span>
-                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>MP4, WEBM, MOV up to 50MB</span>
+                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', border: '1px dashed var(--border-glass)', borderRadius: 'var(--radius-md)', background: 'var(--bg-card-hover)', cursor: 'pointer', gap: '0.35rem', transition: 'all 0.2s ease' }}>
+                    <Video size={20} color="var(--primary)" />
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>Attach Video</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>MP4, WEBM, MOV up to 50MB</span>
                     <input type="file" accept="video/mp4,video/webm,video/quicktime,video/mkv,video/avi" onChange={handleVideoChange} style={{ display: 'none' }} />
                   </label>
                 </div>

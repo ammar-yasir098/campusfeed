@@ -12,7 +12,7 @@ import NotificationBell from './components/NotificationBell';
 import PostDetailView from './components/PostDetailView';
 import AuthNoticeModal from './components/AuthNoticeModal';
 import { api, getToken, removeToken } from './services/api';
-import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap } from 'lucide-react';
+import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap, Sun, Moon } from 'lucide-react';
 
 export default function App() {
   const navigate = useNavigate();
@@ -21,6 +21,22 @@ export default function App() {
 
   const [currentUser, setCurrentUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Theme Management (Light / Dark mode persistence)
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('campusfeed_theme');
+    if (saved) return saved;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('campusfeed_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   // Sync category and search query directly with URL search params (e.g. /feed?category=Buy+%26+Sell)
   const selectedCategory = searchParams.get('category') || 'All';
@@ -273,6 +289,14 @@ export default function App() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button
+            className="btn-icon"
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            style={{ padding: '0.45rem', color: 'var(--text-main)', background: 'var(--bg-card-hover)', borderRadius: '8px' }}
+          >
+            {theme === 'dark' ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} color="#64748b" />}
+          </button>
           <NotificationBell currentUser={currentUser} />
           {currentUser && (
             <button className="btn-primary" onClick={() => setIsCreateModalOpen(true)} style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }}>
@@ -296,6 +320,8 @@ export default function App() {
         isMobileOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
         bookmarkCount={bookmarkedPosts.length}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* Main Content — single flat Routes tree, NO nesting */}
@@ -309,7 +335,7 @@ export default function App() {
             {/* FEED */}
             <Route path="/feed" element={
               <div>
-                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={handleSearchQueryChange} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} />
+                <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={handleSearchQueryChange} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} theme={theme} toggleTheme={toggleTheme} />
 
                 {!currentUser && (
                   <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
@@ -408,7 +434,7 @@ export default function App() {
             {/* PROFILE */}
             <Route path="/profile" element={
               currentUser
-                ? <ProfileView currentUser={currentUser} onOpenEditProfile={() => setIsProfileModalOpen(true)} onDeletePost={handleDeletePost} />
+                ? <ProfileView currentUser={currentUser} onOpenEditProfile={() => setIsProfileModalOpen(true)} onDeletePost={handleDeletePost} theme={theme} toggleTheme={toggleTheme} />
                 : <Navigate to="/login" replace />
             } />
 

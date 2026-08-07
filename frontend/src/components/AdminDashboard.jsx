@@ -409,17 +409,17 @@ export default function AdminDashboard({ currentUser }) {
 
       {/* KPI Stats Grid */}
       <div className="admin-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: '#ffffff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>
+        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             <span>Total Registered</span>
-            <Users size={18} color="#0f2942" />
+            <Users size={18} color="var(--primary)" />
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#0f2942', marginTop: '0.4rem' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-main)', marginTop: '0.4rem' }}>
             {stats.totalUsers}
           </div>
         </div>
 
-        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: '#ffffff' }}>
+        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#059669', fontSize: '0.85rem', fontWeight: 600 }}>
             <span>Active Accounts</span>
             <UserCheck size={18} color="#059669" />
@@ -429,7 +429,7 @@ export default function AdminDashboard({ currentUser }) {
           </div>
         </div>
 
-        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: '#ffffff' }}>
+        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#dc2626', fontSize: '0.85rem', fontWeight: 600 }}>
             <span>Enforced</span>
             <Ban size={18} color="#dc2626" />
@@ -439,12 +439,12 @@ export default function AdminDashboard({ currentUser }) {
           </div>
         </div>
 
-        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: '#ffffff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#2563eb', fontSize: '0.85rem', fontWeight: 600 }}>
+        <div className="glass-panel admin-kpi-card" style={{ padding: '1.2rem 1.4rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 600 }}>
             <span>Verified Accounts</span>
-            <Award size={18} color="#2563eb" />
+            <Award size={18} color="var(--primary)" />
           </div>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#2563eb', marginTop: '0.4rem' }}>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)', marginTop: '0.4rem' }}>
             {stats.verifiedUsers}
           </div>
         </div>
@@ -479,10 +479,10 @@ export default function AdminDashboard({ currentUser }) {
             fontSize: '0.9rem',
             fontWeight: 700,
             cursor: 'pointer',
-            border: 'none',
-            background: adminTab === 'users' ? '#0f2942' : '#ffffff',
-            color: adminTab === 'users' ? '#ffffff' : '#64748b',
-            boxShadow: adminTab === 'users' ? '0 4px 12px rgba(15, 41, 66, 0.2)' : '0 2px 6px rgba(0,0,0,0.04)',
+            border: '1px solid var(--border-glass)',
+            background: adminTab === 'users' ? 'var(--primary)' : 'var(--bg-card)',
+            color: adminTab === 'users' ? '#ffffff' : 'var(--text-muted)',
+            boxShadow: adminTab === 'users' ? 'var(--shadow-glow)' : '0 2px 6px rgba(0,0,0,0.04)',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
@@ -501,9 +501,9 @@ export default function AdminDashboard({ currentUser }) {
             fontSize: '0.9rem',
             fontWeight: 700,
             cursor: 'pointer',
-            border: 'none',
-            background: adminTab === 'reports' ? '#dc2626' : '#ffffff',
-            color: adminTab === 'reports' ? '#ffffff' : '#64748b',
+            border: '1px solid var(--border-glass)',
+            background: adminTab === 'reports' ? '#dc2626' : 'var(--bg-card)',
+            color: adminTab === 'reports' ? '#ffffff' : 'var(--text-muted)',
             boxShadow: adminTab === 'reports' ? '0 4px 12px rgba(220, 38, 38, 0.25)' : '0 2px 6px rgba(0,0,0,0.04)',
             display: 'flex',
             alignItems: 'center',
@@ -532,13 +532,13 @@ export default function AdminDashboard({ currentUser }) {
       </div>
 
       {adminTab === 'reports' ? (
-        <div className="glass-panel" style={{ padding: '1.5rem', background: '#ffffff', borderRadius: '16px' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)', borderRadius: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
             <div>
-              <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f2942' }}>
+              <h3 className="font-heading" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-main)' }}>
                 🚩 Reported Posts Moderation Queue
               </h3>
-              <p style={{ fontSize: '0.86rem', color: '#64748b', marginTop: '0.2rem' }}>
+              <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                 Review flagged content submitted by students. Take administrative action or dismiss false reports.
               </p>
             </div>
@@ -549,38 +549,38 @@ export default function AdminDashboard({ currentUser }) {
           </div>
 
           {loadingReports ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Loading reported posts queue...</div>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading reported posts queue...</div>
           ) : groupedReports.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
               <ShieldCheck size={44} color="#059669" style={{ marginBottom: '0.75rem' }} />
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0f2942', marginBottom: '0.3rem' }}>All Clear! No Pending Reports</h4>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.3rem' }}>All Clear! No Pending Reports</h4>
               <p style={{ fontSize: '0.88rem' }}>There are currently no reported posts waiting for moderation review.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {groupedReports.map((item) => (
                 <div key={item.postId} style={{
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--border-glass)',
                   borderRadius: '16px',
                   padding: '1.4rem',
-                  background: '#ffffff',
-                  boxShadow: '0 4px 15px rgba(15, 23, 42, 0.05)'
+                  background: 'var(--bg-card)',
+                  boxShadow: 'var(--shadow-card)'
                 }}>
                   {/* Card Header: Post Author + Category + Total Reports Count Badge */}
-                  <div className="admin-report-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.85rem', borderBottom: '1px solid #f1f5f9' }}>
+                  <div className="admin-report-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.85rem', borderBottom: '1px solid var(--border-glass)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                       {item.post?.author?.avatarUrl ? (
                         <img src={resolveImageUrl(item.post.author.avatarUrl)} alt={item.post.author.name} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
                       ) : (
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0f2942', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.9rem' }}>
                           {item.post?.author?.name?.charAt(0) || 'U'}
                         </div>
                       )}
                       <div>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f2942' }}>
-                          Post Author: {item.post?.author?.name || 'Unknown Student'} <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 500 }}>(ID: {item.post?.userId})</span>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                          Post Author: {item.post?.author?.name || 'Unknown Student'} <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 500 }}>(ID: {item.post?.userId})</span>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           Posted: {item.post?.createdAt ? new Date(item.post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
                         </div>
                       </div>
@@ -610,12 +610,12 @@ export default function AdminDashboard({ currentUser }) {
                   </div>
 
                   {/* Post Content Preview Box */}
-                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.1rem', marginBottom: '1.25rem' }}>
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f2942', marginBottom: '0.4rem' }}>
+                  <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.1rem', marginBottom: '1.25rem' }}>
+                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
                       {item.post?.title || 'Untitled Post'}
                     </h4>
                     {item.post?.content && (
-                      <p style={{ fontSize: '0.88rem', color: '#334155', margin: 0, whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--text-main)', margin: 0, whiteSpace: 'pre-line', lineHeight: 1.5 }}>
                         {item.post.content.length > 300 ? `${item.post.content.slice(0, 300)}...` : item.post.content}
                       </p>
                     )}
@@ -632,7 +632,7 @@ export default function AdminDashboard({ currentUser }) {
                           <div 
                             onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(images[0]) })}
                             title="Click to view full-size photo"
-                            style={{ marginTop: '0.75rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            style={{ marginTop: '0.75rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                           >
                             <img src={resolveImageUrl(images[0])} alt="Reported Media" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', display: 'block' }} />
                           </div>
@@ -641,7 +641,7 @@ export default function AdminDashboard({ currentUser }) {
 
                       return (
                         <div style={{ marginTop: '0.75rem' }}>
-                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb', marginBottom: '0.35rem' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '0.35rem' }}>
                             📷 {images.length} Photos Attached (Click any photo to enlarge)
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: images.length === 2 ? '1fr 1fr' : 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem' }}>
@@ -650,7 +650,7 @@ export default function AdminDashboard({ currentUser }) {
                                 key={idx}
                                 onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(imgUrl) })}
                                 title={`Click to view photo #${idx + 1}`}
-                                style={{ position: 'relative', height: '120px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer', borderRadius: '4px' }}
+                                style={{ position: 'relative', height: '120px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer', borderRadius: '4px' }}
                               >
                                 <img src={resolveImageUrl(imgUrl)} alt={`Photo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                                 <span style={{ position: 'absolute', bottom: '4px', right: '4px', background: 'rgba(15, 23, 42, 0.8)', color: '#fff', fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', borderRadius: '3px' }}>
@@ -670,22 +670,22 @@ export default function AdminDashboard({ currentUser }) {
                       />
                     )}
                     {item.post?.poll && (
-                      <div style={{ marginTop: '0.85rem', padding: '0.85rem 1rem', background: '#ffffff', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                      <div style={{ marginTop: '0.85rem', padding: '0.85rem 1rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-glass)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#0f2942', fontWeight: 700, fontSize: '0.86rem' }}>
-                            <BarChart2 size={16} color="#2563eb" />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-main)', fontWeight: 700, fontSize: '0.86rem' }}>
+                            <BarChart2 size={16} color="var(--primary)" />
                             <span>Attached Poll Options</span>
                           </div>
-                          <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                             {item.post.poll.totalVotes || 0} votes
                           </span>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
                           {item.post.poll.options && item.post.poll.options.map((opt) => (
-                            <div key={opt.id} style={{ position: 'relative', padding: '0.5rem 0.8rem', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', overflow: 'hidden' }}>
-                              <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${opt.percentage || 0}%`, background: 'rgba(37, 99, 235, 0.12)' }} />
-                              <span style={{ position: 'relative', fontSize: '0.82rem', fontWeight: 600, color: '#1e293b', zIndex: 1 }}>{opt.optionText}</span>
-                              <span style={{ position: 'relative', fontSize: '0.78rem', fontWeight: 700, color: '#2563eb', zIndex: 1 }}>{opt.percentage || 0}% ({opt.voteCount || 0})</span>
+                            <div key={opt.id} style={{ position: 'relative', padding: '0.5rem 0.8rem', borderRadius: '6px', border: '1px solid var(--border-glass)', background: 'var(--bg-card-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', overflow: 'hidden' }}>
+                              <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${opt.percentage || 0}%`, background: 'rgba(56, 189, 248, 0.2)' }} />
+                              <span style={{ position: 'relative', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)', zIndex: 1 }}>{opt.optionText}</span>
+                              <span style={{ position: 'relative', fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary)', zIndex: 1 }}>{opt.percentage || 0}% ({opt.voteCount || 0})</span>
                             </div>
                           ))}
                         </div>
@@ -695,16 +695,16 @@ export default function AdminDashboard({ currentUser }) {
 
                   {/* Student Reports List Section */}
                   <div style={{ marginBottom: '1.25rem' }}>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#475569', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <Users size={14} color="#64748b" />
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Users size={14} color="var(--text-muted)" />
                       <span>Student Complaints ({item.reporters.length}):</span>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {item.reporters.map((rep) => (
                         <div key={rep.reportId} className="admin-complaint-item" style={{
-                          background: '#ffffff',
-                          border: '1px solid #e2e8f0',
+                          background: 'var(--bg-card)',
+                          border: '1px solid var(--border-glass)',
                           borderRadius: '10px',
                           padding: '0.65rem 0.85rem',
                           display: 'flex',
@@ -721,13 +721,13 @@ export default function AdminDashboard({ currentUser }) {
                                 {rep.reporter?.name?.charAt(0) || 'U'}
                               </div>
                             )}
-                            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1e293b' }}>
-                              {rep.reporter?.name || 'Student'} <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 400 }}>({rep.reporter?.email})</span>
+                            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                              {rep.reporter?.name || 'Student'} <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 400 }}>({rep.reporter?.email})</span>
                             </span>
                           </div>
 
                           <div className="admin-complaint-meta" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
                               {new Date(rep.createdAt).toLocaleString()}
                             </span>
 
@@ -754,7 +754,7 @@ export default function AdminDashboard({ currentUser }) {
                       className="btn-secondary"
                       onClick={() => handleDismissAllPostReports(item.postId)}
                       disabled={reportActionId === item.postId}
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', color: '#475569' }}
+                      style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', color: 'var(--text-main)' }}
                     >
                       <CheckCircle2 size={15} />
                       <span>Dismiss Reports</span>
@@ -788,12 +788,12 @@ export default function AdminDashboard({ currentUser }) {
       ) : (
         <>
           {/* Search & Status Filter Bar */}
-      <div className="glass-panel admin-filter-bar" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: '#ffffff' }}>
+      <div className="glass-panel admin-filter-bar" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* Search Box */}
           <div style={{ flex: '1 1 320px', position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               type="text"
               className="input-field"
@@ -817,9 +817,9 @@ export default function AdminDashboard({ currentUser }) {
                   fontWeight: 700,
                   textTransform: 'capitalize',
                   border: '1px solid',
-                  borderColor: statusFilter === s ? '#0f2942' : '#cbd5e1',
-                  background: statusFilter === s ? '#0f2942' : '#ffffff',
-                  color: statusFilter === s ? '#ffffff' : '#475569',
+                  borderColor: statusFilter === s ? 'var(--primary)' : 'var(--border-glass)',
+                  background: statusFilter === s ? 'var(--primary)' : 'var(--bg-card-hover)',
+                  color: statusFilter === s ? '#ffffff' : 'var(--text-muted)',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
@@ -833,16 +833,16 @@ export default function AdminDashboard({ currentUser }) {
       </div>
 
       {/* User Records Section (Desktop Table + Mobile Cards) */}
-      <div className="glass-panel" style={{ background: '#ffffff', overflow: 'hidden', boxShadow: '0 4px 20px rgba(15, 23, 42, 0.06)' }}>
+      <div className="glass-panel" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-glass)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
         {loading ? (
-          <div style={{ padding: '4rem', textAlign: 'center', color: '#64748b' }}>
+          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             <RefreshCw size={24} className="spin-icon" style={{ marginBottom: '0.5rem' }} />
             <p>Searching user records...</p>
           </div>
         ) : users.length === 0 ? (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#64748b' }}>
-            <Users size={36} color="#94a3b8" style={{ marginBottom: '0.75rem' }} />
-            <h3 style={{ fontSize: '1.1rem', color: '#0f172a', fontWeight: 700 }}>No users found</h3>
+          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <Users size={36} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: 700 }}>No users found</h3>
             <p style={{ fontSize: '0.88rem' }}>No accounts matched query "{searchQuery}" with status filter "{statusFilter}".</p>
           </div>
         ) : (
@@ -851,7 +851,7 @@ export default function AdminDashboard({ currentUser }) {
             <div className="admin-desktop-table" style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem', whiteSpace: 'nowrap' }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0', color: '#475569', fontWeight: 700 }}>
+                  <tr style={{ background: 'var(--bg-card-hover)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)', fontWeight: 700 }}>
                     <th style={{ padding: '1.1rem 1.25rem' }}>User Info</th>
                     <th style={{ padding: '1.1rem 1.25rem' }}>Email & Student ID</th>
                     <th style={{ padding: '1.1rem 1.25rem' }}>IP Address</th>
@@ -866,7 +866,7 @@ export default function AdminDashboard({ currentUser }) {
                     const isActionLoading = actionLoadingId === u.id;
 
                     return (
-                      <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background 0.15s ease' }}>
+                      <tr key={u.id} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.15s ease' }}>
 
                         {/* User Info */}
                         <td style={{ padding: '1rem 1.25rem' }}>
@@ -876,23 +876,23 @@ export default function AdminDashboard({ currentUser }) {
                                 <img
                                   src={resolveImageUrl(u.avatarUrl)}
                                   alt={u.name}
-                                  style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #cbd5e1' }}
+                                  style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-glass)' }}
                                 />
                               ) : (
-                                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'linear-gradient(135deg, #0f2942 0%, #1e40af 100%)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+                                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--primary-gradient)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
                                   {u.name.charAt(0).toUpperCase()}
                                 </div>
                               )}
                             </div>
                             <div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <span style={{ fontWeight: 700, color: '#0f172a' }}>{u.name}</span>
+                                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{u.name}</span>
                                 {u.isVerified && <VerifiedBadge size={16} />}
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.1rem' }}>
-                                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>ID: #{u.id}</span>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: #{u.id}</span>
                                 {u.role === 'admin' && (
-                                  <span style={{ fontSize: '0.7rem', fontWeight: 800, background: '#eff6ff', color: '#1e40af', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                                  <span style={{ fontSize: '0.7rem', fontWeight: 800, background: 'var(--bg-card-hover)', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
                                     ADMIN
                                   </span>
                                 )}
@@ -902,17 +902,17 @@ export default function AdminDashboard({ currentUser }) {
                         </td>
 
                         {/* Email & Student ID */}
-                        <td style={{ padding: '1rem 1.25rem', color: '#334155' }}>
+                        <td style={{ padding: '1rem 1.25rem', color: 'var(--text-main)' }}>
                           <div>{u.email}</div>
-                          <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                             {u.studentId ? `Student ID: ${u.studentId}` : u.department || 'No department specified'}
                           </div>
                         </td>
 
                         {/* IP Address */}
                         <td style={{ padding: '1rem 1.25rem' }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#f8fafc', border: '1px solid #e2e8f0', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace', color: '#475569' }}>
-                            <Globe size={13} color="#94a3b8" />
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
+                            <Globe size={13} color="var(--text-muted)" />
                             <span>{u.lastLoginIp || '127.0.0.1'}</span>
                           </div>
                         </td>
@@ -941,9 +941,9 @@ export default function AdminDashboard({ currentUser }) {
                             disabled={isActionLoading}
                             onClick={() => handleVerificationToggle(u.id, u.isVerified)}
                             style={{
-                              background: u.isVerified ? '#eff6ff' : '#f8fafc',
-                              border: `1px solid ${u.isVerified ? '#bfdbfe' : '#cbd5e1'}`,
-                              color: u.isVerified ? '#1d4ed8' : '#64748b',
+                              background: u.isVerified ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                              border: `1px solid ${u.isVerified ? 'var(--primary)' : 'var(--border-glass)'}`,
+                              color: u.isVerified ? 'var(--primary)' : 'var(--text-muted)',
                               padding: '0.35rem 0.75rem',
                               borderRadius: '8px',
                               fontWeight: 600,
@@ -954,7 +954,7 @@ export default function AdminDashboard({ currentUser }) {
                               gap: '0.35rem'
                             }}
                           >
-                            <CheckCircle size={14} color={u.isVerified ? '#2563eb' : '#94a3b8'} />
+                            <CheckCircle size={14} color={u.isVerified ? 'var(--primary)' : 'var(--text-muted)'} />
                             <span>{u.isVerified ? 'Verified' : 'Verify'}</span>
                           </button>
                         </td>
@@ -969,9 +969,9 @@ export default function AdminDashboard({ currentUser }) {
                                 setOpenMenuUserId(prev => prev === u.id ? null : u.id);
                               }}
                               style={{
-                                background: openMenuUserId === u.id ? '#eff6ff' : '#ffffff',
-                                border: `1px solid ${openMenuUserId === u.id ? '#bfdbfe' : '#cbd5e1'}`,
-                                color: openMenuUserId === u.id ? '#1d4ed8' : '#334155',
+                                background: openMenuUserId === u.id ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                                border: '1px solid var(--border-glass)',
+                                color: 'var(--text-main)',
                                 padding: '0.4rem 0.8rem',
                                 borderRadius: '8px',
                                 fontSize: '0.82rem',
@@ -1000,10 +1000,10 @@ export default function AdminDashboard({ currentUser }) {
                                   position: 'absolute',
                                   right: 0,
                                   top: 'calc(100% + 6px)',
-                                  background: '#ffffff',
-                                  border: '1px solid #e2e8f0',
+                                  background: 'var(--bg-card)',
+                                  border: '1px solid var(--border-glass)',
                                   borderRadius: '10px',
-                                  boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1)',
+                                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
                                   padding: '0.35rem',
                                   minWidth: '165px',
                                   zIndex: 100,
@@ -1099,11 +1099,11 @@ export default function AdminDashboard({ currentUser }) {
                     <div 
                       key={u.id}
                       style={{
-                        background: '#ffffff',
-                        border: '1px solid #e2e8f0',
+                        background: 'var(--bg-card)',
+                        border: '1px solid var(--border-glass)',
                         borderRadius: '14px',
                         padding: '1rem',
-                        boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)',
+                        boxShadow: 'var(--shadow-card)',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '0.75rem'
@@ -1116,22 +1116,22 @@ export default function AdminDashboard({ currentUser }) {
                             <img
                               src={resolveImageUrl(u.avatarUrl)}
                               alt={u.name}
-                              style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #cbd5e1' }}
+                              style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-glass)' }}
                             />
                           ) : (
-                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg, #0f2942 0%, #1e40af 100%)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
+                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--primary-gradient)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
                               {u.name.charAt(0).toUpperCase()}
                             </div>
                           )}
                           <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.92rem' }}>{u.name}</span>
+                              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.92rem' }}>{u.name}</span>
                               {u.isVerified && <VerifiedBadge size={15} />}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748b' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                               <span>ID: #{u.id}</span>
                               {u.role === 'admin' && (
-                                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#eff6ff', color: '#1e40af', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid #bfdbfe' }}>
+                                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'var(--bg-card-hover)', color: 'var(--primary)', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
                                   ADMIN
                                 </span>
                               )}
@@ -1152,13 +1152,13 @@ export default function AdminDashboard({ currentUser }) {
                       </div>
 
                       {/* Middle Details: Email & IP */}
-                      <div style={{ background: '#f8fafc', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.8rem', color: '#334155', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.2rem' }}>
-                          <span style={{ fontWeight: 600, color: '#0f172a' }}>{u.email}</span>
-                          <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>{u.studentId ? `ID: ${u.studentId}` : u.department || ''}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{u.email}</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{u.studentId ? `ID: ${u.studentId}` : u.department || ''}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#64748b', fontSize: '0.74rem', fontFamily: 'monospace' }}>
-                          <Globe size={12} color="#94a3b8" />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', fontSize: '0.74rem', fontFamily: 'monospace' }}>
+                          <Globe size={12} color="var(--text-muted)" />
                           <span>IP: {u.lastLoginIp || '127.0.0.1'}</span>
                         </div>
                       </div>
@@ -1169,9 +1169,9 @@ export default function AdminDashboard({ currentUser }) {
                           disabled={isActionLoading}
                           onClick={() => handleVerificationToggle(u.id, u.isVerified)}
                           style={{
-                            background: u.isVerified ? '#eff6ff' : '#ffffff',
-                            border: `1px solid ${u.isVerified ? '#bfdbfe' : '#cbd5e1'}`,
-                            color: u.isVerified ? '#1d4ed8' : '#64748b',
+                            background: u.isVerified ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                            border: `1px solid ${u.isVerified ? 'var(--primary)' : 'var(--border-glass)'}`,
+                            color: u.isVerified ? 'var(--primary)' : 'var(--text-muted)',
                             padding: '0.4rem 0.85rem',
                             borderRadius: '8px',
                             fontWeight: 600,
@@ -1182,7 +1182,7 @@ export default function AdminDashboard({ currentUser }) {
                             gap: '0.35rem'
                           }}
                         >
-                          <CheckCircle size={14} color={u.isVerified ? '#2563eb' : '#94a3b8'} />
+                          <CheckCircle size={14} color={u.isVerified ? 'var(--primary)' : 'var(--text-muted)'} />
                           <span>{u.isVerified ? 'Verified' : 'Verify Badge'}</span>
                         </button>
 
@@ -1194,9 +1194,9 @@ export default function AdminDashboard({ currentUser }) {
                               setOpenMenuUserId(prev => prev === u.id ? null : u.id);
                             }}
                             style={{
-                              background: '#0f2942',
-                              color: '#ffffff',
-                              border: 'none',
+                              background: 'var(--bg-card-hover)',
+                              color: 'var(--text-main)',
+                              border: '1px solid var(--border-glass)',
                               padding: '0.4rem 0.85rem',
                               borderRadius: '8px',
                               fontSize: '0.78rem',
@@ -1217,10 +1217,10 @@ export default function AdminDashboard({ currentUser }) {
                                 position: 'absolute',
                                 right: 0,
                                 bottom: 'calc(100% + 6px)',
-                                background: '#ffffff',
-                                border: '1px solid #e2e8f0',
+                                background: 'var(--bg-card)',
+                                border: '1px solid var(--border-glass)',
                                 borderRadius: '10px',
-                                boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.2)',
+                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
                                 padding: '0.35rem',
                                 minWidth: '160px',
                                 zIndex: 100,
@@ -1233,9 +1233,9 @@ export default function AdminDashboard({ currentUser }) {
                                 <button
                                   disabled={isActionLoading || isSelf}
                                   onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'banned'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? '#94a3b8' : '#dc2626', fontSize: '0.78rem', fontWeight: 600 }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? 'var(--text-muted)' : '#dc2626', fontSize: '0.78rem', fontWeight: 600 }}
                                 >
-                                  <Ban size={14} color={isSelf ? '#94a3b8' : '#dc2626'} />
+                                  <Ban size={14} color={isSelf ? 'var(--text-muted)' : '#dc2626'} />
                                   <span>Ban User</span>
                                 </button>
                               ) : (
@@ -1253,9 +1253,9 @@ export default function AdminDashboard({ currentUser }) {
                                 <button
                                   disabled={isActionLoading || isSelf}
                                   onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'suspended'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? '#94a3b8' : '#d97706', fontSize: '0.78rem', fontWeight: 600 }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? 'var(--text-muted)' : '#d97706', fontSize: '0.78rem', fontWeight: 600 }}
                                 >
-                                  <Clock size={14} color={isSelf ? '#94a3b8' : '#d97706'} />
+                                  <Clock size={14} color={isSelf ? 'var(--text-muted)' : '#d97706'} />
                                   <span>Suspend</span>
                                 </button>
                               )}
@@ -1275,9 +1275,9 @@ export default function AdminDashboard({ currentUser }) {
                                 <button
                                   disabled={isActionLoading}
                                   onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'shadowbanned'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#475569', fontSize: '0.78rem', fontWeight: 600 }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600 }}
                                 >
-                                  <EyeOff size={14} color="#475569" />
+                                  <EyeOff size={14} color="var(--text-muted)" />
                                   <span>Shadowban</span>
                                 </button>
                               )}
@@ -1286,9 +1286,9 @@ export default function AdminDashboard({ currentUser }) {
                                 <button
                                   disabled={isActionLoading}
                                   onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#1d4ed8', fontSize: '0.78rem', fontWeight: 600 }}
+                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 600 }}
                                 >
-                                  <UserCheck size={14} color="#1d4ed8" />
+                                  <UserCheck size={14} color="var(--primary)" />
                                   <span>Activate Account</span>
                                 </button>
                               )}

@@ -157,9 +157,8 @@ export default function NotificationBell({ currentUser }) {
         className="notif-bell-trigger-btn"
         style={{
           position: 'relative',
-          background: open ? '#eff6ff' : '#f8fafc',
-          border: '1px solid',
-          borderColor: open ? '#93c5fd' : '#cbd5e1',
+          background: open ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+          border: '1px solid var(--border-glass)',
           borderRadius: '12px',
           padding: '0.55rem',
           cursor: 'pointer',
@@ -167,8 +166,8 @@ export default function NotificationBell({ currentUser }) {
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-          color: open ? '#1d4ed8' : '#334155',
-          boxShadow: open ? '0 2px 10px rgba(37, 99, 235, 0.12)' : '0 1px 3px rgba(0,0,0,0.03)',
+          color: 'var(--text-main)',
+          boxShadow: open ? '0 2px 10px rgba(56, 189, 248, 0.2)' : '0 1px 3px rgba(0,0,0,0.03)',
         }}
       >
         <Bell size={20} />
@@ -207,7 +206,7 @@ export default function NotificationBell({ currentUser }) {
                 bottom: 0,
                 width: '100vw',
                 height: '100vh',
-                background: 'rgba(15, 23, 42, 0.5)',
+                background: 'rgba(15, 23, 42, 0.55)',
                 backdropFilter: 'blur(4px)',
                 zIndex: 99998,
                 animation: 'fadeInOverlay 0.25s ease',
@@ -226,8 +225,9 @@ export default function NotificationBell({ currentUser }) {
               height: '100vh',
               width: '410px',
               maxWidth: '100vw',
-              background: '#ffffff',
-              boxShadow: '-10px 0 50px rgba(15, 23, 42, 0.25)',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border-glass)',
+              boxShadow: '-10px 0 50px rgba(0, 0, 0, 0.4)',
               zIndex: 99999,
               display: 'flex',
               flexDirection: 'column',
@@ -331,7 +331,7 @@ export default function NotificationBell({ currentUser }) {
               </div>
 
               {/* Bottom Row: Filter Tabs */}
-              <div style={{ display: 'flex', gap: '0.4rem', background: 'rgba(0, 0, 0, 0.2)', padding: '0.25rem', borderRadius: '10px' }}>
+              <div style={{ display: 'flex', gap: '0.4rem', background: 'rgba(0, 0, 0, 0.25)', padding: '0.25rem', borderRadius: '10px' }}>
                 <button
                   onClick={() => setFilter('all')}
                   style={{
@@ -378,34 +378,34 @@ export default function NotificationBell({ currentUser }) {
             </div>
 
             {/* Notification List Container */}
-            <div className="notif-list-container" style={{ overflowY: 'auto', flex: 1, padding: '1rem', background: '#f8fafc', WebkitOverflowScrolling: 'touch' }}>
+            <div className="notif-list-container" style={{ overflowY: 'auto', flex: 1, padding: '1rem', background: 'var(--bg-sidebar)', WebkitOverflowScrolling: 'touch' }}>
               {loading && notifications.length === 0 ? (
-                <div style={{ padding: '4rem 1rem', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
-                  <Sparkles size={24} color="#3b82f6" className="spin-icon" style={{ marginBottom: '0.5rem' }} />
+                <div style={{ padding: '4rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  <Sparkles size={24} color="var(--primary)" className="spin-icon" style={{ marginBottom: '0.5rem' }} />
                   <p style={{ fontWeight: 600 }}>Fetching notifications...</p>
                 </div>
               ) : filteredNotifications.length === 0 ? (
                 <div style={{
                   padding: '3.5rem 1.5rem',
                   textAlign: 'center',
-                  background: '#ffffff',
+                  background: 'var(--bg-card)',
                   borderRadius: '16px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid var(--border-glass)',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
                   marginTop: '0.5rem'
                 }}>
                   <div style={{
                     width: '58px', height: '58px', borderRadius: '50%',
-                    background: '#eff6ff', display: 'flex', alignItems: 'center',
+                    background: 'var(--bg-card-hover)', display: 'flex', alignItems: 'center',
                     justifyContent: 'center', margin: '0 auto 1.1rem auto',
-                    border: '1px solid #bfdbfe'
+                    border: '1px solid var(--border-glass)'
                   }}>
-                    <BellOff size={26} color="#2563eb" />
+                    <BellOff size={26} color="var(--primary)" />
                   </div>
-                  <h4 style={{ fontWeight: 800, fontSize: '1.02rem', color: '#0f2942', margin: '0 0 0.35rem 0' }}>
+                  <h4 style={{ fontWeight: 800, fontSize: '1.02rem', color: 'var(--text-main)', margin: '0 0 0.35rem 0' }}>
                     {filter === 'unread' ? 'No unread notifications' : 'No activity yet'}
                   </h4>
-                  <p style={{ fontSize: '0.83rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: '0.83rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
                     {filter === 'unread'
                       ? 'You are all caught up! Switch to "All Activity" to view past updates.'
                       : 'When someone likes your post or comments on your announcement, it will show up here.'}
@@ -425,11 +425,11 @@ export default function NotificationBell({ currentUser }) {
                           gap: '0.8rem',
                           padding: '0.95rem 1rem',
                           borderRadius: '14px',
-                          background: isUnread ? '#ffffff' : 'rgba(255, 255, 255, 0.85)',
+                          background: isUnread ? 'var(--bg-card)' : 'var(--bg-card-hover)',
                           border: '1px solid',
-                          borderColor: isUnread ? '#bfdbfe' : '#e2e8f0',
+                          borderColor: isUnread ? 'var(--primary)' : 'var(--border-glass)',
                           boxShadow: isUnread
-                            ? '0 4px 14px rgba(37, 99, 235, 0.08)'
+                            ? '0 4px 14px rgba(56, 189, 248, 0.15)'
                             : '0 2px 6px rgba(0, 0, 0, 0.02)',
                           cursor: notif.postId ? 'pointer' : 'default',
                           transition: 'all 0.2s ease',
@@ -445,7 +445,7 @@ export default function NotificationBell({ currentUser }) {
                             top: 0,
                             bottom: 0,
                             width: '4px',
-                            background: 'linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%)',
+                            background: 'var(--primary-gradient)',
                           }} />
                         )}
 
@@ -454,7 +454,7 @@ export default function NotificationBell({ currentUser }) {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{
                             fontSize: '0.86rem',
-                            color: '#0f2942',
+                            color: 'var(--text-main)',
                             fontWeight: isUnread ? 700 : 500,
                             lineHeight: 1.45,
                             margin: 0,
@@ -471,7 +471,7 @@ export default function NotificationBell({ currentUser }) {
                           }}>
                             <span style={{
                               fontSize: '0.72rem',
-                              color: '#64748b',
+                              color: 'var(--text-muted)',
                               fontWeight: 600,
                             }}>
                               {timeAgo(notif.createdAt)}
@@ -480,7 +480,7 @@ export default function NotificationBell({ currentUser }) {
                             {notif.postId && (
                               <span style={{
                                 fontSize: '0.72rem',
-                                color: '#2563eb',
+                                color: 'var(--primary)',
                                 fontWeight: 700,
                                 display: 'flex',
                                 alignItems: 'center',
@@ -502,25 +502,25 @@ export default function NotificationBell({ currentUser }) {
             {notifications.length > 0 && (
               <div style={{
                 padding: '0.8rem 1.1rem',
-                borderTop: '1px solid #e2e8f0',
-                background: '#ffffff',
+                borderTop: '1px solid var(--border-glass)',
+                background: 'var(--bg-card)',
                 flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}>
-                <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                   {filteredNotifications.length} of {notifications.length} items
                 </span>
                 {unreadCount > 0 && (
                   <span style={{
                     fontSize: '0.72rem',
-                    color: '#1d4ed8',
-                    background: '#eff6ff',
+                    color: 'var(--primary)',
+                    background: 'var(--bg-card-hover)',
                     padding: '0.18rem 0.5rem',
                     borderRadius: '6px',
                     fontWeight: 700,
-                    border: '1px solid #bfdbfe'
+                    border: '1px solid var(--border-glass)'
                   }}>
                     {unreadCount} pending
                   </span>
