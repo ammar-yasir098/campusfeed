@@ -118,7 +118,7 @@ router.put('/profile', authenticateToken, profileValidation, validate, (req, res
                 return res.status(404).json({ message: 'User not found' });
             }
 
-            if (name !== undefined) user.name = name;
+            // Note: Full name is permanent and cannot be modified after registration
             if (studentId !== undefined) user.studentId = studentId;
             if (department !== undefined) user.department = department;
             if (bio !== undefined) user.bio = bio;

@@ -352,6 +352,7 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
                     placeholder="e.g. Muhammad Ali"
                     value={name}
                     onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                    maxLength={30}
                     required
                     style={{
                       paddingLeft: '2.8rem',

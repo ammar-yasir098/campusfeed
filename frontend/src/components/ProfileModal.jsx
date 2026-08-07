@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, User, AlertCircle } from 'lucide-react';
+import { X, Upload, User, AlertCircle, Lock } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 
 export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUpdated }) {
@@ -94,14 +94,46 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
           </div>
 
           <div>
-            <label className="input-label">Full Name</label>
-            <input 
-              type="text" 
-              className="input-field" 
-              value={name} 
-              onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))} 
-              required 
-            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <label className="input-label" style={{ margin: 0, fontWeight: 700, color: '#1e293b' }}>Full Name</label>
+              <span style={{
+                fontSize: '0.7rem',
+                color: '#475569',
+                fontWeight: 700,
+                background: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                padding: '0.15rem 0.55rem',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem'
+              }}>
+                <Lock size={11} color="#64748b" /> Locked
+              </span>
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <Lock size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <input 
+                type="text" 
+                className="input-field" 
+                value={name} 
+                disabled={true}
+                style={{
+                  paddingLeft: '2.4rem',
+                  background: '#f8fafc',
+                  color: '#334155',
+                  fontWeight: 600,
+                  cursor: 'not-allowed',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '10px'
+                }}
+                title="Full name cannot be changed after account creation"
+              />
+            </div>
+            <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.35rem', display: 'block', fontWeight: 500 }}>
+              Full name is permanently linked to your student account and cannot be modified.
+            </span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>

@@ -7,7 +7,7 @@ const signupValidation = [
     body('name')
         .trim()
         .notEmpty().withMessage('Name is required')
-        .isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters')
+        .isLength({ min: 2, max: 30 }).withMessage('Name must be between 2 and 30 characters')
         .matches(/^[a-zA-Z\s]+$/).withMessage('Full name can only contain letters and spaces'),
 
     body('email')
@@ -72,7 +72,7 @@ const profileValidation = [
     body('name')
         .optional()
         .trim()
-        .isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters')
+        .isLength({ min: 2, max: 30 }).withMessage('Name must be between 2 and 30 characters')
         .matches(/^[a-zA-Z\s]+$/).withMessage('Full name can only contain letters and spaces'),
 
     body('bio')

@@ -259,15 +259,15 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     <article className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: '#ffffff' }}>
 
       {/* Header: Author info & Category badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', borderBottom: '1px solid rgb(241, 245, 249)', paddingBottom: '0.3rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', borderBottom: '1px solid rgb(241, 245, 249)', paddingBottom: '0.3rem', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1 }}>
           {postData.author?.avatarUrl ? (
             <img
               src={resolveImageUrl(postData.author.avatarUrl)}
               alt={postData.author.name}
               onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(postData.author.avatarUrl), alt: postData.author.name })}
               title="Click to view full-size avatar"
-              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }}
+              style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer', flexShrink: 0 }}
             />
           ) : (
             <div style={{
@@ -280,15 +280,25 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
               justifyContent: 'center',
               fontSize: '0.9rem',
               fontWeight: 700,
-              color: '#ffffff'
+              color: '#ffffff',
+              flexShrink: 0
             }}>
               {postData.author?.name ? postData.author.name.charAt(0).toUpperCase() : 'U'}
             </div>
           )}
 
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+              <h4 style={{
+                fontSize: '0.92rem',
+                fontWeight: 700,
+                color: 'var(--text-main)',
+                lineHeight: 1.2,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '100%'
+              }} title={postData.author?.name}>
                 {postData.author?.name || 'Anonymous Student'}
               </h4>
               {postData.author?.isVerified && (
@@ -302,7 +312,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
           {postData.poll && (
             <span style={{
               fontSize: '0.68rem',
