@@ -303,6 +303,11 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          {postData.poll && (
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, padding: '0.18rem 0.55rem', borderRadius: '4px', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+              📊 POLL
+            </span>
+          )}
           <span className={`badge badge-${(postData.category || 'General').replace(/ & /g, '-').replace(/ /g, '-')}`} style={{ fontSize: '0.68rem', padding: '0.18rem 0.55rem' }}>
             {postData.category || 'General'}
           </span>
