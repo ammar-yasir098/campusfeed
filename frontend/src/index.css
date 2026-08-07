@@ -436,6 +436,47 @@ h6,
   }
 }
 
+/* Admin Moderation Queue Mobile Styling */
+.admin-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.85rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .admin-card-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .admin-card-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .admin-report-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .admin-complaint-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.35rem !important;
+  }
+
+  .admin-complaint-meta {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+}
+
 /* Modern Glassmorphic Play Button Hover Effect */
 .modern-play-btn:hover {
   transform: translate(-50%, -50%) scale(1.08) !important;

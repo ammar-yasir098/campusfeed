@@ -567,7 +567,7 @@ export default function AdminDashboard({ currentUser }) {
                   boxShadow: '0 4px 15px rgba(15, 23, 42, 0.05)'
                 }}>
                   {/* Card Header: Post Author + Category + Total Reports Count Badge */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.85rem', borderBottom: '1px solid #f1f5f9' }}>
+                  <div className="admin-report-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', paddingBottom: '0.85rem', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                       {item.post?.author?.avatarUrl ? (
                         <img src={resolveImageUrl(item.post.author.avatarUrl)} alt={item.post.author.name} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -619,15 +619,49 @@ export default function AdminDashboard({ currentUser }) {
                         {item.post.content.length > 300 ? `${item.post.content.slice(0, 300)}...` : item.post.content}
                       </p>
                     )}
-                    {item.post?.imageUrl && (
-                      <div 
-                        onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(item.post.imageUrl) })}
-                        title="Click to view full-size photo"
-                        style={{ marginTop: '0.75rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer' }}
-                      >
-                        <img src={resolveImageUrl(item.post.imageUrl)} alt="Reported Media" style={{ width: '100%', maxHeight: '240px', objectFit: 'cover', display: 'block', borderRadius: '0px', transition: 'transform 0.2s ease' }} />
-                      </div>
-                    )}
+                    {/* Media: Photos (Single or Multi-Photo Grid) */}
+                    {(() => {
+                      const images = item.post?.imageUrls && item.post.imageUrls.length > 0
+                        ? item.post.imageUrls
+                        : (item.post?.imageUrl ? [item.post.imageUrl] : []);
+
+                      if (images.length === 0) return null;
+
+                      if (images.length === 1) {
+                        return (
+                          <div 
+                            onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(images[0]) })}
+                            title="Click to view full-size photo"
+                            style={{ marginTop: '0.75rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <img src={resolveImageUrl(images[0])} alt="Reported Media" style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', display: 'block' }} />
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ marginTop: '0.75rem' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#2563eb', marginBottom: '0.35rem' }}>
+                            📷 {images.length} Photos Attached (Click any photo to enlarge)
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: images.length === 2 ? '1fr 1fr' : 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem' }}>
+                            {images.map((imgUrl, idx) => (
+                              <div 
+                                key={idx}
+                                onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(imgUrl) })}
+                                title={`Click to view photo #${idx + 1}`}
+                                style={{ position: 'relative', height: '120px', overflow: 'hidden', border: '1px solid #cbd5e1', cursor: 'pointer', borderRadius: '4px' }}
+                              >
+                                <img src={resolveImageUrl(imgUrl)} alt={`Photo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                <span style={{ position: 'absolute', bottom: '4px', right: '4px', background: 'rgba(15, 23, 42, 0.8)', color: '#fff', fontSize: '0.68rem', fontWeight: 700, padding: '1px 6px', borderRadius: '3px' }}>
+                                  #{idx + 1}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     {item.post?.videoUrl && (
                       <AdminVideoPlayer 
                         videoUrl={item.post.videoUrl} 
@@ -668,7 +702,7 @@ export default function AdminDashboard({ currentUser }) {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                       {item.reporters.map((rep) => (
-                        <div key={rep.reportId} style={{
+                        <div key={rep.reportId} className="admin-complaint-item" style={{
                           background: '#ffffff',
                           border: '1px solid #e2e8f0',
                           borderRadius: '10px',
@@ -692,7 +726,7 @@ export default function AdminDashboard({ currentUser }) {
                             </span>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div className="admin-complaint-meta" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
                               {new Date(rep.createdAt).toLocaleString()}
                             </span>
@@ -715,7 +749,7 @@ export default function AdminDashboard({ currentUser }) {
                   </div>
 
                   {/* Admin Card Action Buttons */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #f1f5f9', paddingTop: '0.85rem', flexWrap: 'wrap' }}>
+                  <div className="admin-card-actions">
                     <button
                       className="btn-secondary"
                       onClick={() => handleDismissAllPostReports(item.postId)}
