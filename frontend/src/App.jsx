@@ -276,7 +276,7 @@ export default function App() {
           <button
             className="btn-icon"
             onClick={() => setIsMobileMenuOpen(true)}
-            style={{ padding: '0.45rem', color: '#0f2942', background: '#f1f5f9', borderRadius: '8px' }}
+            style={{ padding: '0.45rem', color: 'var(--text-main)', background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}
             title="Open Navigation Menu"
           >
             <Menu size={22} />
@@ -285,7 +285,7 @@ export default function App() {
             <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <GraduationCap size={18} color="#ffffff" />
             </div>
-            <h3 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f2942' }}>UMT Feed</h3>
+            <h3 className="font-heading" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>UMT Feed</h3>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

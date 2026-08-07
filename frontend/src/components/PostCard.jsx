@@ -314,21 +314,18 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
           {postData.poll && (
-            <span style={{
+            <span className="badge-poll-pill" style={{
               fontSize: '0.68rem',
               fontWeight: 800,
               padding: '0.2rem 0.55rem',
               borderRadius: '9999px',
-              background: '#eff6ff',
-              color: '#2563eb',
-              border: '1px solid #bfdbfe',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.3rem',
               whiteSpace: 'nowrap',
               lineHeight: 1
             }}>
-              <BarChart2 size={12} color="#2563eb" />
+              <BarChart2 size={12} style={{ color: 'currentColor' }} />
               <span>POLL</span>
             </span>
           )}
@@ -350,7 +347,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   setShowReportReasons(false);
                 }}
                 title="Post Options"
-                style={{ color: '#64748b', padding: '0.3rem', borderRadius: '8px' }}
+                style={{ color: 'var(--text-muted)', padding: '0.3rem', borderRadius: '8px' }}
               >
                 <MoreVertical size={16} />
               </button>
@@ -361,10 +358,10 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   right: 0,
                   top: '100%',
                   marginTop: '0.4rem',
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-glass)',
                   borderRadius: '12px',
-                  boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.4)',
                   padding: '0.4rem',
                   zIndex: 100,
                   width: showReportReasons ? '200px' : '160px'
@@ -391,7 +388,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                         gap: '0.55rem',
                         transition: 'background 0.15s'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
                       <Trash2 size={15} color="#dc2626" />
@@ -411,7 +408,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                           textAlign: 'left',
                           padding: '0.5rem 0.65rem',
                           fontSize: '0.82rem',
-                          color: reportSubmitted ? '#d97706' : '#334155',
+                          color: reportSubmitted ? '#d97706' : 'var(--text-main)',
                           background: 'transparent',
                           border: 'none',
                           borderRadius: '8px',
@@ -423,11 +420,11 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                           transition: 'background 0.15s'
                         }}
                         onMouseEnter={(e) => {
-                          if (!reportSubmitted) e.currentTarget.style.background = '#f8fafc';
+                          if (!reportSubmitted) e.currentTarget.style.background = 'var(--bg-card-hover)';
                         }}
                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
-                        <Flag size={15} color={reportSubmitted ? '#d97706' : '#64748b'} fill={reportSubmitted ? '#d97706' : 'none'} />
+                        <Flag size={15} color={reportSubmitted ? '#d97706' : 'var(--text-muted)'} fill={reportSubmitted ? '#d97706' : 'none'} />
                         <span>{reportSubmitted ? 'Reported' : 'Report Post'}</span>
                       </button>
                     ) : (
@@ -435,16 +432,16 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                         <div style={{
                           fontSize: '0.74rem',
                           fontWeight: 700,
-                          color: '#64748b',
+                          color: 'var(--text-muted)',
                           padding: '0.25rem 0.4rem',
-                          borderBottom: '1px solid #f1f5f9',
+                          borderBottom: '1px solid var(--border-glass)',
                           marginBottom: '0.3rem',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between'
                         }}>
                           <span>Select Category Reason:</span>
-                          <X size={13} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={(e) => { e.stopPropagation(); setShowReportReasons(false); }} />
+                          <X size={13} style={{ cursor: 'pointer', color: 'var(--text-muted)' }} onClick={(e) => { e.stopPropagation(); setShowReportReasons(false); }} />
                         </div>
                         {['Spam', 'Harassment', 'Misinformation', 'Inappropriate Content'].map((reason) => (
                           <button
@@ -458,7 +455,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                               textAlign: 'left',
                               padding: '0.45rem 0.6rem',
                               fontSize: '0.8rem',
-                              color: '#334155',
+                              color: 'var(--text-main)',
                               background: 'transparent',
                               border: 'none',
                               borderRadius: '6px',
@@ -468,7 +465,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                               alignItems: 'center',
                               gap: '0.4rem'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-card-hover)'}
                             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                           >
                             <span>🚩</span>
@@ -506,33 +503,24 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
       {/* Content or Admin Takedown Feedback Banner */}
       {postData.isTakedown ? (
-        <div style={{
-          background: '#fef2f2',
-          border: '1px solid #fca5a5',
-          borderRadius: '12px',
-          padding: '1.1rem 1.25rem',
-          margin: '0.75rem 0',
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '0.85rem'
-        }}>
-          <div style={{ padding: '0.45rem', borderRadius: '8px', background: '#fee2e2', color: '#dc2626', flexShrink: 0 }}>
+        <div className="admin-takedown-banner">
+          <div className="takedown-icon-box">
             <ShieldAlert size={22} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <h4 style={{ color: '#991b1b', fontWeight: 800, fontSize: '0.92rem', margin: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <h4 className="takedown-title">
                 Post Taken Down by UMT Administration
               </h4>
-              <span style={{ fontSize: '0.68rem', fontWeight: 800, background: '#fee2e2', color: '#991b1b', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+              <span className="takedown-badge">
                 MODERATED
               </span>
             </div>
-            <p style={{ color: '#7f1d1d', fontSize: '0.86rem', marginTop: '0.25rem', marginBottom: '0.35rem', lineHeight: 1.45 }}>
+            <p className="takedown-body">
               {postData.takedownReason || 'This post was taken down by campus administration for violating community guidelines.'}
             </p>
-            <div style={{ fontSize: '0.74rem', color: '#991b1b', fontWeight: 600 }}>
-              Feedback Logged by: <strong>{postData.takedownByAdmin || 'UMT Admin'}</strong>
+            <div className="takedown-footer">
+              Feedback Logged by: <strong className="takedown-admin-name">{postData.takedownByAdmin || 'UMT Admin'}</strong>
             </div>
           </div>
         </div>
@@ -642,7 +630,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                       </div>
 
                       {/* Percentage & Vote Count Pill Badge (Right Side) */}
-                      <div style={{
+                      <div className={`poll-option-badge ${isUserChoice ? 'selected' : ''}`} style={{
                         position: 'relative',
                         zIndex: 1,
                         display: 'inline-flex',
@@ -650,15 +638,12 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                         gap: '0.3rem',
                         fontSize: '0.76rem',
                         fontWeight: 700,
-                        color: isUserChoice ? '#0f2942' : '#334155',
-                        background: isUserChoice ? '#e0f2fe' : '#f1f5f9',
-                        border: isUserChoice ? '1px solid #bae6fd' : '1px solid #e2e8f0',
                         padding: '0.15rem 0.55rem',
                         borderRadius: '14px',
                         flexShrink: 0
                       }}>
                         <span>{option.percentage}%</span>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 500, color: '#64748b' }}>
+                        <span className="poll-option-subtext">
                           ({option.voteCount} {option.voteCount === 1 ? 'vote' : 'votes'})
                         </span>
                       </div>
@@ -952,7 +937,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
           )}
 
           {/* Actions Bar: Like, Comment, Bookmark */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.55rem', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.55rem', borderTop: '1px solid var(--border-glass)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
 
               {/* Like Button */}

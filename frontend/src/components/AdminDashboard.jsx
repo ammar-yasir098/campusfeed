@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  ShieldCheck, 
-  Search, 
-  UserCheck, 
-  UserX, 
-  Ban, 
-  VolumeX, 
-  EyeOff, 
-  CheckCircle, 
-  RefreshCw, 
-  Globe, 
+import {
+  ShieldCheck,
+  Search,
+  UserCheck,
+  UserX,
+  Ban,
+  VolumeX,
+  EyeOff,
+  CheckCircle,
+  RefreshCw,
+  Globe,
   AlertTriangle,
   AlertCircle,
   Sparkles,
@@ -39,7 +39,7 @@ function AdminVideoPlayer({ videoUrl, thumbnailUrl, onEnlarge }) {
     const handleFullscreenIntercept = () => {
       if (document.fullscreenElement === videoEl || document.webkitFullscreenElement === videoEl) {
         if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
+          document.exitFullscreen().catch(() => { });
         } else if (document.webkitExitFullscreen) {
           document.webkitExitFullscreen();
         }
@@ -61,7 +61,7 @@ function AdminVideoPlayer({ videoUrl, thumbnailUrl, onEnlarge }) {
     setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.preload = 'auto';
-        videoRef.current.play().catch(() => {});
+        videoRef.current.play().catch(() => { });
       }
     }, 50);
   };
@@ -350,22 +350,7 @@ export default function AdminDashboard({ currentUser }) {
     }
   };
 
-  const getStatusBadgeStyle = (status) => {
-    switch (status) {
-      case 'active':
-        return { background: '#d1fae5', color: '#065f46', border: '1px solid #6ee7b7' };
-      case 'suspended':
-        return { background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' };
-      case 'banned':
-        return { background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' };
-      case 'muted':
-        return { background: '#f3e8ff', color: '#6b21a8', border: '1px solid #d8b4fe' };
-      case 'shadowbanned':
-        return { background: '#f1f5f9', color: '#475569', border: '1px solid #cbd5e1' };
-      default:
-        return { background: '#e2e8f0', color: '#334155', border: '1px solid #cbd5e1' };
-    }
-  };
+
 
   return (
     <div style={{ width: '100%', margin: '0 auto', paddingBottom: '3rem' }}>
@@ -514,7 +499,7 @@ export default function AdminDashboard({ currentUser }) {
           <Flag size={18} />
           <span>Reported Posts Queue</span>
           {uniquePostsCount > 0 && (
-            <span 
+            <span
               title={`${pendingCount} total report notices across ${uniquePostsCount} posts`}
               style={{
                 background: adminTab === 'reports' ? '#ffffff' : '#dc2626',
@@ -591,18 +576,7 @@ export default function AdminDashboard({ currentUser }) {
                         {item.post?.category || 'General'}
                       </span>
 
-                      <div style={{
-                        background: '#fee2e2',
-                        color: '#991b1b',
-                        border: '1px solid #fca5a5',
-                        padding: '0.3rem 0.85rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.8rem',
-                        fontWeight: 800,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
-                      }}>
+                      <div className="report-filed-badge">
                         <Flag size={14} />
                         <span>{item.reportCount} {item.reportCount === 1 ? 'Report' : 'Reports'} Filed</span>
                       </div>
@@ -629,7 +603,7 @@ export default function AdminDashboard({ currentUser }) {
 
                       if (images.length === 1) {
                         return (
-                          <div 
+                          <div
                             onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(images[0]) })}
                             title="Click to view full-size photo"
                             style={{ marginTop: '0.75rem', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer', background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -646,7 +620,7 @@ export default function AdminDashboard({ currentUser }) {
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: images.length === 2 ? '1fr 1fr' : 'repeat(auto-fit, minmax(110px, 1fr))', gap: '0.5rem' }}>
                             {images.map((imgUrl, idx) => (
-                              <div 
+                              <div
                                 key={idx}
                                 onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(imgUrl) })}
                                 title={`Click to view photo #${idx + 1}`}
@@ -663,10 +637,10 @@ export default function AdminDashboard({ currentUser }) {
                       );
                     })()}
                     {item.post?.videoUrl && (
-                      <AdminVideoPlayer 
-                        videoUrl={item.post.videoUrl} 
+                      <AdminVideoPlayer
+                        videoUrl={item.post.videoUrl}
                         thumbnailUrl={item.post.thumbnailUrl}
-                        onEnlarge={(src) => setActiveMedia({ type: 'video', src })} 
+                        onEnlarge={(src) => setActiveMedia({ type: 'video', src })}
                       />
                     )}
                     {item.post?.poll && (
@@ -731,15 +705,7 @@ export default function AdminDashboard({ currentUser }) {
                               {new Date(rep.createdAt).toLocaleString()}
                             </span>
 
-                            <span style={{
-                              background: rep.reason === 'Harassment' ? '#fee2e2' : rep.reason === 'Spam' ? '#ffedd5' : '#f3e8ff',
-                              color: rep.reason === 'Harassment' ? '#991b1b' : rep.reason === 'Spam' ? '#9a3412' : '#6b21a8',
-                              border: `1px solid ${rep.reason === 'Harassment' ? '#fca5a5' : rep.reason === 'Spam' ? '#fed7aa' : '#d8b4fe'}`,
-                              padding: '0.15rem 0.55rem',
-                              borderRadius: '6px',
-                              fontSize: '0.72rem',
-                              fontWeight: 800
-                            }}>
+                            <span className={`complaint-reason-badge complaint-reason-${rep.reason?.toLowerCase() === 'harassment' ? 'harassment' : rep.reason?.toLowerCase() === 'spam' ? 'spam' : 'other'}`}>
                               {rep.reason.toUpperCase()}
                             </span>
                           </div>
@@ -788,525 +754,495 @@ export default function AdminDashboard({ currentUser }) {
       ) : (
         <>
           {/* Search & Status Filter Bar */}
-      <div className="glass-panel admin-filter-bar" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="glass-panel admin-filter-bar" style={{ padding: '1.25rem', marginBottom: '1.5rem', background: 'var(--bg-card)', border: '1px solid var(--border-glass)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
 
-          {/* Search Box */}
-          <div style={{ flex: '1 1 320px', position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input
-              type="text"
-              className="input-field"
-              placeholder="Search by User ID, Email, IP Address, or Name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: '2.7rem', height: '44px', borderRadius: '10px' }}
-            />
+              {/* Search Box */}
+              <div style={{ flex: '1 1 320px', position: 'relative' }}>
+                <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Search by User ID, Email, IP Address, or Name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ paddingLeft: '2.7rem', height: '44px', borderRadius: '10px' }}
+                />
+              </div>
+
+              {/* Status Filter Buttons */}
+              <div className="admin-filter-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                {['all', 'active', 'suspended', 'banned', 'muted', 'shadowbanned'].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(s)}
+                    style={{
+                      padding: '0.45rem 0.85rem',
+                      borderRadius: '8px',
+                      fontSize: '0.82rem',
+                      fontWeight: 700,
+                      textTransform: 'capitalize',
+                      border: '1px solid',
+                      borderColor: statusFilter === s ? 'var(--primary)' : 'var(--border-glass)',
+                      background: statusFilter === s ? 'var(--primary)' : 'var(--bg-card-hover)',
+                      color: statusFilter === s ? '#ffffff' : 'var(--text-muted)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+            </div>
           </div>
 
-          {/* Status Filter Buttons */}
-          <div className="admin-filter-pills" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-            {['all', 'active', 'suspended', 'banned', 'muted', 'shadowbanned'].map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  borderRadius: '8px',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  textTransform: 'capitalize',
-                  border: '1px solid',
-                  borderColor: statusFilter === s ? 'var(--primary)' : 'var(--border-glass)',
-                  background: statusFilter === s ? 'var(--primary)' : 'var(--bg-card-hover)',
-                  color: statusFilter === s ? '#ffffff' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+          {/* User Records Section (Desktop Table + Mobile Cards) */}
+          <div className="glass-panel" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-glass)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+            {loading ? (
+              <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <RefreshCw size={24} className="spin-icon" style={{ marginBottom: '0.5rem' }} />
+                <p>Searching user records...</p>
+              </div>
+            ) : users.length === 0 ? (
+              <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <Users size={36} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: 700 }}>No users found</h3>
+                <p style={{ fontSize: '0.88rem' }}>No accounts matched query "{searchQuery}" with status filter "{statusFilter}".</p>
+              </div>
+            ) : (
+              <>
+                {/* DESKTOP TABLE VIEW */}
+                <div className="admin-desktop-table" style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem', whiteSpace: 'nowrap' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg-card-hover)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)', fontWeight: 700 }}>
+                        <th style={{ padding: '1.1rem 1.25rem' }}>User Info</th>
+                        <th style={{ padding: '1.1rem 1.25rem' }}>Email & Student ID</th>
+                        <th style={{ padding: '1.1rem 1.25rem' }}>IP Address</th>
+                        <th style={{ padding: '1.1rem 1.25rem' }}>Status</th>
+                        <th style={{ padding: '1.1rem 1.25rem' }}>Verification</th>
+                        <th style={{ padding: '1.1rem 1.25rem', textAlign: 'center' }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((u) => {
+                        const isSelf = currentUser && currentUser.id === u.id;
+                        const isActionLoading = actionLoadingId === u.id;
 
-        </div>
-      </div>
+                        return (
+                          <tr key={u.id} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.15s ease' }}>
 
-      {/* User Records Section (Desktop Table + Mobile Cards) */}
-      <div className="glass-panel" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-glass)', overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-        {loading ? (
-          <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <RefreshCw size={24} className="spin-icon" style={{ marginBottom: '0.5rem' }} />
-            <p>Searching user records...</p>
-          </div>
-        ) : users.length === 0 ? (
-          <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <Users size={36} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
-            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: 700 }}>No users found</h3>
-            <p style={{ fontSize: '0.88rem' }}>No accounts matched query "{searchQuery}" with status filter "{statusFilter}".</p>
-          </div>
-        ) : (
-          <>
-            {/* DESKTOP TABLE VIEW */}
-            <div className="admin-desktop-table" style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem', whiteSpace: 'nowrap' }}>
-                <thead>
-                  <tr style={{ background: 'var(--bg-card-hover)', borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)', fontWeight: 700 }}>
-                    <th style={{ padding: '1.1rem 1.25rem' }}>User Info</th>
-                    <th style={{ padding: '1.1rem 1.25rem' }}>Email & Student ID</th>
-                    <th style={{ padding: '1.1rem 1.25rem' }}>IP Address</th>
-                    <th style={{ padding: '1.1rem 1.25rem' }}>Status</th>
-                    <th style={{ padding: '1.1rem 1.25rem' }}>Verification</th>
-                    <th style={{ padding: '1.1rem 1.25rem', textAlign: 'center' }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => {
-                    const isSelf = currentUser && currentUser.id === u.id;
-                    const isActionLoading = actionLoadingId === u.id;
+                            {/* User Info */}
+                            <td style={{ padding: '1rem 1.25rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                <div style={{ position: 'relative' }}>
+                                  {u.avatarUrl ? (
+                                    <img
+                                      src={resolveImageUrl(u.avatarUrl)}
+                                      alt={u.name}
+                                      style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-glass)' }}
+                                    />
+                                  ) : (
+                                    <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--primary-gradient)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+                                      {u.name.charAt(0).toUpperCase()}
+                                    </div>
+                                  )}
+                                </div>
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                    <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{u.name}</span>
+                                    {u.isVerified && <VerifiedBadge size={16} />}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.1rem' }}>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: #{u.id}</span>
+                                    {u.role === 'admin' && (
+                                      <span style={{ fontSize: '0.7rem', fontWeight: 800, background: 'var(--bg-card-hover)', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
+                                        ADMIN
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
 
-                    return (
-                      <tr key={u.id} style={{ borderBottom: '1px solid var(--border-glass)', transition: 'background 0.15s ease' }}>
+                            {/* Email & Student ID */}
+                            <td style={{ padding: '1rem 1.25rem', color: 'var(--text-main)' }}>
+                              <div>{u.email}</div>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                                {u.studentId ? `Student ID: ${u.studentId}` : u.department || 'No department specified'}
+                              </div>
+                            </td>
 
-                        {/* User Info */}
-                        <td style={{ padding: '1rem 1.25rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                            <div style={{ position: 'relative' }}>
+                            {/* IP Address */}
+                            <td style={{ padding: '1rem 1.25rem' }}>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
+                                <Globe size={13} color="var(--text-muted)" />
+                                <span>{u.lastLoginIp || '127.0.0.1'}</span>
+                              </div>
+                            </td>
+
+                            {/* Status */}
+                            <td style={{ padding: '1rem 1.25rem' }}>
+                              <span className={`status-badge status-badge-${(u.status || 'active').toLowerCase()}`}>
+                                {u.status}
+                              </span>
+                            </td>
+
+                            {/* Manual Verification Badge Toggle */}
+                            <td style={{ padding: '1rem 1.25rem' }}>
+                              <button
+                                disabled={isActionLoading}
+                                onClick={() => handleVerificationToggle(u.id, u.isVerified)}
+                                className={`admin-verify-btn ${u.isVerified ? 'verified' : ''}`}
+                              >
+                                <CheckCircle size={14} style={{ color: 'currentColor' }} />
+                                <span>{u.isVerified ? 'Verified' : 'Verify'}</span>
+                              </button>
+                            </td>
+
+                            {/* Single Action Dropdown Menu */}
+                            <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
+                              <div className="action-menu-container" style={{ position: 'relative', display: 'inline-block' }}>
+                                <button
+                                  disabled={isActionLoading}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenMenuUserId(prev => prev === u.id ? null : u.id);
+                                  }}
+                                  style={{
+                                    background: openMenuUserId === u.id ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                                    border: '1px solid var(--border-glass)',
+                                    color: 'var(--text-main)',
+                                    padding: '0.4rem 0.8rem',
+                                    borderRadius: '8px',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.4rem',
+                                    transition: 'all 0.15s ease',
+                                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
+                                  }}
+                                >
+                                  <span>Actions</span>
+                                  <ChevronDown
+                                    size={14}
+                                    style={{
+                                      transform: openMenuUserId === u.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                                      transition: 'transform 0.15s ease'
+                                    }}
+                                  />
+                                </button>
+
+                                {openMenuUserId === u.id && (
+                                  <div
+                                    style={{
+                                      position: 'absolute',
+                                      right: 0,
+                                      top: 'calc(100% + 6px)',
+                                      background: 'var(--bg-card)',
+                                      border: '1px solid var(--border-glass)',
+                                      borderRadius: '10px',
+                                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
+                                      padding: '0.35rem',
+                                      minWidth: '165px',
+                                      zIndex: 100,
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      gap: '0.2rem',
+                                      textAlign: 'left'
+                                    }}
+                                  >
+                                    {u.status !== 'banned' ? (
+                                      <button
+                                        disabled={isActionLoading || isSelf}
+                                        onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'banned'); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? '#94a3b8' : '#dc2626', fontSize: '0.82rem', fontWeight: 600, cursor: isSelf ? 'not-allowed' : 'pointer' }}
+                                      >
+                                        <Ban size={15} color={isSelf ? '#94a3b8' : '#dc2626'} />
+                                        <span>Ban User</span>
+                                      </button>
+                                    ) : (
+                                      <button
+                                        disabled={isActionLoading}
+                                        onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#059669', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
+                                      >
+                                        <UserCheck size={15} color="#059669" />
+                                        <span>Unban User</span>
+                                      </button>
+                                    )}
+
+                                    {u.status !== 'suspended' && u.status !== 'banned' && (
+                                      <button
+                                        disabled={isActionLoading || isSelf}
+                                        onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'suspended'); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? '#94a3b8' : '#d97706', fontSize: '0.82rem', fontWeight: 600, cursor: isSelf ? 'not-allowed' : 'pointer' }}
+                                      >
+                                        <Clock size={15} color={isSelf ? '#94a3b8' : '#d97706'} />
+                                        <span>Suspend User</span>
+                                      </button>
+                                    )}
+
+                                    {u.status !== 'muted' && (
+                                      <button
+                                        disabled={isActionLoading}
+                                        onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'muted'); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#7c3aed', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
+                                      >
+                                        <VolumeX size={15} color="#7c3aed" />
+                                        <span>Mute User</span>
+                                      </button>
+                                    )}
+
+                                    {u.status !== 'shadowbanned' && (
+                                      <button
+                                        disabled={isActionLoading}
+                                        onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'shadowbanned'); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#475569', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
+                                      >
+                                        <EyeOff size={15} color="#475569" />
+                                        <span>Shadowban</span>
+                                      </button>
+                                    )}
+
+                                    {u.status !== 'active' && (
+                                      <button
+                                        disabled={isActionLoading}
+                                        onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
+                                        style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#1d4ed8', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
+                                      >
+                                        <UserCheck size={15} color="#1d4ed8" />
+                                        <span>Activate Account</span>
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* MOBILE CARD VIEW — Native Clean Mobile Cards */}
+                <div className="admin-mobile-cards" style={{ display: 'none', padding: '0.85rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    {users.map((u) => {
+                      const isSelf = currentUser && currentUser.id === u.id;
+                      const isActionLoading = actionLoadingId === u.id;
+
+                      return (
+                        <div
+                          key={u.id}
+                          style={{
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-glass)',
+                            borderRadius: '14px',
+                            padding: '1rem',
+                            boxShadow: 'var(--shadow-card)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '0.75rem'
+                          }}
+                        >
+                          {/* Top Row: User Avatar, Name, Role & Status Badge */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0, flex: 1 }}>
                               {u.avatarUrl ? (
                                 <img
                                   src={resolveImageUrl(u.avatarUrl)}
                                   alt={u.name}
-                                  style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-glass)' }}
+                                  style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-glass)', flexShrink: 0 }}
                                 />
                               ) : (
-                                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--primary-gradient)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>
+                                <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--primary-gradient)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', flexShrink: 0 }}>
                                   {u.name.charAt(0).toUpperCase()}
                                 </div>
                               )}
-                            </div>
-                            <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{u.name}</span>
-                                {u.isVerified && <VerifiedBadge size={16} />}
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
+                                  <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.92rem', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{u.name}</span>
+                                  {u.isVerified && <VerifiedBadge size={15} />}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                                  <span>ID: #{u.id}</span>
+                                  {u.role === 'admin' && (
+                                    <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'var(--bg-card-hover)', color: 'var(--primary)', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
+                                      ADMIN
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.1rem' }}>
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: #{u.id}</span>
-                                {u.role === 'admin' && (
-                                  <span style={{ fontSize: '0.7rem', fontWeight: 800, background: 'var(--bg-card-hover)', color: 'var(--primary)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
-                                    ADMIN
-                                  </span>
-                                )}
-                              </div>
+                            </div>
+
+                            <span className={`status-badge status-badge-${(u.status || 'active').toLowerCase()}`} style={{ flexShrink: 0 }}>
+                              {u.status}
+                            </span>
+                          </div>
+
+                          {/* Middle Details: Email & IP */}
+                          <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.2rem' }}>
+                              <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{u.email}</span>
+                              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{u.studentId ? `ID: ${u.studentId}` : u.department || ''}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', fontSize: '0.74rem', fontFamily: 'monospace' }}>
+                              <Globe size={12} color="var(--text-muted)" />
+                              <span>IP: {u.lastLoginIp || '127.0.0.1'}</span>
                             </div>
                           </div>
-                        </td>
 
-                        {/* Email & Student ID */}
-                        <td style={{ padding: '1rem 1.25rem', color: 'var(--text-main)' }}>
-                          <div>{u.email}</div>
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                            {u.studentId ? `Student ID: ${u.studentId}` : u.department || 'No department specified'}
-                          </div>
-                        </td>
-
-                        {/* IP Address */}
-                        <td style={{ padding: '1rem 1.25rem' }}>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', padding: '0.25rem 0.65rem', borderRadius: '6px', fontSize: '0.78rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
-                            <Globe size={13} color="var(--text-muted)" />
-                            <span>{u.lastLoginIp || '127.0.0.1'}</span>
-                          </div>
-                        </td>
-
-                        {/* Status */}
-                        <td style={{ padding: '1rem 1.25rem' }}>
-                          <span style={{
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            padding: '0.25rem 0.65rem',
-                            borderRadius: '9999px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.03em',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.3rem',
-                            ...getStatusBadgeStyle(u.status)
-                          }}>
-                            {u.status}
-                          </span>
-                        </td>
-
-                        {/* Manual Verification Badge Toggle */}
-                        <td style={{ padding: '1rem 1.25rem' }}>
-                          <button
-                            disabled={isActionLoading}
-                            onClick={() => handleVerificationToggle(u.id, u.isVerified)}
-                            style={{
-                              background: u.isVerified ? 'var(--bg-card-hover)' : 'var(--bg-card)',
-                              border: `1px solid ${u.isVerified ? 'var(--primary)' : 'var(--border-glass)'}`,
-                              color: u.isVerified ? 'var(--primary)' : 'var(--text-muted)',
-                              padding: '0.35rem 0.75rem',
-                              borderRadius: '8px',
-                              fontWeight: 600,
-                              fontSize: '0.78rem',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem'
-                            }}
-                          >
-                            <CheckCircle size={14} color={u.isVerified ? 'var(--primary)' : 'var(--text-muted)'} />
-                            <span>{u.isVerified ? 'Verified' : 'Verify'}</span>
-                          </button>
-                        </td>
-
-                        {/* Single Action Dropdown Menu */}
-                        <td style={{ padding: '1rem 1.25rem', textAlign: 'right' }}>
-                          <div className="action-menu-container" style={{ position: 'relative', display: 'inline-block' }}>
+                          {/* Bottom Action Bar */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', paddingTop: '0.2rem' }}>
                             <button
                               disabled={isActionLoading}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenuUserId(prev => prev === u.id ? null : u.id);
-                              }}
+                              onClick={() => handleVerificationToggle(u.id, u.isVerified)}
                               style={{
-                                background: openMenuUserId === u.id ? 'var(--bg-card-hover)' : 'var(--bg-card)',
-                                border: '1px solid var(--border-glass)',
-                                color: 'var(--text-main)',
-                                padding: '0.4rem 0.8rem',
+                                background: u.isVerified ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                                border: `1px solid ${u.isVerified ? 'var(--primary)' : 'var(--border-glass)'}`,
+                                color: u.isVerified ? 'var(--primary)' : 'var(--text-muted)',
+                                padding: '0.4rem 0.85rem',
                                 borderRadius: '8px',
-                                fontSize: '0.82rem',
-                                fontWeight: 700,
+                                fontWeight: 600,
+                                fontSize: '0.78rem',
                                 cursor: 'pointer',
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '0.4rem',
-                                transition: 'all 0.15s ease',
-                                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
+                                gap: '0.35rem'
                               }}
                             >
-                              <span>Actions</span>
-                              <ChevronDown 
-                                size={14} 
-                                style={{ 
-                                  transform: openMenuUserId === u.id ? 'rotate(180deg)' : 'rotate(0deg)',
-                                  transition: 'transform 0.15s ease'
-                                }} 
-                              />
+                              <CheckCircle size={14} color={u.isVerified ? 'var(--primary)' : 'var(--text-muted)'} />
+                              <span>{u.isVerified ? 'Verified' : 'Verify Badge'}</span>
                             </button>
 
-                            {openMenuUserId === u.id && (
-                              <div 
+                            <div className="action-menu-container" style={{ position: 'relative' }}>
+                              <button
+                                disabled={isActionLoading}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuUserId(prev => prev === u.id ? null : u.id);
+                                }}
                                 style={{
-                                  position: 'absolute',
-                                  right: 0,
-                                  top: 'calc(100% + 6px)',
-                                  background: 'var(--bg-card)',
+                                  background: 'var(--bg-card-hover)',
+                                  color: 'var(--text-main)',
                                   border: '1px solid var(--border-glass)',
-                                  borderRadius: '10px',
-                                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
-                                  padding: '0.35rem',
-                                  minWidth: '165px',
-                                  zIndex: 100,
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  gap: '0.2rem',
-                                  textAlign: 'left'
+                                  padding: '0.4rem 0.85rem',
+                                  borderRadius: '8px',
+                                  fontSize: '0.78rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '0.35rem'
                                 }}
                               >
-                                {u.status !== 'banned' ? (
-                                  <button
-                                    disabled={isActionLoading || isSelf}
-                                    onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'banned'); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? '#94a3b8' : '#dc2626', fontSize: '0.82rem', fontWeight: 600, cursor: isSelf ? 'not-allowed' : 'pointer' }}
-                                  >
-                                    <Ban size={15} color={isSelf ? '#94a3b8' : '#dc2626'} />
-                                    <span>Ban User</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    disabled={isActionLoading}
-                                    onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#059669', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
-                                  >
-                                    <UserCheck size={15} color="#059669" />
-                                    <span>Unban User</span>
-                                  </button>
-                                )}
+                                <span>Manage Actions</span>
+                                <ChevronDown size={13} />
+                              </button>
 
-                                {u.status !== 'suspended' && u.status !== 'banned' && (
-                                  <button
-                                    disabled={isActionLoading || isSelf}
-                                    onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'suspended'); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? '#94a3b8' : '#d97706', fontSize: '0.82rem', fontWeight: 600, cursor: isSelf ? 'not-allowed' : 'pointer' }}
-                                  >
-                                    <Clock size={15} color={isSelf ? '#94a3b8' : '#d97706'} />
-                                    <span>Suspend User</span>
-                                  </button>
-                                )}
+                              {openMenuUserId === u.id && (
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    right: 0,
+                                    bottom: 'calc(100% + 6px)',
+                                    background: 'var(--bg-card)',
+                                    border: '1px solid var(--border-glass)',
+                                    borderRadius: '10px',
+                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
+                                    padding: '0.35rem',
+                                    minWidth: '160px',
+                                    zIndex: 100,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.2rem'
+                                  }}
+                                >
+                                  {u.status !== 'banned' ? (
+                                    <button
+                                      disabled={isActionLoading || isSelf}
+                                      onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'banned'); }}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? 'var(--text-muted)' : '#dc2626', fontSize: '0.78rem', fontWeight: 600 }}
+                                    >
+                                      <Ban size={14} color={isSelf ? 'var(--text-muted)' : '#dc2626'} />
+                                      <span>Ban User</span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      disabled={isActionLoading}
+                                      onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#059669', fontSize: '0.78rem', fontWeight: 600 }}
+                                    >
+                                      <UserCheck size={14} color="#059669" />
+                                      <span>Unban User</span>
+                                    </button>
+                                  )}
 
-                                {u.status !== 'muted' && (
-                                  <button
-                                    disabled={isActionLoading}
-                                    onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'muted'); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#7c3aed', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
-                                  >
-                                    <VolumeX size={15} color="#7c3aed" />
-                                    <span>Mute User</span>
-                                  </button>
-                                )}
+                                  {u.status !== 'suspended' && u.status !== 'banned' && (
+                                    <button
+                                      disabled={isActionLoading || isSelf}
+                                      onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'suspended'); }}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? 'var(--text-muted)' : '#d97706', fontSize: '0.78rem', fontWeight: 600 }}
+                                    >
+                                      <Clock size={14} color={isSelf ? 'var(--text-muted)' : '#d97706'} />
+                                      <span>Suspend</span>
+                                    </button>
+                                  )}
 
-                                {u.status !== 'shadowbanned' && (
-                                  <button
-                                    disabled={isActionLoading}
-                                    onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'shadowbanned'); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#475569', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
-                                  >
-                                    <EyeOff size={15} color="#475569" />
-                                    <span>Shadowban</span>
-                                  </button>
-                                )}
+                                  {u.status !== 'muted' && (
+                                    <button
+                                      disabled={isActionLoading}
+                                      onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'muted'); }}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#7c3aed', fontSize: '0.78rem', fontWeight: 600 }}
+                                    >
+                                      <VolumeX size={14} color="#7c3aed" />
+                                      <span>Mute</span>
+                                    </button>
+                                  )}
 
-                                {u.status !== 'active' && (
-                                  <button
-                                    disabled={isActionLoading}
-                                    onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', width: '100%', padding: '0.5rem 0.75rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#1d4ed8', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
-                                  >
-                                    <UserCheck size={15} color="#1d4ed8" />
-                                    <span>Activate Account</span>
-                                  </button>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </td>
+                                  {u.status !== 'shadowbanned' && (
+                                    <button
+                                      disabled={isActionLoading}
+                                      onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'shadowbanned'); }}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600 }}
+                                    >
+                                      <EyeOff size={14} color="var(--text-muted)" />
+                                      <span>Shadowban</span>
+                                    </button>
+                                  )}
 
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* MOBILE CARD VIEW — Native Clean Mobile Cards */}
-            <div className="admin-mobile-cards" style={{ display: 'none', padding: '0.85rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {users.map((u) => {
-                  const isSelf = currentUser && currentUser.id === u.id;
-                  const isActionLoading = actionLoadingId === u.id;
-
-                  return (
-                    <div 
-                      key={u.id}
-                      style={{
-                        background: 'var(--bg-card)',
-                        border: '1px solid var(--border-glass)',
-                        borderRadius: '14px',
-                        padding: '1rem',
-                        boxShadow: 'var(--shadow-card)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.75rem'
-                      }}
-                    >
-                      {/* Top Row: User Avatar, Name, Role & Status Badge */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                          {u.avatarUrl ? (
-                            <img
-                              src={resolveImageUrl(u.avatarUrl)}
-                              alt={u.name}
-                              style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-glass)' }}
-                            />
-                          ) : (
-                            <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--primary-gradient)', color: '#ffffff', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
-                              {u.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                              <span style={{ fontWeight: 700, color: 'var(--text-main)', fontSize: '0.92rem' }}>{u.name}</span>
-                              {u.isVerified && <VerifiedBadge size={15} />}
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                              <span>ID: #{u.id}</span>
-                              {u.role === 'admin' && (
-                                <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'var(--bg-card-hover)', color: 'var(--primary)', padding: '0.05rem 0.35rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
-                                  ADMIN
-                                </span>
+                                  {u.status !== 'active' && (
+                                    <button
+                                      disabled={isActionLoading}
+                                      onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 600 }}
+                                    >
+                                      <UserCheck size={14} color="var(--primary)" />
+                                      <span>Activate Account</span>
+                                    </button>
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>
+
                         </div>
-
-                        <span style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          padding: '0.2rem 0.55rem',
-                          borderRadius: '9999px',
-                          textTransform: 'uppercase',
-                          ...getStatusBadgeStyle(u.status)
-                        }}>
-                          {u.status}
-                        </span>
-                      </div>
-
-                      {/* Middle Details: Email & IP */}
-                      <div style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border-glass)', padding: '0.65rem 0.85rem', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.2rem' }}>
-                          <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{u.email}</span>
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{u.studentId ? `ID: ${u.studentId}` : u.department || ''}</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)', fontSize: '0.74rem', fontFamily: 'monospace' }}>
-                          <Globe size={12} color="var(--text-muted)" />
-                          <span>IP: {u.lastLoginIp || '127.0.0.1'}</span>
-                        </div>
-                      </div>
-
-                      {/* Bottom Action Bar */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', paddingTop: '0.2rem' }}>
-                        <button
-                          disabled={isActionLoading}
-                          onClick={() => handleVerificationToggle(u.id, u.isVerified)}
-                          style={{
-                            background: u.isVerified ? 'var(--bg-card-hover)' : 'var(--bg-card)',
-                            border: `1px solid ${u.isVerified ? 'var(--primary)' : 'var(--border-glass)'}`,
-                            color: u.isVerified ? 'var(--primary)' : 'var(--text-muted)',
-                            padding: '0.4rem 0.85rem',
-                            borderRadius: '8px',
-                            fontWeight: 600,
-                            fontSize: '0.78rem',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '0.35rem'
-                          }}
-                        >
-                          <CheckCircle size={14} color={u.isVerified ? 'var(--primary)' : 'var(--text-muted)'} />
-                          <span>{u.isVerified ? 'Verified' : 'Verify Badge'}</span>
-                        </button>
-
-                        <div className="action-menu-container" style={{ position: 'relative' }}>
-                          <button
-                            disabled={isActionLoading}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setOpenMenuUserId(prev => prev === u.id ? null : u.id);
-                            }}
-                            style={{
-                              background: 'var(--bg-card-hover)',
-                              color: 'var(--text-main)',
-                              border: '1px solid var(--border-glass)',
-                              padding: '0.4rem 0.85rem',
-                              borderRadius: '8px',
-                              fontSize: '0.78rem',
-                              fontWeight: 700,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem'
-                            }}
-                          >
-                            <span>Manage Actions</span>
-                            <ChevronDown size={13} />
-                          </button>
-
-                          {openMenuUserId === u.id && (
-                            <div 
-                              style={{
-                                position: 'absolute',
-                                right: 0,
-                                bottom: 'calc(100% + 6px)',
-                                background: 'var(--bg-card)',
-                                border: '1px solid var(--border-glass)',
-                                borderRadius: '10px',
-                                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
-                                padding: '0.35rem',
-                                minWidth: '160px',
-                                zIndex: 100,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '0.2rem'
-                              }}
-                            >
-                              {u.status !== 'banned' ? (
-                                <button
-                                  disabled={isActionLoading || isSelf}
-                                  onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'banned'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? 'var(--text-muted)' : '#dc2626', fontSize: '0.78rem', fontWeight: 600 }}
-                                >
-                                  <Ban size={14} color={isSelf ? 'var(--text-muted)' : '#dc2626'} />
-                                  <span>Ban User</span>
-                                </button>
-                              ) : (
-                                <button
-                                  disabled={isActionLoading}
-                                  onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#059669', fontSize: '0.78rem', fontWeight: 600 }}
-                                >
-                                  <UserCheck size={14} color="#059669" />
-                                  <span>Unban User</span>
-                                </button>
-                              )}
-
-                              {u.status !== 'suspended' && u.status !== 'banned' && (
-                                <button
-                                  disabled={isActionLoading || isSelf}
-                                  onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'suspended'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: isSelf ? 'var(--text-muted)' : '#d97706', fontSize: '0.78rem', fontWeight: 600 }}
-                                >
-                                  <Clock size={14} color={isSelf ? 'var(--text-muted)' : '#d97706'} />
-                                  <span>Suspend</span>
-                                </button>
-                              )}
-
-                              {u.status !== 'muted' && (
-                                <button
-                                  disabled={isActionLoading}
-                                  onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'muted'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: '#7c3aed', fontSize: '0.78rem', fontWeight: 600 }}
-                                >
-                                  <VolumeX size={14} color="#7c3aed" />
-                                  <span>Mute</span>
-                                </button>
-                              )}
-
-                              {u.status !== 'shadowbanned' && (
-                                <button
-                                  disabled={isActionLoading}
-                                  onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'shadowbanned'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: 'var(--text-muted)', fontSize: '0.78rem', fontWeight: 600 }}
-                                >
-                                  <EyeOff size={14} color="var(--text-muted)" />
-                                  <span>Shadowban</span>
-                                </button>
-                              )}
-
-                              {u.status !== 'active' && (
-                                <button
-                                  disabled={isActionLoading}
-                                  onClick={() => { setOpenMenuUserId(null); handleStatusChange(u.id, 'active'); }}
-                                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px', border: 'none', background: 'transparent', color: 'var(--primary)', fontSize: '0.78rem', fontWeight: 600 }}
-                                >
-                                  <UserCheck size={14} color="var(--primary)" />
-                                  <span>Activate Account</span>
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </>
-  )}
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Embedded Responsive CSS for Admin Dashboard Mobile View */}
       <style>{`
@@ -1360,9 +1296,9 @@ export default function AdminDashboard({ currentUser }) {
       `}</style>
 
       {/* Admin Media Lightbox Modal */}
-      <MediaLightboxModal 
-        media={activeMedia} 
-        onClose={() => setActiveMedia(null)} 
+      <MediaLightboxModal
+        media={activeMedia}
+        onClose={() => setActiveMedia(null)}
       />
 
     </div>

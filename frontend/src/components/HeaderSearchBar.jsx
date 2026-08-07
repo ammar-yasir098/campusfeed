@@ -1,8 +1,8 @@
 import React from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, Sun, Moon } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
-export default function HeaderSearchBar({ searchQuery, setSearchQuery, currentUser }) {
+export default function HeaderSearchBar({ searchQuery, setSearchQuery, currentUser, theme, toggleTheme }) {
   return (
     <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
       
@@ -52,6 +52,33 @@ export default function HeaderSearchBar({ searchQuery, setSearchQuery, currentUs
           </button>
         )}
       </div>
+
+      {/* Guest-Only Light / Dark Mode Toggle Button */}
+      {!currentUser && toggleTheme && (
+        <button
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          style={{
+            height: '42px',
+            padding: '0 0.85rem',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-glass)',
+            color: 'var(--text-main)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)',
+            flexShrink: 0
+          }}
+        >
+          {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#0f2942" />}
+        </button>
+      )}
 
       {/* Notification Bell — pinned top-right of content area (desktop only) */}
       <div className="desktop-notif-bell">

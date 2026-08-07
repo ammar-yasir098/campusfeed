@@ -58,7 +58,7 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
       <div className="glass-panel modal-content" onClick={(e) => e.stopPropagation()} style={{ padding: '1.75rem' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-          <h2 className="font-heading" style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f2942' }}>
+          <h2 className="font-heading" style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-main)' }}>
             Edit UMT Student Profile
           </h2>
           <button className="btn-icon" onClick={onClose}>
@@ -78,9 +78,9 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
           {/* Avatar Upload */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', marginBottom: '0.5rem' }}>
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar Preview" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #ca8a04' }} />
+              <img src={avatarPreview} alt="Avatar Preview" style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }} />
             ) : (
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--gold-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f2942', fontSize: '1.5rem', fontWeight: 800 }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '1.5rem', fontWeight: 800 }}>
                 {name ? name.charAt(0).toUpperCase() : 'U'}
               </div>
             )}
@@ -95,25 +95,25 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
 
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <label className="input-label" style={{ margin: 0, fontWeight: 700, color: '#1e293b' }}>Full Name</label>
+              <label className="input-label" style={{ margin: 0, fontWeight: 700, color: 'var(--text-main)' }}>Full Name</label>
               <span style={{
                 fontSize: '0.7rem',
-                color: '#475569',
+                color: 'var(--text-muted)',
                 fontWeight: 700,
-                background: '#f1f5f9',
-                border: '1px solid #cbd5e1',
+                background: 'var(--bg-card-hover)',
+                border: '1px solid var(--border-glass)',
                 padding: '0.15rem 0.55rem',
                 borderRadius: '6px',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.3rem'
               }}>
-                <Lock size={11} color="#64748b" /> Locked
+                <Lock size={11} color="var(--text-muted)" /> Locked
               </span>
             </div>
 
             <div style={{ position: 'relative' }}>
-              <Lock size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+              <Lock size={15} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input 
                 type="text" 
                 className="input-field" 
@@ -121,17 +121,17 @@ export default function ProfileModal({ isOpen, onClose, currentUser, onProfileUp
                 disabled={true}
                 style={{
                   paddingLeft: '2.4rem',
-                  background: '#f8fafc',
-                  color: '#334155',
+                  background: 'var(--bg-card-hover)',
+                  color: 'var(--text-main)',
                   fontWeight: 600,
                   cursor: 'not-allowed',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--border-glass)',
                   borderRadius: '10px'
                 }}
                 title="Full name cannot be changed after account creation"
               />
             </div>
-            <span style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '0.35rem', display: 'block', fontWeight: 500 }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.35rem', display: 'block', fontWeight: 500 }}>
               Full name is permanently linked to your student account and cannot be modified.
             </span>
           </div>

@@ -230,7 +230,7 @@ h6,
 
 .btn-icon:hover {
   color: var(--text-main);
-  background: #f1f5f9;
+  background: var(--bg-card-hover);
 }
 
 /* Sidebar Nav Links */
@@ -253,7 +253,7 @@ h6,
 
 .nav-link:hover {
   color: var(--primary);
-  background: #f1f5f9;
+  background: var(--bg-card-hover);
 }
 
 .nav-link.active {
@@ -338,6 +338,347 @@ h6,
   background: #d1fae5;
   color: #065f46;
   border: 1px solid #6ee7b7;
+}
+
+/* Dark Mode Professional Translucent Badges */
+[data-theme="dark"] .badge-Announcements {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme="dark"] .badge-Events {
+  background: rgba(168, 85, 247, 0.16) !important;
+  color: #c084fc !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+}
+
+[data-theme="dark"] .badge-General {
+  background: rgba(56, 189, 248, 0.16) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+[data-theme="dark"] .badge-Lost-Found,
+[data-theme="dark"] .badge-Lost\ \&\ Found {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="dark"] .badge-Buy-Sell,
+[data-theme="dark"] .badge-Buy\ \&\ Sell {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #6ee7b7 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+/* POLL Badge — Light & Dark Mode */
+.badge-poll-pill {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+}
+
+[data-theme="dark"] .badge-poll-pill {
+  background: rgba(56, 189, 248, 0.16) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+}
+
+/* Poll Option Percentage Pills — Light & Dark Mode */
+.poll-option-badge {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.poll-option-badge.selected {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.poll-option-subtext {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+[data-theme="dark"] .poll-option-badge {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-glass) !important;
+}
+
+[data-theme="dark"] .poll-option-badge.selected {
+  background: rgba(56, 189, 248, 0.2) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+}
+
+[data-theme="dark"] .poll-option-subtext {
+  color: var(--text-muted) !important;
+}
+
+/* User Roster Status Badges — Light & Dark Mode */
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.status-badge-active {
+  background: #d1fae5;
+  color: #047857;
+  border: 1px solid #6ee7b7;
+}
+
+.status-badge-suspended {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.status-badge-banned {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.status-badge-muted {
+  background: #f3e8ff;
+  color: #7c3aed;
+  border: 1px solid #d8b4fe;
+}
+
+.status-badge-shadowbanned {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+[data-theme="dark"] .status-badge-active {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #6ee7b7 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge-suspended {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge-banned {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge-muted {
+  background: rgba(168, 85, 247, 0.16) !important;
+  color: #c084fc !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge-shadowbanned {
+  background: rgba(148, 163, 184, 0.16) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+}
+
+/* Admin Verification Toggle Button — Light & Dark Mode */
+.admin-verify-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.18s ease;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.admin-verify-btn.verified {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+}
+
+[data-theme="dark"] .admin-verify-btn {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .admin-verify-btn.verified {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  color: #38bdf8 !important;
+}
+
+/* Moderation Queue Badges — Light & Dark Theme */
+.report-filed-badge {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-theme="dark"] .report-filed-badge {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.complaint-reason-badge {
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.complaint-reason-spam {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.complaint-reason-harassment {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.complaint-reason-other {
+  background: #f3e8ff;
+  color: #7c3aed;
+  border: 1px solid #d8b4fe;
+}
+
+[data-theme="dark"] .complaint-reason-spam {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fcd34d !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="dark"] .complaint-reason-harassment {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme="dark"] .complaint-reason-other {
+  background: rgba(168, 85, 247, 0.16) !important;
+  color: #c084fc !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+}
+
+/* Admin Takedown Banner — Dual Theme Support */
+.admin-takedown-banner {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  margin: 0.75rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.takedown-icon-box {
+  padding: 0.45rem;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.takedown-title {
+  color: #991b1b;
+  font-weight: 800;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.takedown-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.takedown-body {
+  color: #7f1d1d;
+  font-size: 0.86rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.45;
+}
+
+.takedown-footer {
+  font-size: 0.74rem;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.takedown-admin-name {
+  color: #991b1b;
+}
+
+/* Dark Mode Overrides for Admin Takedown Banner */
+[data-theme="dark"] .admin-takedown-banner {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+[data-theme="dark"] .takedown-icon-box {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .takedown-title {
+  color: #fca5a5 !important;
+}
+
+[data-theme="dark"] .takedown-badge {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+[data-theme="dark"] .takedown-body {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .takedown-footer {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .takedown-admin-name {
+  color: #fca5a5 !important;
 }
 
 /* Modal Overlay */

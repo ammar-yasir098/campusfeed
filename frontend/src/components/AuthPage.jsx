@@ -112,7 +112,6 @@ export default function AuthPage({ initialMode = 'login', onAuthSuccess, onCance
         borderRadius: '24px',
         overflow: 'hidden',
         background: 'var(--bg-card)',
-        border: '1px solid var(--border-glass)',
         boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.4)',
         position: 'relative',
         zIndex: 1
