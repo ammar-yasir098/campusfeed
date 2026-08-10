@@ -302,12 +302,19 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             </div>
           )}
 
-          <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
             <div
               onClick={(e) => handleAuthorClick(e, postData.author?.id)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, cursor: 'pointer' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                minWidth: 0,
+                maxWidth: '100%',
+                overflow: 'hidden',
+                cursor: 'pointer'
+              }}
             >
-
               <h4
                 className="author-name-link"
                 style={{
@@ -318,7 +325,8 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '100%'
+                  minWidth: 0,
+                  flexShrink: 1
                 }}
                 title={`View ${postData.author?.name || 'student'}'s profile`}
               >
@@ -333,6 +341,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
               <span>{formatTime(postData.createdAt)}</span>
             </div>
           </div>
+
         </div>
 
 

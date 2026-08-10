@@ -81,14 +81,18 @@ export default function MessagesView({ currentUser, onRequireAuth }) {
 
     if (routeConversationId) {
       const convId = parseInt(routeConversationId, 10);
+      if (activeConversation && activeConversation.id === convId) return;
+
       const found = conversations.find(c => c.id === convId);
       if (found) {
-        selectConversation(found);
+        selectConversation(found, false);
       } else {
         loadConversationById(convId);
       }
     } else if (targetUserId) {
-      startChatWithUser(parseInt(targetUserId, 10));
+      const targetId = parseInt(targetUserId, 10);
+      if (activeConversation && activeConversation.otherUser && activeConversation.otherUser.id === targetId) return;
+      startChatWithUser(targetId);
     }
   }, [routeConversationId, targetUserId, loadingConversations]);
 
@@ -109,9 +113,14 @@ export default function MessagesView({ currentUser, onRequireAuth }) {
     }
   };
 
-  const selectConversation = async (conv) => {
+  const selectConversation = async (conv, shouldNavigate = true) => {
+    if (activeConversation && activeConversation.id === conv.id && messages.length > 0) return;
+
     setActiveConversation(conv);
-    navigate(`/messages/${conv.id}`, { replace: true });
+    if (shouldNavigate && routeConversationId !== String(conv.id)) {
+      navigate(`/messages/${conv.id}`, { replace: true });
+    }
+
     try {
       setLoadingMessages(true);
       const res = await api.getConversationMessages(conv.id);
@@ -483,9 +492,12 @@ export default function MessagesView({ currentUser, onRequireAuth }) {
           <>
             {/* Header */}
             <div className="chat-header">
-              <button className="mobile-back-btn" onClick={() => setActiveConversation(null)}>
-                <ArrowLeft size={20} />
+              <button className="mobile-back-btn" onClick={() => { setActiveConversation(null); navigate('/messages', { replace: true }); }}>
+                <ArrowLeft size={18} />
+                <span>Back</span>
               </button>
+
+
               <div
                 className="chat-user-profile"
                 onClick={() => navigate(`/profile?id=${activeConversation.otherUser?.id}`)}
@@ -631,8 +643,9 @@ export default function MessagesView({ currentUser, onRequireAuth }) {
 
       {/* Lightbox Modal for attached images */}
       {lightboxImage && (
-        <ImageLightboxModal imageUrl={lightboxImage} onClose={() => setLightboxImage(null)} />
+        <ImageLightboxModal src={lightboxImage} onClose={() => setLightboxImage(null)} />
       )}
+
     </div>
   );
 }

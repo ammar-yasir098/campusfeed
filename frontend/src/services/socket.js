@@ -1,7 +1,5 @@
 import { io } from 'socket.io-client';
-import { getToken } from './api';
-
-const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { getToken, getApiBaseUrl } from './api';
 
 let socket = null;
 
@@ -19,9 +17,12 @@ export const initSocket = () => {
     return socket;
   }
 
-  socket = io(SOCKET_URL, {
+  const socketUrl = getApiBaseUrl();
+
+  socket = io(socketUrl, {
     auth: { token },
     autoConnect: true,
+
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,

@@ -5,10 +5,11 @@ const { User, DirectMessage, Conversation } = require('../models');
 function initSocket(server) {
     const io = new Server(server, {
         cors: {
-            origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+            origin: true,
             credentials: true
         }
     });
+
 
     // Authentication middleware for Socket.io
     io.use((socket, next) => {

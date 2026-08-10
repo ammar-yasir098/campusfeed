@@ -1433,7 +1433,7 @@ h6,
   padding: 0.3rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .messages-container {
     grid-template-columns: 1fr;
     height: calc(100vh - 100px);
@@ -1448,14 +1448,23 @@ h6,
   }
 
   .mobile-back-btn {
-    display: flex;
+    display: flex !important;
     align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    background: var(--bg-card-hover);
+    color: var(--text-main);
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-right: 0.5rem;
   }
 
   .message-bubble {
     max-width: 85%;
   }
 }
+
 
 /* Post Return Scroll & Highlight Ring Animation */
 @keyframes postTargetGlow {

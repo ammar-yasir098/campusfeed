@@ -215,9 +215,10 @@ router.get('/', async (req, res) => {
         const currentUserId = getUserIdFromHeader(req);
         const whereClause = {};
 
-        if (category && category !== 'All') {
+        if (category && category.toUpperCase() !== 'ALL') {
             whereClause.category = category;
         }
+
 
         if (search && search.trim() !== '') {
             const q = `%${search.trim()}%`;

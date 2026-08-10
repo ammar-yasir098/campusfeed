@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  return `${window.location.protocol}//${window.location.hostname}:5000`;
+};
 
 // Token Management Helpers
 export const getToken = () => localStorage.getItem('token');
@@ -9,8 +12,9 @@ export const removeToken = () => localStorage.removeItem('token');
 export const resolveImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  if (url.startsWith('/')) return `${API_BASE_URL}${url}`;
-  return `${API_BASE_URL}/${url}`;
+  const baseUrl = getApiBaseUrl();
+  if (url.startsWith('/')) return `${baseUrl}${url}`;
+  return `${baseUrl}/${url}`;
 };
 
 // Generic fetch wrapper
@@ -27,10 +31,12 @@ async function request(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
     headers,
   });
+
 
   const data = await response.json().catch(() => ({}));
 

@@ -108,14 +108,14 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
       {/* Profile Header Card */}
       <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', background: 'var(--bg-card)' }}>
 
-        
+
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
-          
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
             {user.avatarUrl ? (
-              <img 
-                src={resolveImageUrl(user.avatarUrl)} 
-                alt={user.name} 
+              <img
+                src={resolveImageUrl(user.avatarUrl)}
+                alt={user.name}
                 style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary)', boxShadow: 'var(--shadow-glow)' }}
               />
             ) : (
@@ -134,7 +134,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
                 {user.email}
               </p>
-              
+
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginTop: '0.4rem' }}>
                 {user.department && (
                   <span className="badge" style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}>
@@ -251,9 +251,9 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
           ) : (
 
             user.posts.map((post) => (
-              <PostCard 
-                key={post.id} 
-                post={{ ...post, author: { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl } }} 
+              <PostCard
+                key={post.id}
+                post={{ ...post, author: { id: user.id, name: user.name, email: user.email, avatarUrl: user.avatarUrl } }}
                 currentUser={currentUser}
                 onDeletePost={onDeletePost}
               />
@@ -270,9 +270,9 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
             </div>
           ) : (
             bookmarkedPosts.map((post) => (
-              <PostCard 
-                key={post.id} 
-                post={post} 
+              <PostCard
+                key={post.id}
+                post={post}
                 currentUser={currentUser}
                 onDeletePost={onDeletePost}
               />
