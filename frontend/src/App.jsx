@@ -11,7 +11,9 @@ import AdminDashboard from './components/AdminDashboard';
 import NotificationBell from './components/NotificationBell';
 import PostDetailView from './components/PostDetailView';
 import AuthNoticeModal from './components/AuthNoticeModal';
+import MessagesView from './components/MessagesView';
 import { api, getToken, removeToken } from './services/api';
+import { initSocket, disconnectSocket } from './services/socket';
 import { Sparkles, MessageSquare, PlusCircle, RefreshCw, ChevronDown, Menu, GraduationCap, Sun, Moon } from 'lucide-react';
 
 export default function App() {
@@ -21,6 +23,8 @@ export default function App() {
 
   const [currentUser, setCurrentUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [unreadDmCount, setUnreadDmCount] = useState(0);
+
 
   // Theme Management (Light / Dark mode persistence)
   const [theme, setTheme] = useState(() => {
@@ -95,7 +99,7 @@ export default function App() {
   const isAuthPage = path === '/login' || path === '/signup';
   const activeTab = path.replace('/', '') || 'feed';
 
-  // ── Initial Auth Check ──────────────────────────────────────────────────────
+  // ── Initial Auth Check & Socket Setup ─────────────────────────────────────
   useEffect(() => {
     const token = getToken();
     if (token) {
@@ -107,6 +111,71 @@ export default function App() {
       setAuthChecked(true);
     }
   }, []);
+
+  // Sync Socket connection and unread DM counter
+  useEffect(() => {
+    if (!currentUser) {
+      disconnectSocket();
+      setUnreadDmCount(0);
+      return;
+    }
+
+    const fetchUnreadDmCount = async () => {
+      try {
+        const res = await api.getUnreadDmCount();
+        setUnreadDmCount(res.unreadCount || 0);
+      } catch (err) {
+        console.error('Failed to fetch unread DM count:', err);
+      }
+    };
+
+    fetchUnreadDmCount();
+
+    const socket = initSocket();
+    if (socket) {
+      const handleUnreadCount = ({ unreadCount }) => {
+        setUnreadDmCount(unreadCount);
+      };
+
+      const handleNewMessage = (msg) => {
+        if (msg.senderId !== currentUser.id && !location.pathname.startsWith('/messages')) {
+          fetchUnreadDmCount();
+        }
+      };
+
+      socket.on('unread_dm_count', handleUnreadCount);
+      socket.on('new_direct_message', handleNewMessage);
+
+      return () => {
+        socket.off('unread_dm_count', handleUnreadCount);
+        socket.off('new_direct_message', handleNewMessage);
+      };
+    }
+  }, [currentUser, location.pathname]);
+
+  // ── Scroll Restoration for Target Post when returning to Feed ────────────
+  useEffect(() => {
+    if (activeTab !== 'feed' || loadingPosts || posts.length === 0) return;
+
+    const targetPostId = sessionStorage.getItem('campusfeed_target_post');
+    if (targetPostId) {
+      const el = document.getElementById(`post-${targetPostId}`);
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('post-target-highlight');
+          setTimeout(() => {
+            el.classList.remove('post-target-highlight');
+            sessionStorage.removeItem('campusfeed_target_post');
+          }, 2200);
+        }, 150);
+      } else if (hasMore && !loadingMore) {
+        loadMorePosts();
+      }
+    }
+  }, [posts, activeTab, loadingPosts]);
+
+
 
   // ── Fetch Posts ─────────────────────────────────────────────────────────────
   const fetchPosts = async () => {
@@ -314,12 +383,13 @@ export default function App() {
         setActiveTab={(tab) => { navigate(`/${tab}`); setIsMobileMenuOpen(false); }}
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => { handleSelectCategory(cat); setIsMobileMenuOpen(false); }}
-        onOpenCreateModal={() => { setIsCreateModalOpen(true); setIsMobileMenuOpen(false); }}
-        onOpenAuthModal={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
-        onLogout={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+        onOpenCreateModal={() => setIsCreateModalOpen(true)}
+        onOpenAuthModal={() => setAuthNoticeModal({ isOpen: true, actionName: 'access student portal features' })}
+        onLogout={handleLogout}
         isMobileOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
         bookmarkCount={bookmarkedPosts.length}
+        unreadDmCount={unreadDmCount}
         theme={theme}
         toggleTheme={toggleTheme}
       />
@@ -332,7 +402,20 @@ export default function App() {
             {/* Default → feed */}
             <Route path="/" element={<Navigate to="/feed" replace />} />
 
+            {/* DIRECT MESSAGES */}
+            <Route path="/messages" element={
+              currentUser ? (
+                <MessagesView currentUser={currentUser} onRequireAuth={handleRequireAuth} />
+              ) : <Navigate to="/login" replace />
+            } />
+            <Route path="/messages/:conversationId" element={
+              currentUser ? (
+                <MessagesView currentUser={currentUser} onRequireAuth={handleRequireAuth} />
+              ) : <Navigate to="/login" replace />
+            } />
+
             {/* FEED */}
+
             <Route path="/feed" element={
               <div>
                 <HeaderSearchBar searchQuery={searchQuery} setSearchQuery={handleSearchQueryChange} selectedCategory={selectedCategory} onSelectCategory={handleSelectCategory} currentUser={currentUser} theme={theme} toggleTheme={toggleTheme} />

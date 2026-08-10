@@ -1,10 +1,12 @@
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
 const sequelize = require('./config/database');
-require('./models'); // Imports models and associations (User, Post, Like, Comment, Bookmark)
+require('./models'); // Imports models and associations (User, Post, Like, Comment, Bookmark, Conversation, DirectMessage)
+const initSocket = require('./config/socket');
 
 const authRoutes = require('./Routes/authRoutes');
 const postRoutes = require('./Routes/postRoutes');
@@ -12,8 +14,14 @@ const userRoutes = require('./Routes/userRoutes');
 const uploadRoutes = require('./Routes/uploadRoutes');
 const adminRoutes = require('./Routes/adminRoutes');
 const notificationRoutes = require('./Routes/notificationRoutes');
+const messageRoutes = require('./Routes/messageRoutes');
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io and attach to express app
+const io = initSocket(server);
+app.set('io', io);
 
 // CORS — only allow configured frontend origin
 app.use(cors({
@@ -32,6 +40,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.get('/', (req, res) => {
   res.send('CampusFeed backend is running!');
@@ -50,10 +59,10 @@ sequelize.authenticate()
   })
   .then(() => {
     console.log(`Database models synchronized. (mode: ${isProduction ? 'production — no alter' : 'development — alter:true'})`);
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+    server.listen(PORT, () => {
+      console.log(`Server running with Socket.io on port ${PORT}`);
     });
   })
   .catch((err) => {
     console.error('PostgreSQL connection error:', err.message);
-  });
+  });

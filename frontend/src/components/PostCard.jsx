@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, MessageSquare, Bookmark, Trash2, Send, Clock, BarChart2, CheckCircle2, AlertCircle, Info, ShieldAlert, Flag, X, MoreVertical, Maximize2, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import VerifiedBadge from './VerifiedBadge';
 import MediaLightboxModal from './MediaLightboxModal';
 
 export default function PostCard({ post, currentUser, onDeletePost, onRequireAuth, defaultShowComments = false }) {
+  const navigate = useNavigate();
   const [postData, setPostData] = useState(post);
+
   const [activeMedia, setActiveMedia] = useState(null);
   const [currentImgIdx, setCurrentImgIdx] = useState(0);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
@@ -63,7 +66,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     const handleFullscreenIntercept = (e) => {
       if (document.fullscreenElement === videoEl || document.webkitFullscreenElement === videoEl) {
         if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
+          document.exitFullscreen().catch(() => { });
         } else if (document.webkitExitFullscreen) {
           document.webkitExitFullscreen();
         }
@@ -85,7 +88,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     setTimeout(() => {
       if (videoRef.current) {
         videoRef.current.preload = 'auto';
-        videoRef.current.play().catch(() => {});
+        videoRef.current.play().catch(() => { });
       }
     }, 50);
   };
@@ -255,8 +258,15 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
     }
   };
 
+  const handleAuthorClick = (e, authorId) => {
+    if (e) e.stopPropagation();
+    if (!authorId) return;
+    sessionStorage.setItem('campusfeed_target_post', postData.id);
+    navigate(`/profile?id=${authorId}`);
+  };
+
   return (
-    <article className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: 'var(--bg-card)' }}>
+    <article id={`post-${postData.id}`} className="glass-panel glass-panel-hover" style={{ marginBottom: '1rem', padding: '1.15rem 1.25rem', background: 'var(--bg-card)' }}>
 
       {/* Header: Author info & Category badge */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.3rem', gap: '0.5rem' }}>
@@ -265,40 +275,53 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             <img
               src={resolveImageUrl(postData.author.avatarUrl)}
               alt={postData.author.name}
-              onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(postData.author.avatarUrl), alt: postData.author.name })}
-              title="Click to view full-size avatar"
+              onClick={(e) => handleAuthorClick(e, postData.author?.id)}
+              title={`View ${postData.author.name}'s profile`}
               style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer', flexShrink: 0 }}
             />
           ) : (
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: 'var(--primary-gradient)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '0.9rem',
-              fontWeight: 700,
-              color: '#ffffff',
-              flexShrink: 0
-            }}>
+            <div
+              onClick={(e) => handleAuthorClick(e, postData.author?.id)}
+              title={`View ${postData.author?.name || 'student'}'s profile`}
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: 'var(--primary-gradient)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                flexShrink: 0,
+                cursor: 'pointer'
+              }}
+            >
               {postData.author?.name ? postData.author.name.charAt(0).toUpperCase() : 'U'}
             </div>
           )}
 
           <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
-              <h4 style={{
-                fontSize: '0.92rem',
-                fontWeight: 700,
-                color: 'var(--text-main)',
-                lineHeight: 1.2,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                maxWidth: '100%'
-              }} title={postData.author?.name}>
+            <div
+              onClick={(e) => handleAuthorClick(e, postData.author?.id)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', minWidth: 0, cursor: 'pointer' }}
+            >
+
+              <h4
+                className="author-name-link"
+                style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  color: 'var(--text-main)',
+                  lineHeight: 1.2,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%'
+                }}
+                title={`View ${postData.author?.name || 'student'}'s profile`}
+              >
                 {postData.author?.name || 'Anonymous Student'}
               </h4>
               {postData.author?.isVerified && (
@@ -311,6 +334,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             </div>
           </div>
         </div>
+
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
           {postData.poll && (
@@ -364,8 +388,39 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                   boxShadow: '0 10px 25px rgba(0, 0, 0, 0.4)',
                   padding: '0.4rem',
                   zIndex: 100,
-                  width: showReportReasons ? '200px' : '160px'
+                  width: showReportReasons ? '200px' : '170px'
                 }}>
+                  {/* Direct Message Option for Non-Owners */}
+                  {!isOwner && currentUser && postData.author && postData.author.id !== currentUser.id && (
+                    <button
+                      onClick={() => {
+                        setShowPostMenu(false);
+                        navigate(`/messages?user=${postData.author.id}`);
+                      }}
+                      style={{
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '0.5rem 0.65rem',
+                        fontSize: '0.82rem',
+                        color: 'var(--text-main)',
+                        background: 'transparent',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.55rem',
+                        transition: 'background 0.15s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-card-hover)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <MessageSquare size={15} color="var(--primary)" />
+                      <span>Send Message</span>
+                    </button>
+                  )}
+
                   {isOwner ? (
                     <button
                       onClick={() => {
@@ -395,6 +450,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                       <span>Delete Post</span>
                     </button>
                   ) : (
+
                     !showReportReasons ? (
                       <button
                         onClick={(e) => {
@@ -663,15 +719,15 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
 
           {/* Multi-Photo Attachments */}
           {(() => {
-            const allImages = post.imageUrls && post.imageUrls.length > 0 
-              ? post.imageUrls 
+            const allImages = post.imageUrls && post.imageUrls.length > 0
+              ? post.imageUrls
               : (post.imageUrl ? [post.imageUrl] : []);
 
             if (allImages.length === 0) return null;
 
             if (allImages.length === 1) {
               return (
-                <div 
+                <div
                   onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(allImages[0]), alt: post.title, images: allImages.map(resolveImageUrl), index: 0 })}
                   title="Click to view full-size photo"
                   style={{ marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', cursor: 'pointer', background: '#0f172a' }}
@@ -689,7 +745,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
               return (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', marginBottom: '0.85rem' }}>
                   {allImages.map((imgSrc, idx) => (
-                    <div 
+                    <div
                       key={idx}
                       onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(imgSrc), alt: post.title, images: allImages.map(resolveImageUrl), index: idx })}
                       title="Click to view photo"
@@ -710,7 +766,7 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
             const activeIdx = Math.min(currentImgIdx, allImages.length - 1);
             return (
               <div style={{ position: 'relative', marginBottom: '0.85rem', borderRadius: '0px', overflow: 'hidden', border: '1px solid var(--border-glass)', background: '#0f172a' }}>
-                <div 
+                <div
                   onClick={() => setActiveMedia({ type: 'image', src: resolveImageUrl(allImages[activeIdx]), alt: post.title, images: allImages.map(resolveImageUrl), index: activeIdx })}
                   style={{ width: '100%', height: '380px', cursor: 'pointer' }}
                   title="Click to view full-size photo"
@@ -1054,23 +1110,40 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                         <img
                           src={resolveImageUrl(comment.author.avatarUrl)}
                           alt={comment.author.name}
-                          style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', marginTop: '0.1rem' }}
+                          onClick={() => {
+                            if (comment.author?.id) navigate(`/profile?id=${comment.author.id}`);
+                          }}
+                          title={`View ${comment.author.name}'s profile`}
+                          style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', marginTop: '0.1rem', cursor: 'pointer' }}
                         />
                       ) : (
-                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#fff', marginTop: '0.1rem' }}>
+                        <div
+                          onClick={() => {
+                            if (comment.author?.id) navigate(`/profile?id=${comment.author.id}`);
+                          }}
+                          title={`View ${comment.author?.name || 'student'}'s profile`}
+                          style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: '#fff', marginTop: '0.1rem', cursor: 'pointer' }}
+                        >
                           {comment.author?.name ? comment.author.name.charAt(0).toUpperCase() : 'S'}
                         </div>
                       )}
 
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.15rem' }}>
-                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)' }}>
+                          <span
+                            className="author-name-link"
+                            onClick={() => {
+                              if (comment.author?.id) navigate(`/profile?id=${comment.author.id}`);
+                            }}
+                            style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)', cursor: 'pointer' }}
+                          >
                             {comment.author?.name || 'Anonymous Student'}
                           </span>
                           <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
                             {formatTime(comment.createdAt)}
                           </span>
                         </div>
+
                         <p style={{ fontSize: '0.84rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
                           {comment.text}
                         </p>
@@ -1080,15 +1153,15 @@ export default function PostCard({ post, currentUser, onDeletePost, onRequireAut
                 )}
               </div>
 
-        </div>
+            </div>
+          )}
+        </>
       )}
-    </>
-  )}
 
       {/* Full-Screen Media Lightbox Modal (Photo & Video) */}
-      <MediaLightboxModal 
-        media={activeMedia} 
-        onClose={() => setActiveMedia(null)} 
+      <MediaLightboxModal
+        media={activeMedia}
+        onClose={() => setActiveMedia(null)}
       />
     </article>
   );

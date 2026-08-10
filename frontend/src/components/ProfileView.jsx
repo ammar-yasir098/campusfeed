@@ -1,21 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { User, Edit3, Award, BookOpen, Layers, Bookmark as BookmarkIcon, Clock, Sun, Moon } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { User, Edit3, Award, BookOpen, Layers, Bookmark as BookmarkIcon, Clock, Sun, Moon, MessageSquare, ArrowLeft } from 'lucide-react';
 import { api, resolveImageUrl } from '../services/api';
 import PostCard from './PostCard';
 import VerifiedBadge from './VerifiedBadge';
 
 export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePost, theme, toggleTheme }) {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const targetIdParam = searchParams.get('id');
+  const targetUserId = targetIdParam ? parseInt(targetIdParam, 10) : null;
+  const isOwnProfile = !targetUserId || (currentUser && targetUserId === currentUser.id);
+
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState('posts'); // 'posts' or 'bookmarks'
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/feed');
+    }
+  };
+
+
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      const res = await api.getProfile();
-      setProfileData(res.user);
+      if (isOwnProfile) {
+        const res = await api.getProfile();
+        setProfileData(res.user);
+      } else {
+        const res = await api.getUserById(targetUserId);
+        setProfileData(res.user);
+      }
     } catch (err) {
       console.error('Failed to load profile:', err);
     } finally {
@@ -24,6 +45,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
   };
 
   const fetchBookmarks = async () => {
+    if (!isOwnProfile) return;
     setLoadingBookmarks(true);
     try {
       const res = await api.getBookmarks();
@@ -36,11 +58,11 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
   };
 
   useEffect(() => {
-    if (currentUser) {
-      fetchProfile();
+    fetchProfile();
+    if (isOwnProfile && currentUser) {
       fetchBookmarks();
     }
-  }, [currentUser]);
+  }, [targetUserId, currentUser]);
 
   if (loading) {
     return (
@@ -50,12 +72,42 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
     );
   }
 
-  const user = profileData || currentUser;
+  const user = profileData || (isOwnProfile ? currentUser : null);
+
+  if (!user) {
+    return (
+      <div className="glass-panel" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+        <h3>User Profile Not Found</h3>
+        <p>The student profile you are looking for does not exist or has been removed.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
+      {/* Back Button */}
+      <button
+        onClick={handleGoBack}
+        className="btn-secondary"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.45rem',
+          marginBottom: '1.25rem',
+          padding: '0.5rem 0.95rem',
+          fontSize: '0.88rem',
+          fontWeight: 700,
+          borderRadius: '10px',
+          cursor: 'pointer'
+        }}
+      >
+        <ArrowLeft size={17} />
+        <span>Back</span>
+      </button>
+
       {/* Profile Header Card */}
       <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem', background: 'var(--bg-card)' }}>
+
         
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem' }}>
           
@@ -101,7 +153,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            {toggleTheme && (
+            {isOwnProfile && toggleTheme && (
               <button
                 className="btn-secondary"
                 onClick={toggleTheme}
@@ -113,10 +165,23 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
               </button>
             )}
 
-            <button className="btn-secondary" onClick={onOpenEditProfile}>
-              <Edit3 size={16} />
-              <span>Edit Profile</span>
-            </button>
+
+            {isOwnProfile ? (
+              <button className="btn-secondary" onClick={onOpenEditProfile}>
+                <Edit3 size={16} />
+                <span>Edit Profile</span>
+              </button>
+            ) : (
+              currentUser && (
+                <button
+                  className="btn-primary"
+                  onClick={() => navigate(`/messages?user=${user.id}`)}
+                >
+                  <MessageSquare size={16} />
+                  <span>Send Message</span>
+                </button>
+              )
+            )}
           </div>
 
         </div>
@@ -129,6 +194,7 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
         )}
 
       </div>
+
 
       {/* Profile Activity Tabs: My Posts vs Bookmarks */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)' }}>
@@ -149,28 +215,30 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
           }}
         >
           <Layers size={17} />
-          <span>My Posts ({user.postCount || (user.posts ? user.posts.length : 0)})</span>
+          <span>{isOwnProfile ? 'My Posts' : 'Posts'} ({user.postCount || (user.posts ? user.posts.length : 0)})</span>
         </button>
 
-        <button
-          onClick={() => setActiveSubTab('bookmarks')}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: activeSubTab === 'bookmarks' ? '2px solid var(--primary)' : '2px solid transparent',
-            color: activeSubTab === 'bookmarks' ? 'var(--primary)' : 'var(--text-muted)',
-            paddingBottom: '0.65rem',
-            fontWeight: 700,
-            fontSize: '1rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.45rem'
-          }}
-        >
-          <BookmarkIcon size={17} />
-          <span>Saved Bookmarks ({bookmarkedPosts.length})</span>
-        </button>
+        {isOwnProfile && (
+          <button
+            onClick={() => setActiveSubTab('bookmarks')}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              borderBottom: activeSubTab === 'bookmarks' ? '2px solid var(--primary)' : '2px solid transparent',
+              color: activeSubTab === 'bookmarks' ? 'var(--primary)' : 'var(--text-muted)',
+              paddingBottom: '0.65rem',
+              fontWeight: 700,
+              fontSize: '1rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem'
+            }}
+          >
+            <BookmarkIcon size={17} />
+            <span>Saved Bookmarks ({bookmarkedPosts.length})</span>
+          </button>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -178,9 +246,10 @@ export default function ProfileView({ currentUser, onOpenEditProfile, onDeletePo
         <div>
           {!user.posts || user.posts.length === 0 ? (
             <div className="glass-panel" style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '1rem' }}>You haven't created any campus posts yet.</p>
+              <p style={{ fontSize: '1rem' }}>{isOwnProfile ? "You haven't created any campus posts yet." : `${user.name} hasn't created any campus posts yet.`}</p>
             </div>
           ) : (
+
             user.posts.map((post) => (
               <PostCard 
                 key={post.id} 

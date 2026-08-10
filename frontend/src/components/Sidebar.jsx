@@ -44,6 +44,7 @@ export default function Sidebar({
   isMobileOpen,
   onCloseMobile,
   bookmarkCount = 0,
+  unreadDmCount = 0,
   theme,
   toggleTheme
 }) {
@@ -153,7 +154,10 @@ export default function Sidebar({
 
             <button 
               className={`nav-link ${activeTab === 'feed' ? 'active' : ''}`}
-              onClick={() => setActiveTab('feed')}
+              onClick={() => {
+                setActiveTab('feed');
+                navigate('/feed');
+              }}
             >
               <Compass size={18} />
               <span>Campus Feed</span>
@@ -161,8 +165,38 @@ export default function Sidebar({
 
             {currentUser && (
               <button 
+                className={`nav-link ${activeTab === 'messages' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab('messages');
+                  navigate('/messages');
+                }}
+              >
+                <MessageSquare size={18} />
+                <span>Direct Messages</span>
+                {unreadDmCount > 0 && (
+                  <span style={{
+                    marginLeft: 'auto',
+                    background: '#ef4444',
+                    color: '#ffffff',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    borderRadius: '9999px',
+                    padding: '0.15rem 0.45rem',
+                    lineHeight: 1
+                  }}>
+                    {unreadDmCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {currentUser && (
+              <button 
                 className={`nav-link ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                onClick={() => setActiveTab('bookmarks')}
+                onClick={() => {
+                  setActiveTab('bookmarks');
+                  navigate('/bookmarks');
+                }}
               >
                 <Bookmark size={18} />
                 <span>Saved Bookmarks</span>
@@ -172,12 +206,16 @@ export default function Sidebar({
             {currentUser && (
               <button 
                 className={`nav-link ${activeTab === 'profile' ? 'active' : ''}`}
-                onClick={() => setActiveTab('profile')}
+                onClick={() => {
+                  setActiveTab('profile');
+                  navigate('/profile');
+                }}
               >
                 <User size={18} />
                 <span>My Student Profile</span>
               </button>
             )}
+
 
             {currentUser && currentUser.role === 'admin' && (
               <button 

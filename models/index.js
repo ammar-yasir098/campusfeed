@@ -75,8 +75,24 @@ Post.hasMany(Report, { foreignKey: 'postId', as: 'reports', onDelete: 'CASCADE' 
 Report.belongsTo(Post, { foreignKey: 'postId', as: 'post' });
 
 // User & Report Associations (reporter)
-User.hasMany(Report, { foreignKey: 'reporterId', as: 'reports', onDelete: 'CASCADE' });
-Report.belongsTo(User, { foreignKey: 'reporterId', as: 'reporter' });
+const Conversation = require('./Conversation');
+const DirectMessage = require('./DirectMessage');
+
+// Conversation & User Associations
+Conversation.belongsTo(User, { foreignKey: 'user1Id', as: 'user1' });
+Conversation.belongsTo(User, { foreignKey: 'user2Id', as: 'user2' });
+User.hasMany(Conversation, { foreignKey: 'user1Id', as: 'startedConversations' });
+User.hasMany(Conversation, { foreignKey: 'user2Id', as: 'receivedConversations' });
+
+// Conversation & DirectMessage Associations
+Conversation.hasMany(DirectMessage, { foreignKey: 'conversationId', as: 'messages', onDelete: 'CASCADE' });
+DirectMessage.belongsTo(Conversation, { foreignKey: 'conversationId', as: 'conversation' });
+
+// DirectMessage & User Associations
+DirectMessage.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
+DirectMessage.belongsTo(User, { foreignKey: 'receiverId', as: 'receiver' });
+User.hasMany(DirectMessage, { foreignKey: 'senderId', as: 'sentMessages', onDelete: 'CASCADE' });
+User.hasMany(DirectMessage, { foreignKey: 'receiverId', as: 'receivedMessages', onDelete: 'CASCADE' });
 
 module.exports = {
   User,
@@ -90,6 +106,9 @@ module.exports = {
   Notification,
   Report,
   PostImage,
+  Conversation,
+  DirectMessage,
 };
+
 
 

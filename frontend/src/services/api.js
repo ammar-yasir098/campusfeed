@@ -117,4 +117,17 @@ export const api = {
   markNotificationRead: (id) => request(`/api/notifications/${id}/read`, { method: 'PATCH' }),
   markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'POST' }),
   clearAllNotifications: () => request('/api/notifications/clear-all', { method: 'DELETE' }),
+
+  // Direct Messages APIs
+  getConversations: () => request('/api/messages/conversations'),
+  getConversationMessages: (conversationId) => request(`/api/messages/conversations/${conversationId}`),
+  sendMessage: (messageData) => {
+    if (messageData instanceof FormData) {
+      return request('/api/messages/send', { method: 'POST', body: messageData });
+    }
+    return request('/api/messages/send', { method: 'POST', body: JSON.stringify(messageData) });
+  },
+  getUnreadDmCount: () => request('/api/messages/unread-count'),
+  searchMessagingUsers: (q) => request(`/api/messages/search-users?q=${encodeURIComponent(q)}`),
 };
+
